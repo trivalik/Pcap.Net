@@ -1,10 +1,10 @@
 PcapDotNet/3rdParty/
 PcapDotNet/bin/
+PcapDotNet/src/*/obj
+PcapDotNet/src/*/bin
 PcapDotNet/src/PcapDotNet.Core/Debug
-PcapDotNet/src/PcapDotNet.Core.Extensions/obj
-PcapDotNet/src/PcapDotNet.Core.Test/bin
-PcapDotNet/src/PcapDotNet.Core.Test/obj
 PcapDotNet/src/TestResults
+.vs/
 TemporaryGeneratedFile_*
 *.cache
 *.csproj.FileListAbsolute.txt

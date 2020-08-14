@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D5DCCC5-A509-4B4E-90B0-92390C6EA06F}"
 	ProjectSection(SolutionItems) = preProject
@@ -30,6 +30,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PcapDotNet.Core", "PcapDotNet.Core\PcapDotNet.Core.vcxproj", "{89C63BE1-AF9A-472E-B256-A4F56B1655A7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PcapDotNet.Core.Extensions", "PcapDotNet.Core.Extensions\PcapDotNet.Core.Extensions.csproj", "{322040C2-3DC1-4D0C-8E0F-F05290AFE023}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PcapDotNet.Core.Managed", "PcapDotNet.Core.Managed\PcapDotNet.Core.Managed.csproj", "{CB7C9D43-422C-4B43-999A-F65F6E2C7075}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -187,9 +189,28 @@ Global
 		{322040C2-3DC1-4D0C-8E0F-F05290AFE023}.Release|Win32.Build.0 = Release|x86
 		{322040C2-3DC1-4D0C-8E0F-F05290AFE023}.Release|x64.ActiveCfg = Release|x64
 		{322040C2-3DC1-4D0C-8E0F-F05290AFE023}.Release|x64.Build.0 = Release|x64
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|Win32.Build.0 = Debug|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|x64.Build.0 = Debug|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Win32.ActiveCfg = Release|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Win32.Build.0 = Release|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|x64.ActiveCfg = Release|Any CPU
+		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {75C5A46A-9EB6-4A9A-8050-66EB3D2F49B8}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = PcapDotNet.vsmdi
