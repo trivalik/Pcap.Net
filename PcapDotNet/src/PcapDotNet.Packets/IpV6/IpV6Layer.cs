@@ -133,7 +133,7 @@ namespace PcapDotNet.Packets.IpV6
             {
                 throw new ArgumentOutOfRangeException("payloadLength", payloadLength,
                                                       "Consider the extension headers, this must be no more than " +
-                                                      (ushort.MaxValue - ExtensionHeaders.BytesLength));
+                                                      (ushort.MaxValue - ExtensionHeaders.BytesLength).ToString(CultureInfo.InvariantCulture));
             }
 
             IpV6Datagram.WriteHeader(buffer, offset,

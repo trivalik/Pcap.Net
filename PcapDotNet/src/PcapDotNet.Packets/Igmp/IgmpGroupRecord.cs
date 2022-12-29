@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.IpV4;
@@ -35,7 +36,7 @@ namespace PcapDotNet.Packets.Igmp
                 throw new ArgumentNullException("auxiliaryData");
 
             if (auxiliaryData.Length % 4 != 0)
-                throw new ArgumentException("Auxiliary data length must divide by 4 and can't be " + auxiliaryData.Length, "auxiliaryData");
+                throw new ArgumentException($"Auxiliary data length must divide by 4 and can't be {auxiliaryData.Length.ToString(CultureInfo.InvariantCulture)}", "auxiliaryData");
 
             RecordType = recordType;
             MulticastAddress = multicastAddress;
@@ -106,7 +107,7 @@ namespace PcapDotNet.Packets.Igmp
         /// </summary>
         public override string ToString()
         {
-            return RecordType + " " + MulticastAddress + " " + SourceAddresses.SequenceToString(", ", "[", "]") + " Aux=" + AuxiliaryData.Length;
+            return RecordType + " " + MulticastAddress + " " + SourceAddresses.SequenceToString(", ", "[", "]") + " Aux=" + AuxiliaryData.Length.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>

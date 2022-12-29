@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.Ethernet;
@@ -28,7 +29,7 @@ namespace PcapDotNet.Packets
         /// </summary>
         public static Packet FromHexadecimalString(string value, DateTime timestamp, IDataLink dataLink)
         {
-            if (value == null) 
+            if (value == null)
                 throw new ArgumentNullException("value");
 
             byte[] bytes = new byte[value.Length / 2];
@@ -53,9 +54,7 @@ namespace PcapDotNet.Packets
         /// </param>
         public Packet(byte[] data, DateTime timestamp, IDataLink dataLink, uint originalLength)
         {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            _data = data;
+            _data = data ?? throw new ArgumentNullException(nameof(data));
             _timestamp = timestamp;
             _dataLink = dataLink;
             OriginalLength = Math.Max((uint)_data.Length, originalLength);
@@ -174,7 +173,7 @@ namespace PcapDotNet.Packets
         /// </summary>
         public override string ToString()
         {
-            return typeof(Packet).Name + " <" + DataLink + ", " + Length + ">";
+            return typeof(Packet).Name + " <" + DataLink + ", " + Length.ToString(CultureInfo.InvariantCulture) + ">";
         }
 
         /// <summary>

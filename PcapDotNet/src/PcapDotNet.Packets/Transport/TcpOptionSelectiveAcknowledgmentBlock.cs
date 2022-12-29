@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using PcapDotNet.Base;
 
 namespace PcapDotNet.Packets.Transport
@@ -48,7 +49,7 @@ namespace PcapDotNet.Packets.Transport
         /// </summary>
         public override string ToString()
         {
-            return LeftEdge + "-" + RightEdge;
+            return LeftEdge.ToString(CultureInfo.InvariantCulture) + "-" + RightEdge.ToString(CultureInfo.InvariantCulture);
         }
 
         /// <summary>

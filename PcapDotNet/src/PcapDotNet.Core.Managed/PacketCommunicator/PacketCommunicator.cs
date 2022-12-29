@@ -1,5 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using PcapDotNet.Core.Native;
 using PcapDotNet.Packets;
 
 namespace PcapDotNet.Core
@@ -9,13 +14,13 @@ namespace PcapDotNet.Core
 
     public abstract class PacketCommunicator : IDisposable
     {
-        private readonly IntPtr /* pcap_t* */ _pcapDescriptor;
         private readonly IpV4SocketAddress _ipV4Netmask;
         private PacketCommunicatorMode _mode;
 
-        internal PacketCommunicator(IntPtr /* pcap_t* */ pcapDescriptor, SocketAddress netmask)
+        internal PacketCommunicator(PcapHandle /* pcap_t* */ pcapDescriptor, SocketAddress netmask)
         {
-
+            PcapDescriptor = pcapDescriptor;
+            _ipV4Netmask = netmask as IpV4SocketAddress;
         }
 
         /// <summary>
@@ -23,14 +28,14 @@ namespace PcapDotNet.Core
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            throw new NotImplementedException();
+            Interop.Pcap.pcap_close(PcapDescriptor);
         }
 
         public void Dispose()
         {
             Dispose(true);
         }
-        
+
         ~PacketCommunicator()
         {
             Dispose(false);
@@ -39,7 +44,7 @@ namespace PcapDotNet.Core
         /// <summary>
         /// pointer to a pcap_t struct
         /// </summary>
-        protected IntPtr PcapDescriptor => _pcapDescriptor;
+        internal PcapHandle /* pcap_t* */ PcapDescriptor { get; }
 
         /// <summary>
         /// The link layer of an adapter.
@@ -49,11 +54,14 @@ namespace PcapDotNet.Core
         {
             get
             {
-                throw new NotImplementedException();
+                return new PcapDataLink(Interop.Pcap.pcap_datalink(PcapDescriptor));
             }
             set
             {
-                throw new NotImplementedException();
+                if (Interop.Pcap.pcap_set_datalink(PcapDescriptor, value.Value) != 0)
+                {
+                    ThrowInvalidOperation($"Failed setting datalink {value}");
+                }
             }
         }
 
@@ -66,64 +74,51 @@ namespace PcapDotNet.Core
         {
             get
             {
-                throw new NotImplementedException();
+                IntPtr dataLinks = IntPtr.Zero;
+                var numDataLinks = Interop.Pcap.pcap_list_datalinks(PcapDescriptor, ref dataLinks);
+                if (numDataLinks < 0)
+                {
+                    ThrowInvalidOperation("Failed getting supported datalinks");
+                }
+
+                try
+                {
+                    var results = new List<PcapDataLink>(numDataLinks);
+                    for (int i = 0; i != numDataLinks; ++i)
+                        results.Add(new PcapDataLink(Marshal.ReadInt32(dataLinks, i)));
+                    return new ReadOnlyCollection<PcapDataLink>(results);
+                }
+                finally
+                {
+                    Interop.Pcap.pcap_free_datalinks(dataLinks);
+                }
             }
         }
 
         /// <summary>
         /// The dimension of the packet portion (in bytes) that is delivered to the application. 
         /// </summary>
-        public int SnapshotLength
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public int SnapshotLength { get => Interop.Pcap.pcap_snapshot(PcapDescriptor); }
 
         /// <summary>
         /// The IPv4 netmask of the network on which packets are being captured; useful for filters when checking for IPv4 broadcast addresses in the filter program. If the netmask of the network on which packets are being captured isn't known to the program, or if packets are being captured on the Linux "any" pseudo-interface that can capture on more than one network, the value will be null and a filter that tests for IPv4 broadcast addreses won't be done correctly, but all other tests in the filter program will be OK.
         /// </summary>
-        public IpV4SocketAddress IpV4Netmask
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public IpV4SocketAddress IpV4Netmask { get => _ipV4Netmask; }
 
         /// <summary>
         /// True if the current file uses a different byte order than the current system. 
         /// </summary>
-        public bool IsFileSystemByteOrder
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public bool IsFileSystemByteOrder { get => Interop.Pcap.pcap_is_swapped(PcapDescriptor) == 0; }
 
         /// <summary>
         /// The major version number of the pcap library used to write the file.
         /// </summary>
-        public int FileMajorVersion
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public int FileMajorVersion { get => Interop.Pcap.pcap_major_version(PcapDescriptor); }
 
         /// <summary>
         /// The minor version number of the pcap library used to write the file.
         /// </summary>
-        public int FileMinorVersion
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public int FileMinorVersion { get => Interop.Pcap.pcap_minor_version(PcapDescriptor); }
 
         /// <summary>
         /// Statistics on current capture.
@@ -140,11 +135,15 @@ namespace PcapDotNet.Core
         {
             get
             {
-                throw new NotImplementedException();
+                return _mode;
             }
             set
             {
-                throw new NotImplementedException();
+                if (Interop.Pcap.pcap_setmode(PcapDescriptor, value) < 0)
+                {
+                    ThrowInvalidOperation($"Error setting mode {value}");
+                }
+                _mode = value;
             }
         }
 
@@ -160,11 +159,21 @@ namespace PcapDotNet.Core
         {
             get
             {
-                throw new NotImplementedException();
+                var errorBuffer = Pcap.CreateErrorBuffer();
+                var nonBlockValue = Interop.Pcap.pcap_getnonblock(PcapDescriptor, errorBuffer);
+                if (nonBlockValue < 0)
+                {
+                    ThrowInvalidOperation("Error getting NonBlocking value: " + errorBuffer.ToString());
+                }
+                return nonBlockValue != 0;
             }
             set
             {
-                throw new NotImplementedException();
+                var errorBuffer = Pcap.CreateErrorBuffer();
+                if (Interop.Pcap.pcap_setnonblock(PcapDescriptor, value ? 1 : 0, errorBuffer) < 0)
+                {
+                    ThrowInvalidOperation($"Error setting NonBlocking to {value}: {errorBuffer}");
+                }
             }
         }
 
@@ -178,7 +187,10 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
         void SetKernelBufferSize(int size)
         {
-            throw new NotImplementedException();
+            if (Interop.Pcap.pcap_setbuff(PcapDescriptor, size) != 0)
+            {
+                ThrowInvalidOperation($"Error setting kernel buffer size to {size.ToString(CultureInfo.InvariantCulture)}");
+            }
         }
 
         /// <summary>
@@ -193,7 +205,10 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
         void SetKernelMinimumBytesToCopy(int size)
         {
-            throw new NotImplementedException();
+            if (Interop.Pcap.pcap_setmintocopy(PcapDescriptor, size) != 0)
+            {
+                ThrowInvalidOperation($"Error setting kernel minimum bytes to copy to {size.ToString(CultureInfo.InvariantCulture)}");
+            }
         }
 
         /// <summary>
@@ -208,7 +223,14 @@ namespace PcapDotNet.Core
         /// <param name="method">The sampling method to be applied</param>
         void SetSamplingMethod(SamplingMethod method)
         {
-            throw new NotImplementedException();
+            if (method == null) throw new ArgumentNullException(nameof(method));
+
+            unsafe
+            {
+                var samplingMethod = (PcapUnmanagedStructures.pcap_samp*)Interop.Pcap.pcap_setsampling(PcapDescriptor);
+                samplingMethod->method = method.Method;
+                samplingMethod->value = method.Value;
+            }
         }
 
         /// <summary>
@@ -233,7 +255,20 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
         public PacketCommunicatorReceiveResult ReceivePacket(out Packet packet)
         {
-            throw new NotImplementedException();
+            AssertMode(PacketCommunicatorMode.Capture);
+
+            IntPtr packetHeader = IntPtr.Zero;
+            IntPtr packetData = IntPtr.Zero;
+            var result = RunPcapNextEx(ref packetHeader, ref packetData);
+
+            if (result != PacketCommunicatorReceiveResult.Ok)
+            {
+                packet = null;
+                return result;
+            }
+
+            packet = CreatePacket(packetHeader, packetData, DataLink);
+            return result;
         }
 
         /// <summary>
@@ -273,7 +308,34 @@ namespace PcapDotNet.Core
         /// </remarks>
         public PacketCommunicatorReceiveResult ReceiveSomePackets(out int countGot, int maxPackets, HandlePacket callback)
         {
-            throw new NotImplementedException();
+            AssertMode(PacketCommunicatorMode.Capture);
+            var packetHandler = new PacketHandler(callback, DataLink);
+            var handlerDelegate = new PcapUnmanagedStructures.pcap_handler(packetHandler.Handle);
+
+            countGot = Interop.Pcap.pcap_dispatch(
+                PcapDescriptor,
+                maxPackets,
+                handlerDelegate,
+                IntPtr.Zero);
+
+            switch (countGot)
+            {
+                case -2:
+                    countGot = 0;
+                    return PacketCommunicatorReceiveResult.BreakLoop;
+                case -1:
+                    ThrowInvalidOperation("Failed reading from device");
+                    break;
+                case 0:
+                    if (packetHandler.PacketCounter != 0)
+                    {
+                        countGot = packetHandler.PacketCounter;
+                        return PacketCommunicatorReceiveResult.Eof;
+                    }
+                    break;
+            }
+
+            return PacketCommunicatorReceiveResult.Ok;
         }
 
         /// <summary>
@@ -299,7 +361,32 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
         public PacketCommunicatorReceiveResult ReceivePackets(int count, HandlePacket callback)
         {
-            throw new NotImplementedException();
+            AssertMode(PacketCommunicatorMode.Capture);
+            var packetHandler = new PacketHandler(callback, DataLink);
+            var handlerDelegate = new PcapUnmanagedStructures.pcap_handler(packetHandler.Handle);
+
+            var result = Interop.Pcap.pcap_loop(
+                PcapDescriptor,
+                count,
+                handlerDelegate,
+                IntPtr.Zero);
+
+            switch (result)
+            {
+                case -2:
+                    return PacketCommunicatorReceiveResult.BreakLoop;
+                case -1:
+                    ThrowInvalidOperation("Failed reading from device");
+                    break;
+                case 0:
+                    if (packetHandler.PacketCounter != count)
+                    {
+                        return PacketCommunicatorReceiveResult.Eof;
+                    }
+                    break;
+            }
+
+            return PacketCommunicatorReceiveResult.Ok;
         }
 
         /// <summary>
@@ -319,7 +406,19 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown if the mode is not Statistics or an error occurred.</exception>
         public PacketCommunicatorReceiveResult ReceiveStatistics(out PacketSampleStatistics statistics)
         {
-            throw new NotImplementedException();
+            AssertMode(PacketCommunicatorMode.Statistics);
+
+            IntPtr packetHeader = IntPtr.Zero;
+            IntPtr packetData = IntPtr.Zero;
+            var result = RunPcapNextEx(ref packetHeader, ref packetData);
+
+            if (result != PacketCommunicatorReceiveResult.Ok)
+            {
+                throw new InvalidOperationException($"Got result {result} in statistics mode");
+            }
+
+            statistics = new PacketSampleStatistics(packetHeader, packetData);
+            return result;
         }
 
         /// <summary>
@@ -341,7 +440,23 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown if the mode is not Statistics or an error occurred.</exception>
         public PacketCommunicatorReceiveResult ReceiveStatistics(int count, HandleStatistics callback)
         {
-            throw new NotImplementedException();
+            AssertMode(PacketCommunicatorMode.Statistics);
+            var statisticsHandler = new StatisticsHandler(callback);
+            var handlerDelegate = new PcapUnmanagedStructures.pcap_handler(statisticsHandler.Handle);
+
+            var result = Interop.Pcap.pcap_loop(
+                PcapDescriptor,
+                count,
+                handlerDelegate,
+                IntPtr.Zero);
+
+            if (result == -1)
+                ThrowInvalidOperation("Failed reading from device");
+
+            else if (result == -2)
+                return PacketCommunicatorReceiveResult.BreakLoop;
+
+            return PacketCommunicatorReceiveResult.Ok;
         }
 
         /// <summary>
@@ -363,7 +478,7 @@ namespace PcapDotNet.Core
         /// </remarks>
         public void Break()
         {
-            throw new NotImplementedException();
+            Interop.Pcap.pcap_breakloop(PcapDescriptor);
         }
 
         /// <summary>
@@ -375,7 +490,23 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">The packet wasn't successfully sent.</exception>
         public void SendPacket(Packet packet)
         {
-            throw new NotImplementedException();
+            if (packet is null) throw new ArgumentNullException(nameof(packet));
+
+            if (packet.Length == 0)
+                return;
+
+            int res;
+            unsafe
+            {
+                fixed (byte* buffer = packet.Buffer)
+                {
+                    res = Interop.Pcap.pcap_sendpacket(PcapDescriptor, new IntPtr(buffer), packet.Length);
+                }
+            }
+            if (res < 0)
+            {
+                ThrowInvalidOperation($"Failed writing to device. Packet length: {packet.Length}");
+            }
         }
 
         /// <summary>
@@ -411,7 +542,7 @@ namespace PcapDotNet.Core
         /// </remarks>
         public BerkeleyPacketFilter CreateFilter(string filterValue)
         {
-            throw new NotImplementedException();
+            return new BerkeleyPacketFilter(PcapDescriptor, filterValue, _ipV4Netmask);
         }
 
         /// <summary>
@@ -423,7 +554,9 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
         public void SetFilter(BerkeleyPacketFilter filter)
         {
-            throw new NotImplementedException();
+            if (filter is null) throw new ArgumentNullException(nameof(filter));
+
+            filter.SetFilter(PcapDescriptor);
         }
 
         /// <summary>
@@ -436,7 +569,10 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
         public void SetFilter(string filterValue)
         {
-            throw new NotImplementedException();
+            using (var filter = CreateFilter(filterValue))
+            {
+                SetFilter(filter);
+            }
         }
 
         /// <summary>
@@ -454,57 +590,84 @@ namespace PcapDotNet.Core
         /// </remarks>
         public PacketDumpFile OpenDump(string fileName)
         {
-            throw new NotImplementedException();
+            return new PacketDumpFile(PcapDescriptor, fileName);
         }
 
-        protected InvalidOperationException BuildInvalidOperation(string errorMessage)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void ThrowInvalidOperation(string errorMessage)
         {
-            throw new NotImplementedException();
+            PcapError.ThrowInvalidOperation(errorMessage, PcapDescriptor);
         }
 
-        private static Packet CreatePacket(IntPtr /* const pcap_pkthdr& */ packetHeader, IntPtr /* const unsigned char* */ packetData, IDataLink dataLink)
+        private static Packet CreatePacket(IntPtr /* pcap_pkthdr * */ packetHeader, IntPtr /* const unsigned char* */ packetData, IDataLink dataLink)
         {
-            throw new NotImplementedException();
+            var header = Interop.Pcap.CreatePcapPacketHeader(packetHeader);
+            var buffer = new byte[header.PacketLength];
+            Marshal.Copy(packetData, buffer, 0, buffer.Length);
+
+            return new Packet(buffer, header.Timestamp, dataLink, header.OriginalLength);
         }
 
-        //private PacketCommunicatorReceiveResult RunPcapNextEx(pcap_pkthdr** packetHeader, const unsigned char** packetData)
-
-        //[System::Runtime::InteropServices::UnmanagedFunctionPointer(System::Runtime::InteropServices::CallingConvention::Cdecl)]
-        //private delegate void HandlerDelegate(unsigned char* user, const struct pcap_pkthdr *packetHeader, const unsigned char* packetData);
+        private PacketCommunicatorReceiveResult RunPcapNextEx(ref IntPtr /* pcap_pkthdr * */ packetHeader, ref IntPtr /* const unsigned char* */ packetData)
+        {
+            var result = Interop.Pcap.pcap_next_ex(PcapDescriptor, ref packetHeader, ref packetData);
+            switch (result)
+            {
+                case -2:
+                    return PacketCommunicatorReceiveResult.Eof;
+                case -1:
+                    ThrowInvalidOperation("Failed reading from device");
+                    goto default;
+                case 0:
+                    return PacketCommunicatorReceiveResult.Timeout;
+                case 1:
+                    return PacketCommunicatorReceiveResult.Ok;
+                default:
+                    throw new InvalidOperationException("Result value " + result.ToString(CultureInfo.InvariantCulture) + " is undefined");
+            }
+        }
 
         private void AssertMode(PacketCommunicatorMode mode)
         {
-            throw new NotImplementedException();
+            if (Mode != mode)
+                throw new InvalidOperationException($"Wrong Mode. Must be in mode {mode} and not in mode {Mode}");
         }
 
         private class PacketHandler
         {
             private readonly HandlePacket _callback;
             private readonly PcapDataLink _dataLink;
-            int _packetCounter;
+            private int _packetCounter = 0;
 
             public PacketHandler(HandlePacket callback, PcapDataLink dataLink)
             {
-                _callback = callback;
-                _dataLink = dataLink;
+                _callback = callback ?? throw new ArgumentNullException(nameof(callback));
+                _dataLink = dataLink ?? throw new ArgumentNullException(nameof(dataLink));
             }
 
             public int PacketCounter => _packetCounter;
-            
-            //public void Handle(unsigned char* user, const struct pcap_pkthdr *packetHeader, const unsigned char* packetData)        
+
+            public void Handle(IntPtr /* unsigned char* */ user, IntPtr /* pcap_pkthdr * */ packetHeader, IntPtr /* const unsigned char* */ packetData)
+            {
+                ++_packetCounter;
+                _callback(CreatePacket(packetHeader, packetData, _dataLink));
+            }
         }
 
         private class StatisticsHandler
         {
             private readonly HandleStatistics _callback;
-            
+
             public StatisticsHandler(HandleStatistics callback)
             {
                 _callback = callback;
             }
 
-            //public void Handle(unsigned char* user, const struct pcap_pkthdr *packetHeader, const unsigned char* packetData)
+            public void Handle(IntPtr /* unsigned char* */ user, IntPtr /* pcap_pkthdr * */ packetHeader, IntPtr /* const unsigned char* */ packetData)
+            {
+                _callback(new PacketSampleStatistics(packetHeader, packetData));
+            }
         }
-        
+
     }
 }

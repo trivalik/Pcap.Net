@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PcapDotNet.Core.Native
+﻿namespace PcapDotNet.Core.Native
 {
     internal interface ISysPal
     {

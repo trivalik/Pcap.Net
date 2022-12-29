@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using PcapDotNet.Packets.IpV4;
 
@@ -914,11 +915,11 @@ namespace PcapDotNet.Packets.Igmp
         {
             int exp = (int)(Math.Log(value, 2) - 7);
             if (exp > 7 || exp < 0)
-                throw new ArgumentOutOfRangeException("value", value, "exp " + exp + " is out of range");
+                throw new ArgumentOutOfRangeException("value", value, $"exp {exp.ToString(CultureInfo.InvariantCulture)} is out of range");
 
             int mant = (int)(value * Math.Pow(2, -exp - 3) - 16);
             if (mant > 15 || mant < 0)
-                throw new ArgumentOutOfRangeException("value", value, "mant " + mant + " is out of range");
+                throw new ArgumentOutOfRangeException("value", value, $"exp {mant.ToString(CultureInfo.InvariantCulture)} is out of range");
 
             return (byte)(0x80 | (exp << 4) | mant);
         }

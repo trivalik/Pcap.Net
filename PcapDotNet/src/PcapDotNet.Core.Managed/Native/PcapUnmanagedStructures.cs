@@ -19,6 +19,7 @@ along with SharpPcap.  If not, see <http://www.gnu.org/licenses/>.
  * Copyright 2008-2009 Chris Morgan <chmorgan@gmail.com>
  */
 
+using PcapDotNet.Packets;
 using System;
 using System.Runtime.InteropServices;
 
@@ -74,6 +75,9 @@ namespace PcapDotNet.Core.Native
             public byte[] sa_data;        /* 14 bytes of protocol address */
         };
 
+        // silence a warning about uninitialized in_addr, this value is assigned in unmanaged mode
+        // so the compiler isn't aware of its assignment
+#pragma warning disable 0649
         /// <summary>
         /// Structure that holds an ipv4 address
         /// </summary>
@@ -81,6 +85,7 @@ namespace PcapDotNet.Core.Native
         {
             public UInt32 s_addr;
         }
+#pragma warning restore 0649
 
         /// <summary>
         /// Structure that holds an ipv4 address
@@ -193,9 +198,12 @@ namespace PcapDotNet.Core.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct pcap_pkthdr_unix
         {
-            public timeval_unix ts;             /* time stamp */
-            public UInt32 caplen;         /* length of portion present */
-            public UInt32 len;            /* length this packet (off wire) */
+            /// <summary>timestamp</summary>
+            public timeval_unix ts;
+            /// <summary>length of portion present</summary>
+            public UInt32 caplen;
+            /// <summary>length this packet (off wire)</summary>
+            public UInt32 len;
         };
 
         /// <summary>
@@ -206,17 +214,23 @@ namespace PcapDotNet.Core.Native
         [StructLayout(LayoutKind.Sequential)]
         public struct pcap_pkthdr_windows
         {
+            /// <summary>timestamp</summary>
             public timeval_windows ts;             /* time stamp */
-            public UInt32 caplen;         /* length of portion present */
-            public UInt32 len;            /* length this packet (off wire) */
+            /// <summary>length of portion present</summary>
+            public UInt32 caplen;
+            /// <summary>length this packet (off wire)</summary>
+            public UInt32 len;
         };
 
         [StructLayout(LayoutKind.Sequential)]
         public struct pcap_pkthdr_macosx
         {
-            public timeval_macosx ts;             /* time stamp */
-            public UInt32 caplen;         /* length of portion present */
-            public UInt32 len;            /* length this packet (off wire) */
+            /// <summary>timestamp</summary>
+            public timeval_macosx ts;
+            /// <summary>length of portion present</summary>
+            public UInt32 caplen;
+            /// <summary>length this packet (off wire)</summary>
+            public UInt32 len;
         };
 
         #endregion
@@ -339,6 +353,27 @@ namespace PcapDotNet.Core.Native
             /// </summary>
             public string password;
         }
+
+        /// <summary>
+        /// This structure defines the information related to sampling.
+        /// In case the sampling is requested, the capturing device should read only a subset of the packets coming from the source.The returned packets depend on the sampling parameters.
+        /// </summary>
+        /// <remarks>
+        /// The sampling process is applied <b>after</b> the filtering process. In other words, packets are filtered first, then the sampling process selects a subset of the 'filtered' packets and it returns them to the caller. 
+        /// </remarks>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct pcap_samp
+        {
+            /// <summary>
+            /// Method used for sampling. Currently, the supported methods are listed in the <see href="https://www.winpcap.org/docs/docs_412/html/group__remote__samp__methods.html">Sampling Methods Section</see>. 
+            /// </summary>
+            public int method;
+
+            /// <summary>
+            /// This value depends on the sampling method defined. For its meaning, please check at the <see href="https://www.winpcap.org/docs/docs_412/html/group__remote__samp__methods.html">Sampling Methods Section</see>. 
+            /// </summary>
+            public int value;
+        };
         #endregion Unmanaged Structs Implementation
 
     }

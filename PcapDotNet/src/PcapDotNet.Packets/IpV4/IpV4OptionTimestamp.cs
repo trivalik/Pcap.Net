@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.Ip;
 
@@ -219,10 +220,10 @@ namespace PcapDotNet.Packets.IpV4
             : base(IpV4OptionType.InternetTimestamp)
         {
             if (overflow > OverflowMaxValue)
-                throw new ArgumentOutOfRangeException("overflow", overflow, "Maximum value is " + OverflowMaxValue);
+                throw new ArgumentOutOfRangeException("overflow", overflow, "Maximum value is " + OverflowMaxValue.ToString(CultureInfo.InvariantCulture));
 
             if (pointedIndex > PointedIndexMaxValue)
-                throw new ArgumentOutOfRangeException("pointedIndex", pointedIndex, "Maximum value is " + PointedIndexMaxValue);
+                throw new ArgumentOutOfRangeException("pointedIndex", pointedIndex, "Maximum value is " + PointedIndexMaxValue.ToString(CultureInfo.InvariantCulture));
 
             _timestampType = timestampType;
             _overflow = overflow;

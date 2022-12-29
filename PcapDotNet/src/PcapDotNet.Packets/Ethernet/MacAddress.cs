@@ -42,7 +42,7 @@ namespace PcapDotNet.Packets.Ethernet
 
             string[] hexes = address.Split(':');
             if (hexes.Length != 6)
-                throw new ArgumentException("Failed parsing " + address + " as mac address. Expected 6 hexes and got " + hexes.Length + " hexes", "address");
+                throw new ArgumentException("Failed parsing " + address + " as mac address. Expected 6 hexes and got " + hexes.Length.ToString(CultureInfo.InvariantCulture) + " hexes", "address");
 
             _value = BitSequence.Merge(Convert.ToByte(hexes[0], 16), Convert.ToByte(hexes[1], 16), Convert.ToByte(hexes[2], 16),
                                        Convert.ToByte(hexes[3], 16), Convert.ToByte(hexes[4], 16), Convert.ToByte(hexes[5], 16));

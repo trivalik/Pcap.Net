@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using PcapDotNet.Base;
 
@@ -20,7 +21,7 @@ namespace PcapDotNet.Packets.Ip
             : this(EndOptions(options, end), true, null)
         {
             if (BytesLength > maximumBytesLength)
-                throw new ArgumentException("given options take " + BytesLength + " bytes and maximum number of bytes for options is " + maximumBytesLength, "options");
+                throw new ArgumentException($"given options take {BytesLength.ToString(CultureInfo.InvariantCulture)} bytes and maximum number of bytes for options is {maximumBytesLength.ToString(CultureInfo.InvariantCulture)}", "options");
         }
 
         internal static int CalculateBytesLength(int optionsLength)

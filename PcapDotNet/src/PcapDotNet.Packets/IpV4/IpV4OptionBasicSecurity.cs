@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.Ip;
 
@@ -72,11 +73,11 @@ namespace PcapDotNet.Packets.IpV4
             : base(IpV4OptionType.BasicSecurity)
         {
             if (length < OptionMinimumLength)
-                throw new ArgumentOutOfRangeException("length", length, "Minimum option length is " + OptionMinimumLength);
+                throw new ArgumentOutOfRangeException("length", length, "Minimum option length is " + OptionMinimumLength.ToString(CultureInfo.InvariantCulture));
 
             if (length == OptionMinimumLength && protectionAuthorities != IpV4OptionSecurityProtectionAuthorities.None)
             {
-                throw new ArgumentException("Can't have a protection authority without minimum of " + (OptionValueMinimumLength + 1) + " length",
+                throw new ArgumentException("Can't have a protection authority without minimum of " + (OptionValueMinimumLength + 1).ToString(CultureInfo.InvariantCulture) + " length",
                                             "protectionAuthorities");
             }
 

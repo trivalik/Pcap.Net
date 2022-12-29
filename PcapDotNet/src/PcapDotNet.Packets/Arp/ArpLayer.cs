@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.Ethernet;
@@ -90,13 +91,13 @@ namespace PcapDotNet.Packets.Arp
 
             if (SenderHardwareAddress.Count != TargetHardwareAddress.Count)
             {
-                throw new ArgumentException("Sender hardware address length is " + SenderHardwareAddress.Count + " bytes " +
-                                            "while target hardware address length is " + TargetHardwareAddress.Count + " bytes");
+                throw new ArgumentException($"Sender hardware address length is {SenderHardwareAddress.Count.ToString(CultureInfo.InvariantCulture)} bytes " +
+                    $"while target hardware address length is {TargetHardwareAddress.Count.ToString(CultureInfo.InvariantCulture)} bytes");
             }
             if (SenderProtocolAddress.Count != TargetProtocolAddress.Count)
             {
-                throw new ArgumentException("Sender protocol address length is " + SenderProtocolAddress.Count + " bytes " +
-                                            "while target protocol address length is " + TargetProtocolAddress.Count + " bytes");
+                throw new ArgumentException($"Sender protocol address length is {SenderProtocolAddress.Count.ToString(CultureInfo.InvariantCulture)} bytes " +
+                    $"while target protocol address length is {TargetProtocolAddress.Count.ToString(CultureInfo.InvariantCulture)} bytes");
             }
 
             ArpDatagram.WriteHeader(buffer, offset,

@@ -5,14 +5,23 @@ using static PcapDotNet.Core.Native.PcapUnmanagedStructures;
 
 namespace PcapDotNet.Core.Native
 {
+#pragma warning disable IDE1006 // Naming Styles
     internal interface IPcapPal
     {
+        Encoding StringEncoding { get; }
+
         /// <summary>
-        /// Creates a platform depend pcap packet header.
+        /// Creates a platform depend pcap packet header.handle
         /// </summary>
         /// <remarks>MUST be freed with Marshal.FreeHCGlobal!</remarks>
         /// <returns>Pointer to the header structure</returns>
-        IntPtr CreatePcapPacketHeader(Packet packet);
+        IntPtr CreatePcapPacketHeaderHandle(Packet packet);
+
+        /// <summary>
+        /// Creates a PcapPacketHeader object from platform depend unmanaged structure
+        /// </summary>
+        /// <param name="handle">pointer to platform depend structure of pcap_pkthdr</param>
+        PcapPacketHeader CreatePcapPacketHeader(IntPtr /* pcap_pkthdr* */ ptr);
 
         int pcap_findalldevs(ref IntPtr /* pcap_if_t** */ alldevs, StringBuilder /* char* */ errbuf);
 
@@ -21,7 +30,7 @@ namespace PcapDotNet.Core.Native
             ref pcap_rmtauth /*pcap_rmtauth **/auth,
             ref IntPtr /*pcap_if_t ** */alldevs,
             StringBuilder /*char * */errbuf);
-        
+
         void pcap_freealldevs(IntPtr /* pcap_if_t * */ alldevs);
 
         /// <summary>
@@ -29,28 +38,7 @@ namespace PcapDotNet.Core.Native
         /// provides extra flags and functionality
         /// See http://www.winpcap.org/docs/docs_40_2/html/group__wpcapfunc.html#g2b64c7b6490090d1d37088794f1f1791
         /// </summary>
-        /// <param name="dev">
-        /// A <see cref="string"/>
-        /// </param>
-        /// <param name="packetLen">
-        /// A <see cref="int"/>
-        /// </param>
-        /// <param name="flags">
-        /// A <see cref="int"/>
-        /// </param>
-        /// <param name="read_timeout">
-        /// A <see cref="int"/>
-        /// </param>
-        /// <param name="rmtauth">
-        /// A <see cref="IntPtr"/>
-        /// </param>
-        /// <param name="errbuf">
-        /// A <see cref="StringBuilder"/>
-        /// </param>
-        /// <returns>
-        /// A <see cref="IntPtr"/>
-        /// </returns>
-        IntPtr /* pcap_t* */ pcap_open(
+        PcapHandle /* pcap_t* */ pcap_open(
             string dev,
             int packetLen,
             int flags,
@@ -58,10 +46,10 @@ namespace PcapDotNet.Core.Native
             ref pcap_rmtauth rmtauth,
             StringBuilder errbuf);
 
-        IntPtr /* pcap_t* */ pcap_create(string dev, StringBuilder errbuf);
+        PcapHandle /* pcap_t* */ pcap_create(string dev, StringBuilder errbuf);
 
-        IntPtr /* pcap_t* */ pcap_open_offline(string/*const char* */ fname, StringBuilder/* char* */ errbuf);
-        
+        PcapHandle /* pcap_t* */ pcap_open_offline(string/*const char* */ fname, StringBuilder/* char* */ errbuf);
+
 
         /// <summary>
         /// Open a fake pcap_t for compiling filters or opening a capture for output.
@@ -69,12 +57,12 @@ namespace PcapDotNet.Core.Native
         /// <param name="linktype">Specifies the link-layer type for the pcap_t</param>
         /// <param name="snaplen">Specifies the snapshot length for the pcap_t</param>
         /// <returns>An IntPtr to a pcap_t structure</returns>
-        IntPtr /* pcap_t* */ pcap_open_dead(int linktype, int snaplen);
+        PcapHandle /* pcap_t* */ pcap_open_dead(int linktype, int snaplen);
 
-        int pcap_set_buffer_size(IntPtr /* pcap_t */ adapter, int bufferSizeInBytes);
+        int pcap_set_buffer_size(PcapHandle /* pcap_t */ adapter, int bufferSizeInBytes);
 
         /// <summary>Open a file to write packets. </summary>
-        IntPtr /*pcap_dumper_t * */ pcap_dump_open(IntPtr /*pcap_t * */adaptHandle, string /*const char* */fname);
+        IntPtr /*pcap_dumper_t * */ pcap_dump_open(PcapHandle /*pcap_t * */adaptHandle, string /*const char* */fname);
 
         /// <summary>
         /// Get the current file offset for a savefile being written.
@@ -87,14 +75,14 @@ namespace PcapDotNet.Core.Native
         /// </summary>
         /// <param name="user">If called directly, the user parameter is of type pcap_dumper_t as returned by pcap_dump_open().</param>
         void pcap_dump(IntPtr /*u_char * */user, IntPtr /*const struct pcap_pkthdr * */header, IntPtr /*const u_char * */ data);
-        
-        /// <summary> close the files associated with p and deallocates resources.</summary>
-        void pcap_close(IntPtr /*pcap_t **/adaptHandle);
+
+        /// <summary> close the files associated with <see cref="adaptHandle"/> and deallocates resources.</summary>
+        void pcap_close(PcapHandle /*pcap_t **/adaptHandle);
 
         /// <summary>
         /// To avoid callback, this returns one packet at a time
         /// </summary>
-        int pcap_next_ex(IntPtr /* pcap_t* */ adaptHandle, ref IntPtr /* **pkt_header */ header, ref IntPtr data);
+        int pcap_next_ex(PcapHandle /* pcap_t* */ adaptHandle, ref IntPtr /* **pkt_header */ header, ref IntPtr data);
 
         /// <summary>
         /// Send a raw packet.<br/>
@@ -106,15 +94,15 @@ namespace PcapDotNet.Core.Native
         /// <param name="data">contains the data of the packet to send (including the various protocol headers)</param>
         /// <param name="size">the dimension of the buffer pointed by data</param>
         /// <returns>0 if the packet is succesfully sent, -1 otherwise.</returns>
-        int pcap_sendpacket(IntPtr /* pcap_t* */ adaptHandle, IntPtr data, int size);
+        int pcap_sendpacket(PcapHandle /* pcap_t* */ adaptHandle, IntPtr data, int size);
 
         /// <summary>
         /// Compile a packet filter, converting an high level filtering expression (see Filtering expression syntax) in a program that can be interpreted by the kernel-level filtering engine. 
         /// </summary>
         /// <returns>0 on success and -1 on failure</returns>
-        int pcap_compile(IntPtr /* pcap_t* */ adaptHandle, IntPtr /*bpf_program **/fp, string /*char * */str, int optimize, UInt32 netmask);
+        int pcap_compile(PcapHandle /* pcap_t* */ adaptHandle, IntPtr /*bpf_program **/fp, string /*char * */str, int optimize, UInt32 netmask);
 
-        int pcap_setfilter(IntPtr /* pcap_t* */ adaptHandle, IntPtr /*bpf_program **/fp);
+        int pcap_setfilter(PcapHandle /* pcap_t* */ adaptHandle, IntPtr /*bpf_program **/fp);
 
         /// <summary>
         /// Check whether a filter matches a packet. 
@@ -132,7 +120,7 @@ namespace PcapDotNet.Core.Native
         /// <summary>
         /// return the error text pertaining to the last pcap library error.
         /// </summary>
-        IntPtr pcap_geterr(IntPtr /*pcap_t * */ adaptHandle);
+        IntPtr pcap_geterr(PcapHandle /*pcap_t * */ adaptHandle);
 
         /// <summary>Returns a pointer to a string giving information about the version of the libpcap library being used; note that it contains more information than just a version number. </summary>
         IntPtr /*const char* */  pcap_lib_version();
@@ -149,7 +137,28 @@ namespace PcapDotNet.Core.Native
         void pcap_dump_close(IntPtr /*pcap_dumper_t **/p);
 
         /// <summary> Return the link layer of an adapter. </summary>
-        int pcap_datalink(IntPtr /* pcap_t* */ adaptHandle);
+        int pcap_datalink(PcapHandle /* pcap_t* */ adaptHandle);
+
+        /// <summary>
+        /// set the link-layer header type to be used by a capture device
+        /// </summary>
+        /// <param name="dlt">new link-layer header type of the pcap descriptor which should be used</param>
+        /// <returns>0 on success, PCAP_ERROR_NOT_ACTIVATED if called on a capture handle that has been created but not activated, or PCAP_ERROR on other errors. If PCAP_ERROR is returned, pcap_geterr(3PCAP) or pcap_perror(3PCAP) may be called with p as an argument to fetch or display the error text.</returns>
+        int pcap_set_datalink(PcapHandle /* pcap_t* */ adaptHandle, int dlt);
+
+        /// <summary>
+        /// Is used to get a list of the supported link-layer header types of the interface associated with the pcap descriptor. pcap_list_datalinks() allocates an array to hold the list and sets *dataLinkList to point to that array.
+        /// The caller is responsible for freeing the array with pcap_free_datalinks(), which frees the list of link-layer header types pointed to by dataLinkList.
+        /// It must not be called on a pcap descriptor created by pcap_create(3PCAP) that has not yet been activated by pcap_activate(3PCAP). 
+        /// </summary>
+        /// <param name="dataLinkList">list of link-layer header types supported by a capture device</param>
+        /// <returns>The number of link-layer header types in the array on success, PCAP_ERROR_NOT_ACTIVATED if called on a capture handle that has been created but not activated, and PCAP_ERROR on other errors. If PCAP_ERROR is returned, pcap_geterr(3PCAP) or pcap_perror(3PCAP) may be called with p as an argument to fetch or display the error text.</returns>
+        int pcap_list_datalinks(PcapHandle /* pcap_t* */ adaptHandle, ref IntPtr /* int** */ dataLinkList);
+
+        /// <summary>
+        /// Frees the list of link-layer header types pointed to by dataLinkList. 
+        /// </summary>
+        void pcap_free_datalinks(IntPtr /* int* */ dataLinkList);
 
         /// <summary>
         /// Get the link-layer header type value corresponding to a header type name.
@@ -182,102 +191,105 @@ namespace PcapDotNet.Core.Native
         /// <summary>
         /// Set nonblocking mode. pcap_loop() and pcap_next() doesnt work in  nonblocking mode!
         /// </summary>
-        int pcap_setnonblock(IntPtr /* pcap_if_t** */ adaptHandle, int nonblock, StringBuilder /* char* */ errbuf);
+        int pcap_setnonblock(PcapHandle /* pcap_t* */ adaptHandle, int nonblock, StringBuilder /* char* */ errbuf);
 
         /// <summary>
         /// Get nonblocking mode, returns allways 0 for savefiles.
         /// </summary>
-        int pcap_getnonblock(IntPtr /* pcap_if_t** */ adaptHandle, StringBuilder /* char* */ errbuf);
+        int pcap_getnonblock(PcapHandle /* pcap_t* */ adaptHandle, StringBuilder /* char* */ errbuf);
 
         /// <summary>
         /// Read packets until cnt packets are processed or an error occurs.
         /// </summary>
-        int pcap_dispatch(IntPtr /* pcap_t* */ adaptHandle, int count, pcap_handler callback, IntPtr ptr);
+        int pcap_dispatch(PcapHandle /* pcap_t* */ adaptHandle, int count, pcap_handler callback, IntPtr ptr);
 
         /// <summary>
-        /// Retrieves a selectable file descriptor
+        /// Read packets until cnt packets are processed or an error occurs.
         /// </summary>
-        /// <param name="adaptHandle">
-        /// A <see cref="IntPtr"/>
-        /// </param>
-        /// <returns>
-        /// A <see cref="int"/>
-        /// </returns>
-        int pcap_get_selectable_fd(IntPtr /* pcap_t* */ adaptHandle);
-
-        /// <summary>
-        /// Fills in the pcap_stat structure passed to the function
-        /// based on the pcap_t adapter
-        /// </summary>
-        /// <param name="adapter">
-        /// A <see cref="IntPtr"/>
-        /// </param>
-        /// <param name="stat">
-        /// A <see cref="IntPtr"/>
-        /// </param>
-        /// <returns>
-        /// A <see cref="int"/>
-        /// </returns>
-        int pcap_stats(IntPtr /* pcap_t* */ adapter, IntPtr /* struct pcap_stat* */ stat);
-
-        /// <summary>
-        /// Returns the snapshot length
-        /// </summary>
-        /// <param name="adapter">
-        /// A <see cref="IntPtr"/>
-        /// </param>
-        /// <returns>
-        /// A <see cref="int"/>
-        /// </returns>
-        int pcap_snapshot(IntPtr /* pcap_t... */ adapter);
-
-        /// <summary>
-        /// pcap_set_rfmon() sets whether monitor mode should be set on a capture handle when the handle is activated.
-        /// If rfmon is non-zero, monitor mode will be set, otherwise it will not be set.  
-        /// </summary>
-        /// <param name="p">A <see cref="IntPtr"/></param>
-        /// <param name="rfmon">A <see cref="int"/></param>
-        /// <returns>Returns 0 on success or PCAP_ERROR_ACTIVATED if called on a capture handle that has been activated.</returns>
-        int pcap_set_rfmon(IntPtr /* pcap_t* */ p, int rfmon);
-
-        /// <summary>
-        /// pcap_set_snaplen() sets the snapshot length to be used on a capture handle when the handle is activated to snaplen.  
-        /// </summary>
-        /// <param name="p">A <see cref="IntPtr"/></param>
-        /// <param name="snaplen">A <see cref="int"/></param>
-        /// <returns>Returns 0 on success or PCAP_ERROR_ACTIVATED if called on a capture handle that has been activated.</returns>
-        int pcap_set_snaplen(IntPtr /* pcap_t* */ p, int snaplen);
-
-        /// <summary>
-        /// pcap_set_promisc() sets whether promiscuous mode should be set on a capture handle when the handle is activated. 
-        /// If promisc is non-zero, promiscuous mode will be set, otherwise it will not be set.  
-        /// </summary>
-        /// <param name="p">A <see cref="IntPtr"/></param>
-        /// <param name="promisc">A <see cref="int"/></param>
-        /// <returns>Returns 0 on success or PCAP_ERROR_ACTIVATED if called on a capture handle that has been activated.</returns>
-        int pcap_set_promisc(IntPtr /* pcap_t* */ p, int promisc);
-
-        /// <summary>
-        /// pcap_set_timeout() sets the packet buffer timeout that will be used on a capture handle when the handle is activated to to_ms, which is in units of milliseconds.
-        /// </summary>
-        /// <param name="p">A <see cref="IntPtr"/></param>
-        /// <param name="to_ms">A <see cref="int"/></param>
-        /// <returns>Returns 0 on success or PCAP_ERROR_ACTIVATED if called on a capture handle that has been activated.</returns>
-        int pcap_set_timeout(IntPtr /* pcap_t* */ p, int to_ms);
-
-        /// <summary>
-        /// pcap_activate() is used to activate a packet capture handle to look at packets on the network, with the options that were set on the handle being in effect.  
-        /// </summary>
-        /// <param name="p">A <see cref="IntPtr"/></param>
-        /// <returns>Returns 0 on success without warnings, a non-zero positive value on success with warnings, and a negative value on error. A non-zero return value indicates what warning or error condition occurred.</returns>
-        int pcap_activate(IntPtr /* pcap_t* */ p);
+        int pcap_loop(PcapHandle /* pcap_t* */ adaptHandle, int count, pcap_handler callback, IntPtr ptr);
 
         /// <summary>
         /// Force a pcap_dispatch() or pcap_loop() call to return
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        int pcap_breakloop(IntPtr /* pcap_t_* */ p);
+        int pcap_breakloop(PcapHandle /* pcap_t* */ p);
+
+        /// <summary>
+        /// Retrieves a selectable file descriptor
+        /// </summary>
+        int pcap_get_selectable_fd(PcapHandle /* pcap_t* */ adaptHandle);
+
+        /// <summary>
+        /// Fills in the pcap_stat structure passed to the function
+        /// based on the pcap_t adapter
+        /// </summary>
+        int pcap_stats(PcapHandle /* pcap_t* */ adapter, IntPtr /* struct pcap_stat* */ stat);
+
+        /// <summary>
+        /// Returns the snapshot length
+        /// </summary>
+        int pcap_snapshot(PcapHandle /* pcap_t* */ adapter);
+
+        /// <summary>
+        /// find out whether a 'savefile' has the native byte order 
+        /// </summary>
+        /// <returns>
+        /// returns true (1) if p refers to a 'savefile' that uses a different byte order than the current system. For a live capture, it always returns false (0). Returns PCAP_ERROR_NOT_ACTIVATED if called on a capture handle that has been created but not activated.
+        /// </returns>
+        int pcap_is_swapped(PcapHandle /* pcap_t* */ adapter);
+
+        /// <summary>
+        /// The version number of a 'savefile' 
+        /// </summary>
+        /// <returns>The major number of the file format of the 'savefile'</returns>
+        /// <remarks>
+        /// The version number is stored in the 'savefile'; note that the meaning of its values depends on the type of 'savefile' (for example, pcap or pcapng).
+        /// If p refers to a live capture, the values returned by pcap_major_version() and pcap_minor_version() are not meaningful.
+        /// </remarks>
+        int pcap_major_version(PcapHandle /* pcap_t* */ adapter);
+
+        /// <summary>
+        /// The version number of a 'savefile' 
+        /// </summary>
+        /// <returns>The minor number of the file format of the 'savefile'</returns>
+        /// <remarks>
+        /// The version number is stored in the 'savefile'; note that the meaning of its values depends on the type of 'savefile' (for example, pcap or pcapng).
+        /// If p refers to a live capture, the values returned by pcap_major_version() and pcap_minor_version() are not meaningful.
+        /// </remarks>
+        int pcap_minor_version(PcapHandle /* pcap_t* */ adapter);
+
+        /// <summary>
+        /// pcap_set_rfmon() sets whether monitor mode should be set on a capture handle when the handle is activated.
+        /// If rfmon is non-zero, monitor mode will be set, otherwise it will not be set.  
+        /// </summary>
+        /// <returns>Returns 0 on success or PCAP_ERROR_ACTIVATED if called on a capture handle that has been activated.</returns>
+        int pcap_set_rfmon(PcapHandle /* pcap_t* */ p, int rfmon);
+
+        /// <summary>
+        /// pcap_set_snaplen() sets the snapshot length to be used on a capture handle when the handle is activated to snaplen.  
+        /// </summary>
+        /// <returns>Returns 0 on success or PCAP_ERROR_ACTIVATED if called on a capture handle that has been activated.</returns>
+        int pcap_set_snaplen(PcapHandle /* pcap_t* */ p, int snaplen);
+
+        /// <summary>
+        /// pcap_set_promisc() sets whether promiscuous mode should be set on a capture handle when the handle is activated. 
+        /// If promisc is non-zero, promiscuous mode will be set, otherwise it will not be set.  
+        /// </summary>
+        /// <returns>Returns 0 on success or PCAP_ERROR_ACTIVATED if called on a capture handle that has been activated.</returns>
+        int pcap_set_promisc(PcapHandle /* pcap_t* */ p, int promisc);
+
+        /// <summary>
+        /// pcap_set_timeout() sets the packet buffer timeout that will be used on a capture handle when the handle is activated to to_ms, which is in units of milliseconds.
+        /// </summary>
+        /// <returns>Returns 0 on success or PCAP_ERROR_ACTIVATED if called on a capture handle that has been activated.</returns>
+        int pcap_set_timeout(PcapHandle /* pcap_t* */ p, int to_ms);
+
+        /// <summary>
+        /// pcap_activate() is used to activate a packet capture handle to look at packets on the network, with the options that were set on the handle being in effect.
+        /// </summary>
+        /// <returns>Returns 0 on success without warnings, a non-zero positive value on success with warnings, and a negative value on error. A non-zero return value indicates what warning or error condition occurred.</returns>
+        int pcap_activate(PcapHandle /* pcap_t* */ p);
 
         #region libpcap specific
         /// <summary>
@@ -287,13 +299,34 @@ namespace PcapDotNet.Core.Native
         /// pcap_open_offline()
         /// Libpcap specific method
         /// </summary>
-        /// <param name="adapter">
-        /// A <see cref="IntPtr"/>
-        /// </param>
-        /// <returns>
-        /// A <see cref="int"/>
-        /// </returns>
-        int pcap_fileno(IntPtr /* pcap_t* p */ adapter);
+        int pcap_fileno(PcapHandle /* pcap_t* p */ adapter);
+
+        #endregion
+
+        #region Windows-specific Extensions (win pcap)
+        /// <summary>
+        /// Set the working mode of the interface p to mode. 
+        /// </summary>
+        int pcap_setmode(PcapHandle /* pcap_t* p */ adapter, PacketCommunicatorMode mode);
+
+        /// <summary>
+        /// Set the size of the kernel buffer associated with an adapter.
+        /// </summary>
+        int pcap_setbuff(PcapHandle /* pcap_t* p */ adapter, int dim);
+
+        /// <summary>
+        /// Set the minumum amount of data received by the kernel in a single call.
+        /// </summary>
+        int pcap_setmintocopy(PcapHandle /* pcap_t* p */ adapter, int size);
+
+        /// <summary>
+        /// Define a sampling method for packet capture. This function allows applying a sampling method to the packet capture process.The currently sampling methods (and the way to set them) are described into the struct pcap_samp. In other words, the user must set the appropriate parameters into it; these will be applied as soon as the capture starts.
+        /// </summary>
+        /// <remarks>
+        /// Sampling parameters cannot be changed when a capture is active. These parameters must be applied before starting the capture. If they are applied when the capture is in progress, the new settings are ignored.
+        /// Sampling works only when capturing data on Win32 or reading from a file.It has not been implemented on other platforms.Sampling works on remote machines provided that the probe (i.e.the capturing device) is a Win32 workstation.
+        /// </remarks>
+        IntPtr /* struct pcap_samp* */ pcap_setsampling(PcapHandle /* pcap_t* p */ adapter);
         #endregion
 
         #region Send queue functions
@@ -310,7 +343,8 @@ namespace PcapDotNet.Core.Native
         /// If it is smaller than the size parameter, an error occurred 
         /// during the send. The error can be caused by a driver/adapter 
         /// problem or by an inconsistent/bogus send queue.</returns>
-        int pcap_sendqueue_transmit(IntPtr/*pcap_t * */p, ref pcap_send_queue queue, int sync);
+        int pcap_sendqueue_transmit(PcapHandle /*pcap_t * */ p, ref pcap_send_queue queue, int sync);
         #endregion
     }
+#pragma warning restore IDE1006 // Naming Styles
 }

@@ -34,7 +34,7 @@ namespace PcapDotNet.Core
         /// <param name="snapshotLength">Length of the packet that has to be retained. For each packet received by the filter, only the first 'snapshotLength' bytes are stored in the buffer and passed to the user application. For instance, snaplen equal to 100 means that only the first 100 bytes of each packet are stored.</param>
         /// <param name="attributes">Keeps several flags that can be needed for capturing packets.</param>
         /// <param name="readTimeout">Read timeout in milliseconds. The read timeout is used to arrange that the read not necessarily return immediately when a packet is seen, but that it waits for some amount of time to allow more packets to arrive and to read multiple packets from the OS kernel in one operation. Not all platforms support a read timeout; on platforms that don't, the read timeout is ignored.</param>
-        /// <exception cref="System::InvalidOperationException">Thrown on failure.</exception>
+        /// <exception cref="System.InvalidOperationException">Thrown on failure.</exception>
         PacketCommunicator Open(int snapshotLength, PacketDeviceOpenAttributes attributes, int readTimeout);
 
         /// <summary>

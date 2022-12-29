@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using PcapDotNet.Base;
 
@@ -134,7 +135,7 @@ namespace PcapDotNet.Packets.IpV4
             : base(optionType)
         {
             if (pointedAddressIndex > PointedAddressIndexMaxValue)
-                throw new ArgumentOutOfRangeException("pointedAddressIndex", pointedAddressIndex, "Maximum value is " + PointedAddressIndexMaxValue);
+                throw new ArgumentOutOfRangeException("pointedAddressIndex", pointedAddressIndex, "Maximum value is " + PointedAddressIndexMaxValue.ToString(CultureInfo.InvariantCulture));
 
             _route = route.AsReadOnly();
             _pointedAddressIndex = pointedAddressIndex;

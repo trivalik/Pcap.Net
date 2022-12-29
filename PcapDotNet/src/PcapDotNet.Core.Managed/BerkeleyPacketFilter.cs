@@ -48,7 +48,7 @@ namespace PcapDotNet.Core
             Initialize(filterValue, snapshotLength, kind, null);
         }
 
-        internal BerkeleyPacketFilter(IntPtr /* pcap_t* */ pcapDescriptor, string filterString, IpV4SocketAddress netmask)
+        internal BerkeleyPacketFilter(PcapHandle /* pcap_t* */ pcapDescriptor, string filterString, IpV4SocketAddress netmask)
         {
             Initialize(pcapDescriptor, filterString, netmask);
         }
@@ -80,7 +80,7 @@ namespace PcapDotNet.Core
             if (packet == null)
                 throw new ArgumentNullException(nameof(packet));
 
-            using(var header = new PacketHeader(packet))
+            using (var header = new PcapPacketHeaderHandle(packet))
             {
                 unsafe
                 {
@@ -109,27 +109,22 @@ namespace PcapDotNet.Core
             return Test(out snapshotLength, packet);
         }
 
-        internal void SetFilter(IntPtr /* pcap_t* */ pcapDescriptor)
+        internal void SetFilter(PcapHandle /* pcap_t* */ pcapDescriptor)
         {
             if (Interop.Pcap.pcap_setfilter(pcapDescriptor, _bpf) != 0)
-                throw PcapError.BuildInvalidOperation("Failed setting bpf filter", pcapDescriptor);
+                PcapError.ThrowInvalidOperation("Failed setting bpf filter", pcapDescriptor);
         }
 
         private void Initialize(string filterString, int snapshotLength, DataLinkKind kind, IpV4SocketAddress netmask)
         {
             var dataLink = new PcapDataLink(kind);
-            var pcapDescriptor = Interop.Pcap.pcap_open_dead(dataLink.Value, snapshotLength);
-            try 
+            using (var pcapDescriptor = Interop.Pcap.pcap_open_dead(dataLink.Value, snapshotLength))
             {
                 Initialize(pcapDescriptor, filterString, netmask);
             }
-            finally
-            {
-                Interop.Pcap.pcap_close(pcapDescriptor);
-            }
         }
 
-        private void Initialize(IntPtr /* pcap_t* */ pcapDescriptor, string filterString, IpV4SocketAddress netmask)
+        private void Initialize(PcapHandle /* pcap_t* */ pcapDescriptor, string filterString, IpV4SocketAddress netmask)
         {
             uint netmaskValue = 0;
             if (netmask != null)
@@ -138,7 +133,7 @@ namespace PcapDotNet.Core
             _bpf = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(PcapUnmanagedStructures.bpf_program)));
             try
             {
-                if(Interop.Pcap.pcap_compile(pcapDescriptor, _bpf, filterString, 1, netmaskValue) != 0)
+                if (Interop.Pcap.pcap_compile(pcapDescriptor, _bpf, filterString, 1, netmaskValue) != 0)
                 {
                     throw new ArgumentException("An error has occured when compiling the filter <" + filterString + ">: " + PcapError.GetErrorMessage(pcapDescriptor));
                 }

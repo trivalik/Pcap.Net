@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.IpV4;
 
@@ -66,7 +67,7 @@ namespace PcapDotNet.Packets.IpV6
             : base(nextHeader)
         {
             if (fragmentOffset > MaxFragmentOffset)
-                throw new ArgumentOutOfRangeException("fragmentOffset", fragmentOffset, "Max value is " + MaxFragmentOffset);
+                throw new ArgumentOutOfRangeException("fragmentOffset", fragmentOffset, "Max value is " + MaxFragmentOffset.ToString(CultureInfo.InvariantCulture));
             FragmentOffset = fragmentOffset;
             MoreFragments = moreFragments;
             Identification = identification;

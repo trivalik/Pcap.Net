@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.Ip;
@@ -52,7 +53,7 @@ namespace PcapDotNet.Packets.Transport
                 throw new ArgumentNullException("data");
 
             if (data.Count != OptionValueLength)
-                throw new ArgumentException("data must be " + OptionValueLength + " bytes and not " + data.Count + " bytes", "data");
+                throw new ArgumentException($"data must be {OptionValueLength.ToString(CultureInfo.InvariantCulture)} bytes and not {data.Count.ToString(CultureInfo.InvariantCulture)} bytes", "data");
 
             Data = new ReadOnlyCollection<byte>(data);
         }

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 using PcapDotNet.Core.Native;
 
 namespace PcapDotNet.Core
@@ -16,7 +14,7 @@ namespace PcapDotNet.Core
         private ulong _acceptedBytes;
 
         internal PacketSampleStatistics(
-            IntPtr /* const pcap_pkthdr& */ packetHeader, 
+            IntPtr /* const pcap_pkthdr& */ packetHeader,
             IntPtr /* const unsigned char* */ packetData)
         {
             if (packetHeader == IntPtr.Zero)
@@ -25,8 +23,7 @@ namespace PcapDotNet.Core
             if (packetData == IntPtr.Zero)
                 throw new ArgumentNullException(nameof(packetData));
 
-            //ToDo: fetch interop timestamp
-            //Marshal.PtrToStructure<PcapUnmanagedStructures.pcap_pkthdr_windows>
+            _timestamp = Interop.Pcap.CreatePcapPacketHeader(packetHeader).Timestamp;
 
             _acceptedPackets = (ulong)Marshal.ReadInt64(packetData, 0);
             _acceptedBytes = (ulong)Marshal.ReadInt64(packetData, 8);

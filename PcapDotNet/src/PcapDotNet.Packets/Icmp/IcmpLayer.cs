@@ -1,5 +1,6 @@
 using PcapDotNet.Base;
 using PcapDotNet.Packets.IpV4;
+using System.Globalization;
 
 namespace PcapDotNet.Packets.Icmp
 {
@@ -142,7 +143,7 @@ namespace PcapDotNet.Packets.Icmp
         /// </summary>
         public sealed override string ToString()
         {
-            return MessageType + "." + CodeValue + "(" + Variable + ")";
+            return MessageType + "." + CodeValue.ToString(CultureInfo.InvariantCulture) + "(" + Variable.ToString(CultureInfo.InvariantCulture) + ")";
         }
 
         /// <summary>

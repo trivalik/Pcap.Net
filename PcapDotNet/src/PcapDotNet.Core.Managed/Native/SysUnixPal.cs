@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace PcapDotNet.Core.Native
 {
@@ -21,9 +19,9 @@ namespace PcapDotNet.Core.Native
 
                 case 10 /* AF_INET6 */:
                     return SocketAddressFamily.Internet6;
-                
+
                 default:
-                    throw new PlatformNotSupportedException("SocketAddressFamily " + value + "is not supported");
+                    throw new PlatformNotSupportedException("SocketAddressFamily " + value + " is not supported");
             }
         }
     }

@@ -13,13 +13,13 @@ namespace PcapDotNet.Core
         private IntPtr /*pcap_dumper_t* */ _pcapDumper;
         private readonly string _filename;
 
-        internal PacketDumpFile(IntPtr /*pcap_t* */ pcapDescriptor, string filename)
+        internal PacketDumpFile(PcapHandle /*pcap_t* */ pcapDescriptor, string filename)
         {
             _filename = filename;
 
             // TODO: Use pcap_dump_fopen() to support Unicode filenames once it's available. See http://www.winpcap.org/pipermail/winpcap-users/2011-February/004273.html
             _pcapDumper = Interop.Pcap.pcap_dump_open(pcapDescriptor, filename);
-            if(_pcapDumper == IntPtr.Zero)
+            if (_pcapDumper == IntPtr.Zero)
                 throw new InvalidOperationException("Error opening output file " + filename + " Error: " + PcapError.GetErrorMessage(pcapDescriptor));
         }
 
@@ -33,11 +33,13 @@ namespace PcapDotNet.Core
             if (packet == null)
                 throw new ArgumentNullException(nameof(packet));
 
-            using(var header = new PacketHeader(packet))
-            unsafe
+            using (var header = new PcapPacketHeaderHandle(packet))
             {
-                fixed (byte* bytes = packet.Buffer)
-                    Interop.Pcap.pcap_dump(_pcapDumper, header.Pointer, new IntPtr(bytes));
+                unsafe
+                {
+                    fixed (byte* bytes = packet.Buffer)
+                        Interop.Pcap.pcap_dump(_pcapDumper, header.Pointer, new IntPtr(bytes));
+                }
             }
         }
 
@@ -47,7 +49,7 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown on error.</exception>
         void Flush()
         {
-            if(Interop.Pcap.pcap_dump_flush(_pcapDumper) != 0)
+            if (Interop.Pcap.pcap_dump_flush(_pcapDumper) != 0)
                 throw new InvalidOperationException("Failed flushing to file " + _filename);
         }
 
@@ -88,23 +90,18 @@ namespace PcapDotNet.Core
             if (packets == null)
                 throw new ArgumentNullException(nameof(packets));
 
-            var pcapDescriptor = Interop.Pcap.pcap_open_dead(dataLink.Value, snapshotLength);
-            if (pcapDescriptor == IntPtr.Zero)
-                throw new InvalidOperationException("Unable to open open a dead capture");
-
-            try
+            using (var pcapDescriptor = Interop.Pcap.pcap_open_dead(dataLink.Value, snapshotLength))
             {
-                using(var dumpFile = new PacketDumpFile(pcapDescriptor, fileName))
+                if (pcapDescriptor.IsInvalid)
+                    throw new InvalidOperationException("Unable to open open a dead capture");
+
+                using (var dumpFile = new PacketDumpFile(pcapDescriptor, fileName))
                 {
                     foreach (var packet in packets)
                     {
                         dumpFile.Dump(packet);
                     }
                 }
-            }
-            finally
-            {
-                Interop.Pcap.pcap_close(pcapDescriptor);
             }
         }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using PcapDotNet.Base;
 
 namespace PcapDotNet.Packets.Dns
@@ -76,7 +77,7 @@ namespace PcapDotNet.Packets.Dns
                 throw new ArgumentNullException("addressFamilyDependentPart");
 
             if (addressFamilyDependentPart.Length > AddressFamilyDependentPartMaxLength)
-                throw new ArgumentOutOfRangeException("addressFamilyDependentPart", addressFamilyDependentPart, "Cannot be longer than " + AddressFamilyDependentPartMaxLength);
+                throw new ArgumentOutOfRangeException("addressFamilyDependentPart", addressFamilyDependentPart, "Cannot be longer than " + AddressFamilyDependentPartMaxLength.ToString(CultureInfo.InvariantCulture));
 
             AddressFamily = addressFamily;
             PrefixLength = prefixLength;
