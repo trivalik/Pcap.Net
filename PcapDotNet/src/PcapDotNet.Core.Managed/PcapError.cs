@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using PcapDotNet.Core.Native;
 
@@ -10,11 +9,7 @@ namespace PcapDotNet.Core
     {
         public static string GetErrorMessage(PcapHandle /*pcap_t*/ pcapDescriptor)
         {
-
-            var unmanagedPcapError = Interop.Pcap.pcap_geterr(pcapDescriptor);
-            if (unmanagedPcapError == IntPtr.Zero)
-                return null;
-            return Marshal.PtrToStringAnsi(unmanagedPcapError);
+            return Interop.Pcap.pcap_geterr(pcapDescriptor);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -15,7 +15,7 @@ namespace PcapDotNet.Core
         {
             get
             {
-                return Marshal.PtrToStringAnsi(Interop.Pcap.pcap_lib_version());
+                return Interop.Pcap.pcap_lib_version();
                 //ToDo: error Handling?
             }
 

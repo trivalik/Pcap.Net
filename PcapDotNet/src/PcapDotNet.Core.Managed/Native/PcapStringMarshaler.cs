@@ -10,6 +10,8 @@ namespace PcapDotNet.Core.Native
     /// </summary>
     internal class PcapStringMarshaler : ICustomMarshaler
     {
+        public const string Cookie = "no_free";
+
         public static ICustomMarshaler GetInstance(string cookie)
         {
             return new PcapStringMarshaler(cookie);
@@ -20,7 +22,7 @@ namespace PcapDotNet.Core.Native
         public PcapStringMarshaler(string cookie)
         {
             // If the string was not allocated by us, don't free it
-            _freeOnClean = !cookie.Contains("no_free");
+            _freeOnClean = !cookie.Contains(Cookie);
         }
 
         public void CleanUpManagedData(object managedObj)

@@ -120,10 +120,10 @@ namespace PcapDotNet.Core.Native
         /// <summary>
         /// return the error text pertaining to the last pcap library error.
         /// </summary>
-        IntPtr pcap_geterr(PcapHandle /*pcap_t * */ adaptHandle);
+        string pcap_geterr(PcapHandle /*pcap_t * */ adaptHandle);
 
         /// <summary>Returns a pointer to a string giving information about the version of the libpcap library being used; note that it contains more information than just a version number. </summary>
-        IntPtr /*const char* */  pcap_lib_version();
+        string /*const char* */  pcap_lib_version();
 
         /// <summary>return the standard I/O stream of the 'savefile' opened by pcap_dump_open().</summary>
         IntPtr /*FILE **/  pcap_dump_file(IntPtr /*pcap_dumper_t **/p);
@@ -173,20 +173,20 @@ namespace PcapDotNet.Core.Native
         /// which is the DLT_ name for the link-layer header type value with the DLT_ removed. 
         /// NULL is returned if the type value does not correspond to a known DLT_ value. 
         /// </summary>
-        IntPtr /* const char* */ pcap_datalink_val_to_name(int dlt);
+        string /* const char* */ pcap_datalink_val_to_name(int dlt);
 
         /// <summary>
         /// Translates a link-layer header type value to a short description of that link-layer header type. 
         /// NULL is returned if the type value does not correspond to a known DLT_ value.  
         /// </summary>
-        IntPtr /* const char* */ pcap_datalink_val_to_description(int dlt);
+        string /* const char* */ pcap_datalink_val_to_description(int dlt);
 
         /// <summary>
         /// Translates a link-layer header type value to a short description of that link-layer header type 
         /// just like pcap_datalink_val_to_description. If the type value does not correspond to a known DLT_ value, 
         /// the string "DLT n" is returned, where n is the value of the dlt argument.  
         /// </summary>
-        IntPtr /* const char* */ pcap_datalink_val_to_description_or_dlt(int dlt);
+        string /* const char* */ pcap_datalink_val_to_description_or_dlt(int dlt);
 
         /// <summary>
         /// Set nonblocking mode. pcap_loop() and pcap_next() doesnt work in  nonblocking mode!

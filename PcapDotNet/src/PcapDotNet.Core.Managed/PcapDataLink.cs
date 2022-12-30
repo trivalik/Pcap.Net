@@ -98,9 +98,9 @@ namespace PcapDotNet.Core
         {
             get
             {
-                var ptr = Interop.Pcap.pcap_datalink_val_to_name(Value);
-                if (ptr != IntPtr.Zero)
-                    return Marshal.PtrToStringAnsi(ptr);
+                var name = Interop.Pcap.pcap_datalink_val_to_name(Value);
+                if (!string.IsNullOrEmpty(name))
+                    return name;
 
                 switch(Value)
                 {
@@ -120,9 +120,9 @@ namespace PcapDotNet.Core
         {
             get
             {
-                var ptr = Interop.Pcap.pcap_datalink_val_to_description(Value);
-                if (ptr != IntPtr.Zero)
-                    return Marshal.PtrToStringAnsi(ptr);
+                var description = Interop.Pcap.pcap_datalink_val_to_description(Value);
+                if (!string.IsNullOrEmpty(description))
+                    return description;
 
                 switch (Value)
                 {
