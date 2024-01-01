@@ -23,7 +23,7 @@
             
             foreach (var device in devices) 
             {
-                Console.WriteLine($" - {device.Description}");
+                Console.WriteLine($" - {device.Description} ({device.Attributes})");
                 foreach (var addr in device.Addresses)
                 {
                     Console.WriteLine($" -- {addr.Address}");
