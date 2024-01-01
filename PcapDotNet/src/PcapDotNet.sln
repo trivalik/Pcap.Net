@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D5DCCC5-A509-4B4E-90B0-92390C6EA06F}"
 	ProjectSection(SolutionItems) = preProject
@@ -31,7 +31,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PcapDotNet.Core", "PcapDotN
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PcapDotNet.Core.Extensions", "PcapDotNet.Core.Extensions\PcapDotNet.Core.Extensions.csproj", "{322040C2-3DC1-4D0C-8E0F-F05290AFE023}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PcapDotNet.Core.Managed", "PcapDotNet.Core.Managed\PcapDotNet.Core.Managed.csproj", "{CB7C9D43-422C-4B43-999A-F65F6E2C7075}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PcapDotNet.Core.Managed", "PcapDotNet.Core.Managed\PcapDotNet.Core.Managed.csproj", "{CB7C9D43-422C-4B43-999A-F65F6E2C7075}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PcapDotNet.Core.Managed.Tests", "PcapDotNet.Core.Managed.Tests\PcapDotNet.Core.Managed.Tests.csproj", "{23F3898E-FDA7-442E-91AD-1DD5DF91B706}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -205,6 +207,22 @@ Global
 		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Win32.Build.0 = Release|Any CPU
 		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|x64.ActiveCfg = Release|Any CPU
 		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|x64.Build.0 = Release|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|Win32.Build.0 = Debug|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|x64.Build.0 = Debug|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|Win32.ActiveCfg = Release|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|Win32.Build.0 = Release|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|x64.ActiveCfg = Release|Any CPU
+		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

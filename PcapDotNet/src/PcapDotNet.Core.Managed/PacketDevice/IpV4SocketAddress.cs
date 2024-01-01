@@ -21,7 +21,7 @@ namespace PcapDotNet.Core
                 throw new ArgumentNullException(nameof(address));
 
             var sockaddr_in = Marshal.PtrToStructure<PcapUnmanagedStructures.sockaddr_in>(address);
-            _address = new IpV4Address((uint)IPAddress.HostToNetworkOrder(sockaddr_in.sin_addr.s_addr));
+            _address = new IpV4Address((uint)IPAddress.NetworkToHostOrder(unchecked((int)sockaddr_in.sin_addr.s_addr)));
         }
 
         /// <summary>

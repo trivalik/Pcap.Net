@@ -19,7 +19,6 @@ along with SharpPcap.  If not, see <http://www.gnu.org/licenses/>.
  * Copyright 2008-2009 Chris Morgan <chmorgan@gmail.com>
  */
 
-using PcapDotNet.Packets;
 using System;
 using System.Runtime.InteropServices;
 

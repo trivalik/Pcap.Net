@@ -16,6 +16,9 @@ namespace PcapDotNet.Core
 
         internal const int PCAP_ERRBUF_SIZE = 256;
 
+        internal const string PCAP_SRC_FILE_STRING = "file://";
+        internal const string PCAP_SRC_IF_STRING = "rpcap://";
+
         #region native error codes
         /*
          * Error codes for the pcap API.

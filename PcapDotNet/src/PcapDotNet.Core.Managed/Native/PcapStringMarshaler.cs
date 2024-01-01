@@ -53,13 +53,15 @@ namespace PcapDotNet.Core.Native
             var byteCount = 0;
             if (managedObj is string str)
             {
-                bytes = Interop.Pcap.StringEncoding.GetBytes(str);
+                var endcoding = GetEncoding();
+                bytes = endcoding.GetBytes(str);
                 byteCount = bytes.Length + 1;
             }
             else if (managedObj is StringBuilder builder)
             {
-                bytes = Interop.Pcap.StringEncoding.GetBytes(builder.ToString());
-                byteCount = Interop.Pcap.StringEncoding.GetMaxByteCount(builder.Capacity) + 1;
+                var endcoding = GetEncoding();
+                bytes = endcoding.GetBytes(builder.ToString());
+                byteCount = endcoding.GetMaxByteCount(builder.Capacity) + 1;
             }
 
             if (bytes is null)
@@ -85,7 +87,15 @@ namespace PcapDotNet.Core.Native
             {
                 nbBytes++;
             }
-            return Interop.Pcap.StringEncoding.GetString(bytes, nbBytes);
+            return GetEncoding().GetString(bytes, nbBytes);
+        }
+
+        private static Encoding GetEncoding()
+        {
+            // HACK: while init Interop (static ctor) PcapPal is mabybe null.
+            // create the windows PAL pcap_init is called and we need encoding either way
+            // whats a better solution here???
+            return Interop.Pcap?.StringEncoding ?? Encoding.Default;
         }
     }
 }

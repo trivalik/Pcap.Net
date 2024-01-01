@@ -15,16 +15,11 @@ namespace PcapDotNet.Core
         private readonly SocketAddress _broadcast;
         private readonly SocketAddress _destination;
 
-        internal DeviceAddress(IntPtr /* pcap_addr* */ pcapAddress)
+        internal DeviceAddress(PcapUnmanagedStructures.pcap_addr pcap_addr)
         {
-            if (pcapAddress == IntPtr.Zero)
-                throw new ArgumentNullException(nameof(pcapAddress));
-
-            var pcap_addr = Marshal.PtrToStructure<PcapUnmanagedStructures.pcap_addr>(pcapAddress);
-
             if (pcap_addr.Addr == IntPtr.Zero)
                 return;
-                
+
             var sockaddr = Marshal.PtrToStructure<PcapUnmanagedStructures.sockaddr>(pcap_addr.Addr);
             var family = Interop.Sys.GetSocketAddressFamily(sockaddr.sa_family);
 

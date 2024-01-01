@@ -27,7 +27,7 @@ namespace PcapDotNet.Core.Native
 
         int pcap_findalldevs_ex(
             string /*char **/source,
-            ref pcap_rmtauth /*pcap_rmtauth **/auth,
+            ref pcap_rmtauth /* pcap_rmtauth * */auth,
             ref IntPtr /*pcap_if_t ** */alldevs,
             StringBuilder /*char * */errbuf);
 
