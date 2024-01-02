@@ -324,7 +324,7 @@ namespace PcapDotNet.Core.Native
             /// Packets that reach the application
             /// WIN32 only, based on struct pcap_stat in pcap.h
             /// </summary>
-            public uint bs_capt;
+            public uint ps_capt;
         }
 
         /// <summary>

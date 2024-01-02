@@ -83,7 +83,8 @@ namespace PcapDotNet.Core
 
         public override PacketCommunicator Open(int snapshotLength, PacketDeviceOpenAttributes attributes, int readTimeout)
         {
-            throw new NotImplementedException();
+            var netmask = Addresses.Count > 0 ? Addresses[0].Netmask : null;
+            return new LivePacketCommunicator(Name, snapshotLength, attributes, readTimeout, default, netmask);
         }
     }
 }

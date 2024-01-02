@@ -27,6 +27,8 @@ namespace PcapDotNet.Core.Native
         /// <exception cref="InvalidOperationException">if native libpcap call respond an error</exception>
         PcapInterfaceHandle GetAllLocalMachine();
 
+        PacketTotalStatistics GetTotalStatistics(PcapHandle pcapDescriptor);
+
         int pcap_findalldevs(ref PcapInterfaceHandle /* pcap_if_t** */ alldevs, StringBuilder /* char* */ errbuf);
 
         void pcap_freealldevs(IntPtr /* pcap_if_t * */ alldevs);

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using PcapDotNet.Packets;
+using System;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using PcapDotNet.Packets;
 using static PcapDotNet.Core.Native.PcapUnmanagedStructures;
 
 namespace PcapDotNet.Core.Native
@@ -44,6 +44,26 @@ namespace PcapDotNet.Core.Native
                 PcapError.ThrowInvalidOperation("Failed getting devices. Error: " + errorBuffer.ToString(), null);
             }
             return handle;
+        }
+
+        public PacketTotalStatistics GetTotalStatistics(PcapHandle pcapDescriptor)
+        {
+            var stat = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(PcapUnmanagedStructures.pcap_stat_unix)));
+            try
+            {
+                var result = pcap_stats(pcapDescriptor, stat);
+                if (result != 0)
+                {
+                    PcapError.ThrowInvalidOperation("Failed getting total statistics", pcapDescriptor);
+                }
+
+                var managedStat = (PcapUnmanagedStructures.pcap_stat_unix)Marshal.PtrToStructure(stat, typeof(PcapUnmanagedStructures.pcap_stat_unix));
+                return new PacketTotalStatistics(managedStat);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(stat);
+            }
         }
 
         public int pcap_activate(PcapHandle p)

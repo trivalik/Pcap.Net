@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PcapDotNet.Core.Native;
+using System;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace PcapDotNet.Core
@@ -13,17 +15,23 @@ namespace PcapDotNet.Core
         private readonly uint _packetsDroppedByInterface;
         private readonly uint _packetsCaptured;
 
-        internal PacketTotalStatistics(IntPtr /* const pcap_stat&  */ statistics, int statisticsSize)
+        internal PacketTotalStatistics(PcapUnmanagedStructures.pcap_stat_unix stat)
         {
-            throw new NotImplementedException();
-            /*
-            _packetsReceived = statistics.ps_recv;
-            _packetsDroppedByDriver = statistics.ps_drop;
-            _packetsDroppedByInterface = statistics.ps_ifdrop;
-            _packetsCaptured = (statisticsSize >= 16 
-                        ? *(reinterpret_cast<const int*>(&statistics) + 3)
-                        : 0);
-             */
+            _packetsReceived = (uint)stat.ps_recv.ToInt64();
+            _packetsDroppedByDriver = (uint)stat.ps_drop.ToInt64();
+            _packetsDroppedByInterface = (uint)stat.ps_ifdrop.ToInt64();
+        }
+
+        internal PacketTotalStatistics(IntPtr /* const pcap_stat&  */ statisticsPtr, int statisticsSize)
+        {
+            const int elementSize = sizeof(uint);
+
+            _packetsReceived = (uint)Marshal.ReadInt32(statisticsPtr, 0 * elementSize);
+            _packetsDroppedByDriver = (uint)Marshal.ReadInt32(statisticsPtr, 1 * elementSize);
+            _packetsDroppedByInterface = (uint)Marshal.ReadInt32(statisticsPtr, 2 * elementSize);
+            _packetsCaptured = statisticsSize >= 16
+                        ? (uint)Marshal.ReadInt32(statisticsPtr, 4 * elementSize)
+                        : 0;
         }
 
         /// <summary>

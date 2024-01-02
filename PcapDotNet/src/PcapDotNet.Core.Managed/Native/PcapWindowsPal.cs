@@ -1,9 +1,9 @@
-﻿using System;
+﻿using PcapDotNet.Packets;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
-using PcapDotNet.Packets;
 using static PcapDotNet.Core.Native.PcapUnmanagedStructures;
 
 namespace PcapDotNet.Core.Native
@@ -75,6 +75,16 @@ namespace PcapDotNet.Core.Native
                 PcapError.ThrowInvalidOperation("Failed getting devices. Error: " + errorBuffer.ToString(), null);
             }
             return handle;
+        }
+
+        public PacketTotalStatistics GetTotalStatistics(PcapHandle pcapDescriptor)
+        {
+            int statisticsSize = 0;
+            var statisticsPtr = SafeNativeMethods.pcap_stats_ex(pcapDescriptor, ref statisticsSize);
+            if (statisticsPtr == IntPtr.Zero)
+                PcapError.ThrowInvalidOperation("Failed getting total statistics", pcapDescriptor);
+
+            return new PacketTotalStatistics(statisticsPtr, statisticsSize);
         }
 
         public int pcap_activate(PcapHandle p)
@@ -444,9 +454,9 @@ namespace PcapDotNet.Core.Native
             /// </summary>
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static int pcap_compile(
-                PcapHandle /* pcap_t* */ adaptHandle, 
+                PcapHandle /* pcap_t* */ adaptHandle,
                 IntPtr /*bpf_program **/fp,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] string /*char * */str, 
+                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] string /*char * */str,
                 int optimize,
                 UInt32 netmask);
 
@@ -550,6 +560,18 @@ namespace PcapDotNet.Core.Native
             /// </summary>
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static int pcap_stats(PcapHandle /* pcap_t* */ adapter, IntPtr /* struct pcap_stat* */ stat);
+
+            /// <summary>
+            /// pcap_stats_ex() extends the pcap_stats() allowing to return more statistical parameters than the old call. 
+            /// One of the advantages of this new call is that the pcap_stat structure is not allocated by the user; instead, 
+            /// it is returned back by the system. This allow to extend the pcap_stat structure without affecting backward 
+            /// compatibility on older applications. These will simply check at the values of the members at the beginning 
+            /// of the structure, while only newest applications are able to read new statistical values, which are appended in tail.
+            /// To be sure not to read a piece of memory which has not been allocated by the system, the variable pcap_stat_size 
+            /// will return back the size of the structure pcap_stat allocated by the system.
+            /// </summary>
+            [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
+            internal extern static IntPtr /* struct pcap_stat* */ pcap_stats_ex(PcapHandle adapter, ref int pcapStatSize);
 
             /// <summary>
             /// Returns the snapshot length

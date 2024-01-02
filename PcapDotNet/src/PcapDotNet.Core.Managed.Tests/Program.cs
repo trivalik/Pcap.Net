@@ -23,8 +23,7 @@
             Console.WriteLine();
 
             var devices = LivePacketDevice.AllLocalMachine;
-            
-            foreach (var device in devices) 
+            foreach (var device in devices)
             {
                 Console.WriteLine($" - {device.Description} ({device.Attributes})");
                 foreach (var addr in device.Addresses)
@@ -33,6 +32,24 @@
                 }
                 Console.WriteLine();
             }
+
+            var selectedDevice = devices.Where(d => d.Description?.Contains("Realtek") == true || d.Name.Contains("eth0")).FirstOrDefault();
+            if (selectedDevice == null)
+            {
+                Console.WriteLine("No device found to operate on!");
+                return;
+            }
+
+            Console.WriteLine($"Selected device: {selectedDevice.Name}; {selectedDevice.Description}");
+
+            var com = (LivePacketCommunicator)selectedDevice.Open();
+            
+            var stat = com.TotalStatistics;
+
+
+            Console.WriteLine(stat);
+
+
         }
     }
 }

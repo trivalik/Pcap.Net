@@ -16,10 +16,7 @@ namespace PcapDotNet.Core
             PcapUnmanagedStructures.pcap_rmtauth auth,
             SocketAddress netmask)
             : base(PcapOpen(source, snapshotLength, attributes, readTimeout, auth), netmask)
-        {
-
-        }
-
+        { }
 
         /// <summary>
         /// Statistics on current capture.
@@ -28,10 +25,7 @@ namespace PcapDotNet.Core
         /// <exception cref="InvalidOperationException">Thrown if there is an error or the underlying packet capture doesn't support packet statistics.</exception>
         public override PacketTotalStatistics TotalStatistics
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
+            get { return Interop.Pcap.GetTotalStatistics(PcapDescriptor); }
         }
 
         /// <summary>
@@ -66,7 +60,7 @@ namespace PcapDotNet.Core
                 ref auth,               // authentication on the remote machine
                 errorBuffer);
 
-            if (handle == null)
+            if (handle.IsInvalid)
                 PcapError.ThrowInvalidOperation($"Unable to open the adapter. Adapter name: {source}. Error: {errorBuffer}", null);
 
             return handle;
