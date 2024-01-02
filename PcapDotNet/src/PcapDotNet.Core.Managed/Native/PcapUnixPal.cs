@@ -33,6 +33,19 @@ namespace PcapDotNet.Core.Native
             return new PcapPacketHeader(timestamp, pcap_header->caplen, pcap_header->len);
         }
 
+        public PcapInterfaceHandle GetAllLocalMachine()
+        {
+            var handle = new PcapInterfaceHandle();
+            var errorBuffer = Pcap.CreateErrorBuffer();
+
+            var result = pcap_findalldevs(ref handle, errorBuffer);
+            if (result < 0)
+            {
+                PcapError.ThrowInvalidOperation("Failed getting devices. Error: " + errorBuffer.ToString(), null);
+            }
+            return handle;
+        }
+
         public int pcap_activate(PcapHandle p)
         {
             return SafeNativeMethods.pcap_activate(p);
@@ -43,7 +56,7 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_breakloop(p);
         }
 
-        public void pcap_close(PcapHandle adaptHandle)
+        public void pcap_close(IntPtr adaptHandle)
         {
             SafeNativeMethods.pcap_close(adaptHandle);
         }
@@ -123,14 +136,9 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_fileno(adapter);
         }
 
-        public int pcap_findalldevs(ref IntPtr alldevs, StringBuilder errbuf)
+        public int pcap_findalldevs(ref PcapInterfaceHandle alldevs, StringBuilder errbuf)
         {
             return SafeNativeMethods.pcap_findalldevs(ref alldevs, errbuf);
-        }
-
-        public int pcap_findalldevs_ex(string source, ref pcap_rmtauth auth, ref IntPtr alldevs, StringBuilder errbuf)
-        {
-            return SafeNativeMethods.pcap_findalldevs_ex(source, ref auth, ref alldevs, errbuf);
         }
 
         public void pcap_freealldevs(IntPtr alldevs)
@@ -313,15 +321,8 @@ namespace PcapDotNet.Core.Native
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static int pcap_findalldevs(
-                ref IntPtr /* pcap_if_t** */ alldevs,
+                ref PcapInterfaceHandle /* pcap_if_t** */ alldevs,
                 [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder /* char* */ errbuf);
-
-            [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
-            internal extern static int pcap_findalldevs_ex(
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] string /*char **/source,
-                ref pcap_rmtauth /* pcap_rmtauth* */auth,
-                ref IntPtr /* pcap_if_t** */alldevs,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder /*char * */errbuf);
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static void pcap_freealldevs(IntPtr /* pcap_if_t* */ alldevs);
@@ -365,7 +366,7 @@ namespace PcapDotNet.Core.Native
 
             /// <summary> close the files associated with p and deallocates resources.</summary>
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
-            internal extern static void pcap_close(PcapHandle /*pcap_t* */adaptHandle);
+            internal extern static void pcap_close(IntPtr /*pcap_t* */adaptHandle);
 
             /// <summary>
             /// To avoid callback, this returns one packet at a time

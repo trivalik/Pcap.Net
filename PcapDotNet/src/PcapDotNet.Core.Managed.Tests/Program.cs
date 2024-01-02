@@ -19,6 +19,9 @@
 
         private static void Run(string[] args)
         {
+            Console.WriteLine(PcapLibrary.Version);
+            Console.WriteLine();
+
             var devices = LivePacketDevice.AllLocalMachine;
             
             foreach (var device in devices) 

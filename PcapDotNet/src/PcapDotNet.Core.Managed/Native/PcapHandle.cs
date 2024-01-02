@@ -11,7 +11,7 @@ namespace PcapDotNet.Core.Native
 
         protected override bool ReleaseHandle()
         {
-            Interop.Pcap.pcap_close(this);
+            Interop.Pcap.pcap_close(handle);
             return true;
         }
     }

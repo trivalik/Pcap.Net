@@ -23,13 +23,11 @@ namespace PcapDotNet.Core.Native
         /// <param name="handle">pointer to platform depend structure of pcap_pkthdr</param>
         PcapPacketHeader CreatePcapPacketHeader(IntPtr /* pcap_pkthdr* */ ptr);
 
-        int pcap_findalldevs(ref IntPtr /* pcap_if_t** */ alldevs, StringBuilder /* char* */ errbuf);
+        /// <returns>NULL or pointer to the first pcap_if_t entry</returns>
+        /// <exception cref="InvalidOperationException">if native libpcap call respond an error</exception>
+        PcapInterfaceHandle GetAllLocalMachine();
 
-        int pcap_findalldevs_ex(
-            string /*char **/source,
-            ref pcap_rmtauth /* pcap_rmtauth * */auth,
-            ref IntPtr /*pcap_if_t ** */alldevs,
-            StringBuilder /*char * */errbuf);
+        int pcap_findalldevs(ref PcapInterfaceHandle /* pcap_if_t** */ alldevs, StringBuilder /* char* */ errbuf);
 
         void pcap_freealldevs(IntPtr /* pcap_if_t * */ alldevs);
 
@@ -77,7 +75,7 @@ namespace PcapDotNet.Core.Native
         void pcap_dump(IntPtr /*u_char * */user, IntPtr /*const struct pcap_pkthdr * */header, IntPtr /*const u_char * */ data);
 
         /// <summary> close the files associated with <see cref="adaptHandle"/> and deallocates resources.</summary>
-        void pcap_close(PcapHandle /*pcap_t **/adaptHandle);
+        void pcap_close(IntPtr /*pcap_t **/adaptHandle);
 
         /// <summary>
         /// To avoid callback, this returns one packet at a time

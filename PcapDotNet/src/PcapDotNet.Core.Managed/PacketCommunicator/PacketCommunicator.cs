@@ -28,7 +28,7 @@ namespace PcapDotNet.Core
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            Interop.Pcap.pcap_close(PcapDescriptor);
+            PcapDescriptor.Dispose();
         }
 
         public void Dispose()

@@ -20,6 +20,9 @@ namespace PcapDotNet.Core.Native
                 case 10 /* AF_INET6 */:
                     return SocketAddressFamily.Internet6;
 
+                case 17: /* AF_PACKET */
+                    return SocketAddressFamily.Packet;
+
                 default:
                     throw new PlatformNotSupportedException("SocketAddressFamily " + value + " is not supported");
             }

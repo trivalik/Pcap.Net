@@ -1,7 +1,6 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using PcapDotNet.Core.Native;
+using System;
 using System.Text;
-using PcapDotNet.Core.Native;
 
 namespace PcapDotNet.Core
 {
@@ -15,15 +14,9 @@ namespace PcapDotNet.Core
         private readonly SocketAddress _broadcast;
         private readonly SocketAddress _destination;
 
-        internal DeviceAddress(PcapUnmanagedStructures.pcap_addr pcap_addr)
+        internal DeviceAddress(PcapUnmanagedStructures.pcap_addr pcap_addr, SocketAddressFamily socketAddressFamily)
         {
-            if (pcap_addr.Addr == IntPtr.Zero)
-                return;
-
-            var sockaddr = Marshal.PtrToStructure<PcapUnmanagedStructures.sockaddr>(pcap_addr.Addr);
-            var family = Interop.Sys.GetSocketAddressFamily(sockaddr.sa_family);
-
-            switch (family)
+            switch (socketAddressFamily)
             {
                 case SocketAddressFamily.Internet:
                     if (pcap_addr.Addr != IntPtr.Zero)
@@ -48,7 +41,7 @@ namespace PcapDotNet.Core
                     break;
 
                 default:
-                    throw new NotImplementedException("Device of family " + family.ToString() + " is unsupported");
+                    throw new NotImplementedException("Device of family " + socketAddressFamily.ToString() + " is unsupported");
             }
         }
 

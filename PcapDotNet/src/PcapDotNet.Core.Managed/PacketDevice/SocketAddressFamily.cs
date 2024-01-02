@@ -164,6 +164,11 @@
         /// <summary>
         /// Bluetooth RFCOMM/L2CAP protocols
         /// </summary>
-        Bluetooth = 32
+        Bluetooth = 32,
+
+        /// <summary>
+        /// Low-level Packet address.
+        /// </summary>
+        Packet = 0xFFFF,
     }
 }

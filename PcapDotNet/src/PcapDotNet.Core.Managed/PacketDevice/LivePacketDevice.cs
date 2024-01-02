@@ -35,34 +35,14 @@ namespace PcapDotNet.Core
         {
             get
             {
-                var devicePtr = IntPtr.Zero;
-                var errorBuffer = Pcap.CreateErrorBuffer();
-                var auth = default(PcapUnmanagedStructures.pcap_rmtauth); //auth is not needed
-
-                var result = Interop.Pcap.pcap_findalldevs_ex(Pcap.PCAP_SRC_IF_STRING, ref auth, ref devicePtr, errorBuffer);
-                if (result < 0)
-                {
-                    PcapError.ThrowInvalidOperation("Failed getting devices. Error: " + errorBuffer.ToString(), null);
-                }
-                try
+                using (var devicePtrHandle = Interop.Pcap.GetAllLocalMachine())
                 {
                     var deviceList = new List<LivePacketDevice>();
-                    var nextDevPtr = devicePtr;
-                    while (nextDevPtr != IntPtr.Zero)
+                    foreach (var pcap_if in devicePtrHandle.GetManagedData())
                     {
-                        // Marshal pointer into a struct
-                        var pcap_if_unmanaged = Marshal.PtrToStructure<PcapUnmanagedStructures.pcap_if>(nextDevPtr);
-
-                        deviceList.Add(new LivePacketDevice(pcap_if_unmanaged));
-
-
-                        nextDevPtr = pcap_if_unmanaged.Next;
+                        deviceList.Add(new LivePacketDevice(pcap_if));
                     }
                     return new ReadOnlyCollection<LivePacketDevice>(deviceList);
-                }
-                finally
-                {
-                    Interop.Pcap.pcap_freealldevs(devicePtr);
                 }
             }
         }
@@ -77,11 +57,18 @@ namespace PcapDotNet.Core
             var nextaddressPtr = device.Addresses;
             while (nextaddressPtr != IntPtr.Zero)
             {
-                var addr = Marshal.PtrToStructure<PcapUnmanagedStructures.pcap_addr>(nextaddressPtr);
+                var pcap_addr = Marshal.PtrToStructure<PcapUnmanagedStructures.pcap_addr>(nextaddressPtr);
+                if (pcap_addr.Addr != IntPtr.Zero)
+                {
+                    var sockaddr = Marshal.PtrToStructure<PcapUnmanagedStructures.sockaddr>(pcap_addr.Addr);
+                    var family = Interop.Sys.GetSocketAddressFamily(sockaddr.sa_family);
+                    if (family == SocketAddressFamily.Internet || family == SocketAddressFamily.Internet6)
+                    {
+                        addresses.Add(new DeviceAddress(pcap_addr, family));
+                    }
+                }
 
-                addresses.Add(new DeviceAddress(addr));
-
-                nextaddressPtr = addr.Next;
+                nextaddressPtr = pcap_addr.Next;
             }
             Addresses = new ReadOnlyCollection<DeviceAddress>(addresses);
         }
