@@ -45,7 +45,12 @@ namespace PcapDotNet.Core
         /// </remarks>
         public override void Transmit(PacketSendBuffer sendBuffer, bool isSync)
         {
-            throw new NotImplementedException();
+            if (sendBuffer is null)
+            {
+                throw new ArgumentNullException(nameof(sendBuffer));
+            }
+
+            sendBuffer.Transmit(PcapDescriptor, isSync);
         }
 
         private static PcapHandle PcapOpen(string source, int snapshotLength, PacketDeviceOpenAttributes attributes, int readTimeout, PcapUnmanagedStructures.pcap_rmtauth auth)
@@ -61,7 +66,9 @@ namespace PcapDotNet.Core
                 errorBuffer);
 
             if (handle.IsInvalid)
+            {
                 PcapError.ThrowInvalidOperation($"Unable to open the adapter. Adapter name: {source}. Error: {errorBuffer}", null);
+            }
 
             return handle;
         }

@@ -1,9 +1,9 @@
-﻿using PcapDotNet.Packets;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using PcapDotNet.Packets;
 using static PcapDotNet.Core.Native.PcapUnmanagedStructures;
 
 namespace PcapDotNet.Core.Native
@@ -12,6 +12,7 @@ namespace PcapDotNet.Core.Native
     {
         public PcapWindowsPal()
         {
+            PcapHeaderSize = Marshal.SizeOf(typeof(pcap_pkthdr_windows));
             StringEncoding = ConfigureStringEncoding();
         }
 
@@ -41,17 +42,21 @@ namespace PcapDotNet.Core.Native
 
         public Encoding StringEncoding { get; }
 
+        public int PcapHeaderSize { get; }
+
         public IntPtr CreatePcapPacketHeaderHandle(Packet packet)
         {
-            var header = new pcap_pkthdr_windows();
-            header.caplen = packet.OriginalLength;
-            header.len = (uint)packet.Length;
+            var header = new pcap_pkthdr_windows
+            {
+                caplen = packet.OriginalLength,
+                len = (uint)packet.Length
+            };
             var dt = packet.Timestamp.ToUniversalTime();
             var ts = dt - Interop.UnixEpoch;
             header.ts.tv_sec = (int)ts.TotalSeconds;
             header.ts.tv_usec = (int)((ts.TotalMilliseconds - 1000 * (double)header.ts.tv_sec) * 1000);
 
-            var result = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(pcap_pkthdr_windows)));
+            var result = Marshal.AllocHGlobal(PcapHeaderSize);
             Marshal.StructureToPtr(header, result, true);
             return result;
         }
@@ -247,11 +252,6 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_sendpacket(adaptHandle, data, size);
         }
 
-        public int pcap_sendqueue_transmit(PcapHandle p, ref pcap_send_queue queue, int sync)
-        {
-            return SafeNativeMethods.pcap_sendqueue_transmit(p, ref queue, sync);
-        }
-
         public int pcap_setfilter(PcapHandle adaptHandle, IntPtr fp)
         {
             return SafeNativeMethods.pcap_setfilter(adaptHandle, fp);
@@ -350,6 +350,11 @@ namespace PcapDotNet.Core.Native
         public IntPtr pcap_setsampling(PcapHandle adapter)
         {
             return SafeNativeMethods.pcap_setsampling(adapter);
+        }
+
+        public int pcap_sendqueue_transmit(PcapHandle p, ref pcap_send_queue queue, int sync)
+        {
+            return SafeNativeMethods.pcap_sendqueue_transmit(p, ref queue, sync);
         }
 
         /// <summary>
@@ -684,6 +689,7 @@ namespace PcapDotNet.Core.Native
             /// problem or by an inconsistent/bogus send queue.</returns>
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static int pcap_sendqueue_transmit(PcapHandle /* pcap_t* */p, ref pcap_send_queue queue, int sync);
+
             #endregion
         }
     }

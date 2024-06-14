@@ -1,27 +1,36 @@
-﻿using PcapDotNet.Packets;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using PcapDotNet.Packets;
 using static PcapDotNet.Core.Native.PcapUnmanagedStructures;
 
 namespace PcapDotNet.Core.Native
 {
     internal class PcapUnixPal : IPcapPal
     {
+        public PcapUnixPal()
+        {
+            PcapHeaderSize = Marshal.SizeOf(typeof(pcap_pkthdr_unix));
+        }
+
         public Encoding StringEncoding { get => Encoding.UTF8; /* libpcap always use UTF-8 when not on Windows */ }
+
+        public int PcapHeaderSize { get; }
 
         public IntPtr CreatePcapPacketHeaderHandle(Packet packet)
         {
-            var header = new pcap_pkthdr_unix();
-            header.caplen = packet.OriginalLength;
-            header.len = (uint)packet.Length;
+            var header = new pcap_pkthdr_unix
+            {
+                caplen = packet.OriginalLength,
+                len = (uint)packet.Length
+            };
             var dt = packet.Timestamp.ToUniversalTime();
             var ts = dt - Interop.UnixEpoch;
             header.ts.tv_sec = (IntPtr)ts.TotalSeconds;
             header.ts.tv_usec = (IntPtr)((ts.TotalMilliseconds - 1000 * (double)header.ts.tv_sec) * 1000);
 
-            var result = Marshal.AllocHGlobal(Marshal.SizeOf(typeof(pcap_pkthdr_unix)));
+            var result = Marshal.AllocHGlobal(PcapHeaderSize);
             Marshal.StructureToPtr(header, result, true);
             return result;
         }
@@ -221,11 +230,6 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_sendpacket(adaptHandle, data, size);
         }
 
-        public int pcap_sendqueue_transmit(PcapHandle p, ref pcap_send_queue queue, int sync)
-        {
-            return SafeNativeMethods.pcap_sendqueue_transmit(p, ref queue, sync);
-        }
-
         public int pcap_setfilter(PcapHandle adaptHandle, IntPtr fp)
         {
             return SafeNativeMethods.pcap_setfilter(adaptHandle, fp);
@@ -324,6 +328,11 @@ namespace PcapDotNet.Core.Native
         public IntPtr pcap_setsampling(PcapHandle adapter)
         {
             throw new NotImplementedException();
+        }
+
+        public int pcap_sendqueue_transmit(PcapHandle p, ref pcap_send_queue queue, int sync)
+        {
+            throw new PlatformNotSupportedException();
         }
 
         /// <summary>
@@ -579,24 +588,6 @@ namespace PcapDotNet.Core.Native
             /// </summary>
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static int pcap_fileno(PcapHandle /* pcap_t* p */ adapter);
-            #endregion
-
-            #region Send queue functions
-
-            /// <summary>
-            /// Send a queue of raw packets to the network. 
-            /// </summary>
-            /// <param name="p"></param>
-            /// <param name="queue"></param>
-            /// <param name="sync">determines if the send operation must be synchronized: 
-            /// if it is non-zero, the packets are sent respecting the timestamps, 
-            /// otherwise they are sent as fast as possible</param>
-            /// <returns>The amount of bytes actually sent. 
-            /// If it is smaller than the size parameter, an error occurred 
-            /// during the send. The error can be caused by a driver/adapter 
-            /// problem or by an inconsistent/bogus send queue.</returns>
-            [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
-            internal extern static int pcap_sendqueue_transmit(PcapHandle/*pcap_t * */p, ref pcap_send_queue queue, int sync);
             #endregion
         }
     }

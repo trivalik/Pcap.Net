@@ -20,6 +20,7 @@
         private static void Run(string[] args)
         {
             Console.WriteLine(PcapLibrary.Version);
+            Console.WriteLine(PcapLibrary.SemanticVersion);
             Console.WriteLine();
 
             var devices = LivePacketDevice.AllLocalMachine;

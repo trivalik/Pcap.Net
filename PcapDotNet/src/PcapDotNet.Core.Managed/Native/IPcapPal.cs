@@ -11,6 +11,11 @@ namespace PcapDotNet.Core.Native
         Encoding StringEncoding { get; }
 
         /// <summary>
+        /// Size of pcap_pkthdr struct in bytes
+        /// </summary>
+        int PcapHeaderSize { get; }
+
+        /// <summary>
         /// Creates a platform depend pcap packet header.handle
         /// </summary>
         /// <remarks>MUST be freed with Marshal.FreeHCGlobal!</remarks>
@@ -343,7 +348,9 @@ namespace PcapDotNet.Core.Native
         /// If it is smaller than the size parameter, an error occurred 
         /// during the send. The error can be caused by a driver/adapter 
         /// problem or by an inconsistent/bogus send queue.</returns>
+        /// <remarks>Windows only</remarks>
         int pcap_sendqueue_transmit(PcapHandle /*pcap_t * */ p, ref pcap_send_queue queue, int sync);
+
         #endregion
     }
 #pragma warning restore IDE1006 // Naming Styles

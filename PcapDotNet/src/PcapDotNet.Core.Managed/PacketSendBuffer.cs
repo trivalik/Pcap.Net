@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using PcapDotNet.Core.Native;
 using PcapDotNet.Packets;
+using static PcapDotNet.Core.Native.PcapUnmanagedStructures;
 
 namespace PcapDotNet.Core
 {
@@ -12,8 +13,8 @@ namespace PcapDotNet.Core
     /// </summary>
     public sealed class PacketSendBuffer : IDisposable
     {
-        private IntPtr /* pcap_send_queue* */ _pcapSendQueue;
-        private int _length;
+        private byte[] _buffer;
+        private int _currentBufferPosition;
 
         /// <summary>
         /// This function allocates a send buffer, i.e. a buffer containing a set of raw packets that will be transimtted on the network with PacketCommunicator.Transmit().
@@ -21,22 +22,40 @@ namespace PcapDotNet.Core
         /// <param name="capacity">The size, in bytes, of the buffer, therefore it determines the maximum amount of data that the buffer will contain.</param>
         public PacketSendBuffer(uint capacity)
         {
-            throw new NotImplementedException();
-            // ToDo: Only works on windows with winpcap or npcap!
-            //_pcapSendQueue = Interop.Pcap.pcap_sendqueue_alloc(capacity);
+            _buffer = new byte[capacity];
         }
 
-        public int Length => _length;
+        public int Length { get; private set; }
 
         /// <summary>
         /// Adds a raw packet at the end of the send buffer.
         /// 'Raw packet' means that the sending application will have to include the protocol headers, since every packet is sent to the network 'as is'. The CRC of the packets needs not to be calculated, because it will be transparently added by the network interface.
         /// </summary>
         /// <param name="packet">The packet to be added to the buffer</param>
-        /// <exception cref="System.InvalidOperationException">Thrown on failure.</exception>
-        void Enqueue(Packet packet)
+        /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
+        public void Enqueue(Packet packet)
         {
-            throw new NotImplementedException();
+            CheckDisposed();
+
+            if (packet is null)
+            {
+                throw new ArgumentNullException(nameof(packet));
+            }
+            
+            var hdrSize = Interop.Pcap.PcapHeaderSize;
+            if (hdrSize + packet.Length > _buffer.Length - _currentBufferPosition)
+            {
+                throw new InvalidOperationException("Failed enqueueing to queue");
+            }
+
+            using (var headerHandle = new PcapPacketHeaderHandle(packet))
+            {
+                Marshal.Copy(headerHandle.Pointer, _buffer, _currentBufferPosition, hdrSize);
+            }
+            Buffer.BlockCopy(packet.Buffer, 0, _buffer, _currentBufferPosition + hdrSize, packet.Length);
+
+            _currentBufferPosition += hdrSize + packet.Length;
+            ++Length;
         }
 
         /// <summary>
@@ -44,14 +63,40 @@ namespace PcapDotNet.Core
         /// </summary>
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _buffer = null;
         }
 
-        internal void Transmit(IntPtr /*pcap_t* */ pcapDescriptor, bool isSync)
+        internal unsafe void Transmit(PcapHandle /*pcap_t* */ pcapDescriptor, bool isSync)
         {
-            throw new NotImplementedException();
+            CheckDisposed();
+
+            if (_currentBufferPosition == 0)
+            {
+                // Npcap does not properly check for 0 packets queue
+                // See https://github.com/nmap/npcap/issues/287
+                return;
+            }
+            fixed (byte* buf = _buffer)
+            {
+                var pcapSendQueue = new pcap_send_queue
+                {
+                    maxlen = (uint)_buffer.Length,
+                    len = (uint)_currentBufferPosition,
+                    ptrBuff = new IntPtr(buf)
+                };
+                int numBytesTransmitted = Interop.Pcap.pcap_sendqueue_transmit(pcapDescriptor, ref pcapSendQueue, isSync ? 1 : 0);
+                if(numBytesTransmitted < _currentBufferPosition)
+                    PcapError.ThrowInvalidOperation("Failed transmiting packets from queue", pcapDescriptor);
+            }
         }
 
-    
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void CheckDisposed()
+        {
+            if(_buffer == null)
+            {
+                throw new ObjectDisposedException(nameof(PacketSendBuffer));
+            }
+        }
     }
 }

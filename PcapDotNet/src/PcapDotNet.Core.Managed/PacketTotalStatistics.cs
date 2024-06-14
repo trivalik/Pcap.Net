@@ -1,7 +1,7 @@
-﻿using PcapDotNet.Core.Native;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using PcapDotNet.Core.Native;
 
 namespace PcapDotNet.Core
 {

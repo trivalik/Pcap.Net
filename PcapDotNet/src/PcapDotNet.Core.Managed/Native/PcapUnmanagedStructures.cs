@@ -24,6 +24,7 @@ using System.Runtime.InteropServices;
 
 namespace PcapDotNet.Core.Native
 {
+#pragma warning disable IDE1006 // Naming Styles
     internal class PcapUnmanagedStructures
     {
         /// <summary>
@@ -39,6 +40,7 @@ namespace PcapDotNet.Core.Native
         /// Item in a list of interfaces.
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
+
         public struct pcap_if
         {
             public IntPtr /* pcap_if* */    Next;
@@ -376,4 +378,5 @@ namespace PcapDotNet.Core.Native
         #endregion Unmanaged Structs Implementation
 
     }
+#pragma warning restore IDE1006 // Naming Styles
 }
