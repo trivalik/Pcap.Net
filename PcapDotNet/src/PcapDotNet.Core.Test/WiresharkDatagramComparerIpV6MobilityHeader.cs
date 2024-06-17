@@ -2,11 +2,11 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.IpV6;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -162,7 +162,7 @@ namespace PcapDotNet.Core.Test
                     switch (field.Show())
                     {
                         case "Binding Refresh Request":
-                            Assert.AreEqual(IpV6MobilityHeaderType.BindingRefreshRequest, mobilityHeader.MobilityHeaderType);
+                            Assert.Equal(IpV6MobilityHeaderType.BindingRefreshRequest, mobilityHeader.MobilityHeaderType);
                             field.AssertNoFields();
                             break;
 
@@ -364,7 +364,7 @@ namespace PcapDotNet.Core.Test
                             break;
 
                         case "Fast Neighbor Advertisement":
-                            Assert.AreEqual(IpV6MobilityHeaderType.FastNeighborAdvertisement, mobilityHeader.MobilityHeaderType);
+                            Assert.Equal(IpV6MobilityHeaderType.FastNeighborAdvertisement, mobilityHeader.MobilityHeaderType);
                             field.AssertNoFields();
                             break;
 
@@ -689,7 +689,7 @@ namespace PcapDotNet.Core.Test
                                             case IpV6MobilityOptionType.PadN:
                                                 if (optionField.Show() != "PadN" && optionIndex == mobilityHeader.MobilityOptions.Count - 1)
                                                 {
-                                                    Assert.IsFalse(mobilityHeader.IsValid);
+                                                    Assert.False(mobilityHeader.IsValid);
                                                     return true;
                                                 }
                                                 optionField.AssertShow("PadN");
@@ -856,7 +856,7 @@ namespace PcapDotNet.Core.Test
                                                 break;
 
                                             case IpV6MobilityOptionType.VendorSpecific:
-                                                Assert.IsTrue(optionField.Show().StartsWith("Vendor Specific: "));
+                                                Assert.StartsWith("Vendor Specific: ", optionField.Show());
                                                 IpV6MobilityOptionVendorSpecific vendorSpecific = (IpV6MobilityOptionVendorSpecific)option;
                                                 foreach (XElement optionSubfield in optionField.Fields())
                                                 {
@@ -958,7 +958,7 @@ namespace PcapDotNet.Core.Test
                                                 break;
 
                                             case IpV6MobilityOptionType.MobileNodeIdentifier:
-                                                Assert.IsTrue(optionField.Show().StartsWith("Mobile Node Identifier"));
+                                                Assert.StartsWith("Mobile Node Identifier", optionField.Show());
                                                 IpV6MobilityOptionMobileNodeIdentifier mobileNodeIdentifier = (IpV6MobilityOptionMobileNodeIdentifier)option;
                                                 foreach (XElement optionSubfield in optionField.Fields())
                                                 {
@@ -1221,7 +1221,7 @@ namespace PcapDotNet.Core.Test
                                                             break;
 
                                                         case "mip6.mhipv6ap.ipv6_address_prefix":
-                                                            Assert.IsTrue(optionSubfield.Value().EndsWith(ipV6AddressPrefix.AddressOrPrefix.ToValue().ToString("x32")));
+                                                            Assert.EndsWith(ipV6AddressPrefix.AddressOrPrefix.ToValue().ToString("x32"), optionSubfield.Value());
                                                             break;
 
                                                         default:
@@ -1902,7 +1902,7 @@ namespace PcapDotNet.Core.Test
                                                 optionField.AssertShow("Care-of Test Init");
                                                 foreach (XElement optionSubfield in optionField.Fields())
                                                 {
-                                                    Assert.IsTrue(HandleCommonMobilityOptionSubfield(optionSubfield, option));
+                                                    Assert.True(HandleCommonMobilityOptionSubfield(optionSubfield, option));
                                                 }
                                                 break;
 
@@ -1987,7 +1987,7 @@ namespace PcapDotNet.Core.Test
 
                         default:
                             field.AssertShow("Unknown MH Type");
-                            Assert.IsTrue(mobilityHeader.MobilityHeaderType == IpV6MobilityHeaderType.Experimental ||
+                            Assert.True(mobilityHeader.MobilityHeaderType == IpV6MobilityHeaderType.Experimental ||
                                           mobilityHeader.MobilityHeaderType == IpV6MobilityHeaderType.HomeAgentSwitchMessage ||
                                           mobilityHeader.MobilityHeaderType == IpV6MobilityHeaderType.LocalizedRoutingInitiation ||
                                           mobilityHeader.MobilityHeaderType == IpV6MobilityHeaderType.LocalizedRoutingAcknowledgement);

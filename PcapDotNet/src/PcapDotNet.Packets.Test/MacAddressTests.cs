@@ -1,47 +1,18 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Packets.Test
 {
     /// <summary>
     /// Summary description for MacAddressTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class MacAddressTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void MacAddressTest()
         {
             Random random = new Random();
@@ -50,17 +21,17 @@ namespace PcapDotNet.Packets.Test
             {
                 MacAddress macAddress = random.NextMacAddress();
 
-                Assert.IsNotNull(macAddress.ToString());
-                Assert.AreEqual(macAddress, new MacAddress(macAddress.ToString()));
-                Assert.AreNotEqual(macAddress, random.NextMacAddress());
-                Assert.IsTrue(macAddress == new MacAddress(macAddress.ToString()));
-                Assert.AreEqual(macAddress.GetHashCode(), new MacAddress(macAddress.ToString()).GetHashCode());
-                Assert.IsTrue(macAddress != random.NextMacAddress());
-                Assert.AreNotEqual(macAddress.GetHashCode(), random.NextMacAddress().GetHashCode());
+                Assert.NotNull(macAddress.ToString());
+                Assert.Equal(macAddress, new MacAddress(macAddress.ToString()));
+                Assert.NotEqual(macAddress, random.NextMacAddress());
+                Assert.True(macAddress == new MacAddress(macAddress.ToString()));
+                Assert.Equal(macAddress.GetHashCode(), new MacAddress(macAddress.ToString()).GetHashCode());
+                Assert.True(macAddress != random.NextMacAddress());
+                Assert.NotEqual(macAddress.GetHashCode(), random.NextMacAddress().GetHashCode());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void MacAddressWithBufferTest()
         {
             Random random = new Random();
@@ -69,47 +40,42 @@ namespace PcapDotNet.Packets.Test
             byte[] buffer = new byte[MacAddress.SizeOf];
 
             buffer.Write(0, address, Endianity.Big);
-            Assert.AreEqual(address, buffer.ReadMacAddress(0, Endianity.Big));
-            Assert.AreNotEqual(address, buffer.ReadMacAddress(0, Endianity.Small));
+            Assert.Equal(address, buffer.ReadMacAddress(0, Endianity.Big));
+            Assert.NotEqual(address, buffer.ReadMacAddress(0, Endianity.Small));
 
             int offset = 0;
             buffer.Write(ref offset, address, Endianity.Big);
-            Assert.AreEqual(address, buffer.ReadMacAddress(0, Endianity.Big));
-            Assert.AreEqual(6, offset);
+            Assert.Equal(address, buffer.ReadMacAddress(0, Endianity.Big));
+            Assert.Equal(6, offset);
 
             offset = 0;
-            Assert.AreEqual(address, buffer.ReadMacAddress(ref offset, Endianity.Big));
-            Assert.AreEqual(MacAddress.SizeOf, offset);
+            Assert.Equal(address, buffer.ReadMacAddress(ref offset, Endianity.Big));
+            Assert.Equal(MacAddress.SizeOf, offset);
 
             buffer.Write(0, address, Endianity.Small);
-            Assert.AreEqual(address, buffer.ReadMacAddress(0, Endianity.Small));
-            Assert.AreNotEqual(address, buffer.ReadMacAddress(0, Endianity.Big));
+            Assert.Equal(address, buffer.ReadMacAddress(0, Endianity.Small));
+            Assert.NotEqual(address, buffer.ReadMacAddress(0, Endianity.Big));
 
             offset = 0;
             buffer.Write(ref offset, address, Endianity.Small);
-            Assert.AreEqual(address, buffer.ReadMacAddress(0, Endianity.Small));
-            Assert.AreEqual(6, offset);
+            Assert.Equal(address, buffer.ReadMacAddress(0, Endianity.Small));
+            Assert.Equal(6, offset);
 
             offset = 0;
-            Assert.AreEqual(address, buffer.ReadMacAddress(ref offset, Endianity.Small));
-            Assert.AreEqual(MacAddress.SizeOf, offset);
+            Assert.Equal(address, buffer.ReadMacAddress(ref offset, Endianity.Small));
+            Assert.Equal(MacAddress.SizeOf, offset);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
+        [Fact]
         public void MacAddressBadStringErrorTest()
         {
-            MacAddress address = new MacAddress("12:34:56:78");
-            Assert.IsNotNull(address);
-            Assert.Fail();
+            Assert.Throws<ArgumentException>(() => new MacAddress("12:34:56:78"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void MacAddressConstructorNullTest()
         {
-            Assert.IsNotNull(new MacAddress(null));
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => new MacAddress(null));
         }
     }
 }

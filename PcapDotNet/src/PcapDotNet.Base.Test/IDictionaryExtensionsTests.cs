@@ -1,89 +1,58 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace PcapDotNet.Base.Test
 {
+    /// <summary>
     /// Summary description for DictionaryExtensionsTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     // ReSharper disable InconsistentNaming
     public class IDictionaryExtensionsTests
     // ReSharper restore InconsistentNaming
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void DictionaryEqualsTest()
         {
             // Both null
             Dictionary<int, int> dic1 = null;
             Dictionary<int, int> dic2 = null;
-            Assert.IsTrue(dic1.DictionaryEquals(dic2));
-            Assert.IsTrue(dic2.DictionaryEquals(dic1));
+            Assert.True(dic1.DictionaryEquals(dic2));
+            Assert.True(dic2.DictionaryEquals(dic1));
       
             // One null
             dic1 = new Dictionary<int, int>();
-            Assert.IsFalse(dic1.DictionaryEquals(dic2));
-            Assert.IsFalse(dic2.DictionaryEquals(dic1));
+            Assert.False(dic1.DictionaryEquals(dic2));
+            Assert.False(dic2.DictionaryEquals(dic1));
 
             // Both empty
             dic2 = new Dictionary<int, int>();
-            Assert.IsTrue(dic1.DictionaryEquals(dic2));
-            Assert.IsTrue(dic2.DictionaryEquals(dic1));
+            Assert.True(dic1.DictionaryEquals(dic2));
+            Assert.True(dic2.DictionaryEquals(dic1));
 
             // Different count
             dic1.Add(1,1);
-            Assert.IsFalse(dic1.DictionaryEquals(dic2));
-            Assert.IsFalse(dic2.DictionaryEquals(dic1));
+            Assert.False(dic1.DictionaryEquals(dic2));
+            Assert.False(dic2.DictionaryEquals(dic1));
 
             // Different key
             dic2.Add(2, 1);
-            Assert.IsFalse(dic1.DictionaryEquals(dic2));
-            Assert.IsFalse(dic2.DictionaryEquals(dic1));
+            Assert.False(dic1.DictionaryEquals(dic2));
+            Assert.False(dic2.DictionaryEquals(dic1));
 
             // Different value
             dic1.Add(2, 1);
             dic2.Add(1, 2);
-            Assert.IsFalse(dic1.DictionaryEquals(dic2));
-            Assert.IsFalse(dic2.DictionaryEquals(dic1));
+            Assert.False(dic1.DictionaryEquals(dic2));
+            Assert.False(dic2.DictionaryEquals(dic1));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void DictionaryEqualsNullTest()
         {
-            Assert.IsFalse(new Dictionary<int, int>().DictionaryEquals(new Dictionary<int, int>(), null));
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => new Dictionary<int, int>().DictionaryEquals(new Dictionary<int, int>(), null));
         }
     }
 }

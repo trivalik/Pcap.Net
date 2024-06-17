@@ -2,51 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.Icmp;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Packets.Test
 {
     /// <summary>
     /// Summary description for IcmpTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class IcmpTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void RandomIcmpTest()
         {
             EthernetLayer ethernetLayer = new EthernetLayer
@@ -96,12 +67,12 @@ namespace PcapDotNet.Packets.Test
                 PacketBuilder packetBuilder = new PacketBuilder(new ILayer[] { ethernetLayer, ipLayer, icmpLayer }.Concat(icmpPayloadLayers));
 
                 Packet packet = packetBuilder.Build(DateTime.Now);
-                Assert.IsTrue(packet.IsValid, "IsValid");
+                Assert.True(packet.IsValid, "IsValid");
 
                 byte[] buffer = (byte[])packet.Buffer.Clone();
                 buffer.Write(ethernetLayer.Length + ipLayer.Length, random.NextDatagram(icmpLayer.Length));
                 Packet illegalPacket = new Packet(buffer, DateTime.Now, packet.DataLink);
-                Assert.IsFalse(illegalPacket.IsValid, "IsInvalid");
+                Assert.False(illegalPacket.IsValid, "IsInvalid");
                 if (illegalPacket.Ethernet.Ip.Icmp is IcmpUnknownDatagram)
                 {
                     byte[] icmpBuffer = new byte[illegalPacket.Ethernet.Ip.Icmp.ExtractLayer().Length];
@@ -111,13 +82,13 @@ namespace PcapDotNet.Packets.Test
                     MoreAssert.AreSequenceEqual(illegalPacket.Ethernet.Ip.Icmp.ToArray(),
                                     icmpBuffer);
 
-                    Assert.AreEqual(illegalPacket,
+                    Assert.Equal(illegalPacket,
                                     PacketBuilder.Build(DateTime.Now, ethernetLayer, ipLayer, illegalPacket.Ethernet.Ip.Icmp.ExtractLayer()));
                 }
 
                 // Ethernet
                 ethernetLayer.EtherType = ipLayer == ipV4Layer ? EthernetType.IpV4 : EthernetType.IpV6;
-                Assert.AreEqual(ethernetLayer, packet.Ethernet.ExtractLayer(), "Ethernet Layer");
+                Assert.Equal(ethernetLayer, packet.Ethernet.ExtractLayer());
                 ethernetLayer.EtherType = EthernetType.None;
 
                 // IP.
@@ -126,45 +97,45 @@ namespace PcapDotNet.Packets.Test
                     // IPv4.
                     ipV4Layer.Protocol = IpV4Protocol.InternetControlMessageProtocol;
                     ipV4Layer.HeaderChecksum = ((IpV4Layer)packet.Ethernet.IpV4.ExtractLayer()).HeaderChecksum;
-                    Assert.AreEqual(ipV4Layer, packet.Ethernet.IpV4.ExtractLayer());
+                    Assert.Equal(ipV4Layer, packet.Ethernet.IpV4.ExtractLayer());
                     ipV4Layer.HeaderChecksum = null;
-                    Assert.AreEqual(ipV4Layer.Length, packet.Ethernet.IpV4.HeaderLength);
-                    Assert.IsTrue(packet.Ethernet.IpV4.IsHeaderChecksumCorrect);
-                    Assert.AreEqual(ipV4Layer.Length + icmpLayer.Length + icmpPayloadLength,
+                    Assert.Equal(ipV4Layer.Length, packet.Ethernet.IpV4.HeaderLength);
+                    Assert.True(packet.Ethernet.IpV4.IsHeaderChecksumCorrect);
+                    Assert.Equal(ipV4Layer.Length + icmpLayer.Length + icmpPayloadLength,
                                     packet.Ethernet.IpV4.TotalLength);
-                    Assert.AreEqual(IpV4Datagram.DefaultVersion, packet.Ethernet.IpV4.Version);
+                    Assert.Equal(IpV4Datagram.DefaultVersion, packet.Ethernet.IpV4.Version);
                 } 
                 else
                 {
                     // IPv6.
-                    Assert.AreEqual(ipLayer, packet.Ethernet.IpV6.ExtractLayer());
+                    Assert.Equal(ipLayer, packet.Ethernet.IpV6.ExtractLayer());
                 }
 
                 // ICMP
                 IcmpDatagram actualIcmp = packet.Ethernet.Ip.Icmp;
                 IcmpLayer actualIcmpLayer = (IcmpLayer)actualIcmp.ExtractLayer();
                 icmpLayer.Checksum = actualIcmpLayer.Checksum;
-                Assert.AreEqual(icmpLayer, actualIcmpLayer);
-                Assert.AreEqual(icmpLayer.GetHashCode(), actualIcmpLayer.GetHashCode());
+                Assert.Equal(icmpLayer, actualIcmpLayer);
+                Assert.Equal(icmpLayer.GetHashCode(), actualIcmpLayer.GetHashCode());
                 if (actualIcmpLayer.MessageType != IcmpMessageType.RouterSolicitation)
                 {
-                    Assert.AreNotEqual(random.NextIcmpLayer(), actualIcmpLayer);
+                    Assert.NotEqual(random.NextIcmpLayer(), actualIcmpLayer);
                     IcmpLayer otherIcmpLayer = random.NextIcmpLayer();
-                    Assert.AreNotEqual(otherIcmpLayer.GetHashCode(), actualIcmpLayer.GetHashCode());
+                    Assert.NotEqual(otherIcmpLayer.GetHashCode(), actualIcmpLayer.GetHashCode());
                 }
-                Assert.IsTrue(actualIcmp.IsChecksumCorrect);
-                Assert.AreEqual(icmpLayer.MessageType, actualIcmp.MessageType);
-                Assert.AreEqual(icmpLayer.CodeValue, actualIcmp.Code);
-                Assert.AreEqual(icmpLayer.MessageTypeAndCode, actualIcmp.MessageTypeAndCode);
-                Assert.AreEqual(packet.Length - ethernetLayer.Length - ipLayer.Length - IcmpDatagram.HeaderLength, actualIcmp.Payload.Length);
-                Assert.IsNotNull(icmpLayer.ToString());
+                Assert.True(actualIcmp.IsChecksumCorrect);
+                Assert.Equal(icmpLayer.MessageType, actualIcmp.MessageType);
+                Assert.Equal(icmpLayer.CodeValue, actualIcmp.Code);
+                Assert.Equal(icmpLayer.MessageTypeAndCode, actualIcmp.MessageTypeAndCode);
+                Assert.Equal(packet.Length - ethernetLayer.Length - ipLayer.Length - IcmpDatagram.HeaderLength, actualIcmp.Payload.Length);
+                Assert.NotNull(icmpLayer.ToString());
 
                 switch (packet.Ethernet.Ip.Icmp.MessageType)
                 {
                     case IcmpMessageType.RouterSolicitation:
                     case IcmpMessageType.SourceQuench:
                     case IcmpMessageType.TimeExceeded:
-                        Assert.AreEqual<uint>(0, actualIcmp.Variable);
+                        Assert.Equal<uint>(0, actualIcmp.Variable);
                         break;
 
                     case IcmpMessageType.DestinationUnreachable:
@@ -182,7 +153,7 @@ namespace PcapDotNet.Packets.Test
                     case IcmpMessageType.AddressMaskReply:
                         break;
                     case IcmpMessageType.TraceRoute:
-                        Assert.AreEqual(((IcmpTraceRouteLayer)icmpLayer).ReturnHopCount == 0xFFFF, ((IcmpTraceRouteDatagram)actualIcmp).IsOutbound);
+                        Assert.Equal(((IcmpTraceRouteLayer)icmpLayer).ReturnHopCount == 0xFFFF, ((IcmpTraceRouteDatagram)actualIcmp).IsOutbound);
                         break;
                     case IcmpMessageType.DomainNameRequest:
                     case IcmpMessageType.SecurityFailures:
@@ -196,47 +167,41 @@ namespace PcapDotNet.Packets.Test
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void IcmpRouterAdvertisementEntryTest()
         {
             Random random = new Random();
             IcmpRouterAdvertisementEntry entry1 = new IcmpRouterAdvertisementEntry(random.NextIpV4Address(), random.Next());
             IcmpRouterAdvertisementEntry entry2 = new IcmpRouterAdvertisementEntry(random.NextIpV4Address(), random.Next());
 
-            Assert.AreEqual(entry1, entry1);
-            Assert.AreEqual(entry1.GetHashCode(), entry1.GetHashCode());
-            Assert.AreNotEqual(entry1, entry2);
-            Assert.AreNotEqual(entry1.GetHashCode(), entry2.GetHashCode());
+            Assert.Equal(entry1, entry1);
+            Assert.Equal(entry1.GetHashCode(), entry1.GetHashCode());
+            Assert.NotEqual(entry1, entry2);
+            Assert.NotEqual(entry1.GetHashCode(), entry2.GetHashCode());
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void IcmpDatagramCreateDatagramNullBufferTest()
         {
-            Assert.IsNotNull(IcmpDatagram.CreateDatagram(null, 0, 0));
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => IcmpDatagram.CreateDatagram(null, 0, 0));
         }
 
-        [TestMethod]
+        [Fact]
         public void IcmpDatagramCreateDatagramBadOffsetTest()
         {
-            Assert.IsInstanceOfType(IcmpDatagram.CreateDatagram(new byte[0], -1, 0), typeof(IcmpUnknownDatagram));
+            Assert.IsType<IcmpUnknownDatagram>(IcmpDatagram.CreateDatagram(new byte[0], -1, 0));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException), AllowDerivedTypes = false)]
+        [Fact]
         public void IcmpParameterProblemLayerOriginalDatagramLengthNotRound()
         {
-            Layer layer = new IcmpParameterProblemLayer {OriginalDatagramLength = 6};
-            Assert.IsNotNull(layer);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new IcmpParameterProblemLayer {OriginalDatagramLength = 6});
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException), AllowDerivedTypes = false)]
+        [Fact]
         public void IcmpParameterProblemLayerOriginalDatagramLengthTooBig()
         {
-            Layer layer = new IcmpParameterProblemLayer { OriginalDatagramLength = 2000 };
-            Assert.IsNotNull(layer);
+            Assert.Throws<ArgumentOutOfRangeException>(() => new IcmpParameterProblemLayer { OriginalDatagramLength = 2000 });
         }
     }
 }

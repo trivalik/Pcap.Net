@@ -1,50 +1,21 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
     /// <summary>
     /// Summary description for PcapDataLinkTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class PcapDataLinkTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void TestValidDataLinks()
         {
             PcapDataLink dataLink = new PcapDataLink();
-            Assert.AreEqual(new PcapDataLink("NULL"), dataLink);
+            Assert.Equal(new PcapDataLink("NULL"), dataLink);
             string previousDataLinkName = null;
             for (int i = 0; i != 1000; ++i)
             {
@@ -60,62 +31,53 @@ namespace PcapDotNet.Core.Test
                     continue;
                 }
 
-                Assert.AreEqual(new PcapDataLink(dataLinkName), dataLink);
-                Assert.IsFalse(dataLink.Equals(null));
-                Assert.IsTrue(new PcapDataLink(dataLinkName) == dataLink);
-                Assert.IsFalse(new PcapDataLink(dataLinkName) != dataLink);
-                Assert.IsTrue(previousDataLinkName == null || new PcapDataLink(previousDataLinkName) != dataLink);
-                Assert.IsNotNull(dataLink.Description);
-                Assert.AreEqual(i, dataLink.Value);
-                Assert.AreEqual(dataLink.Value.GetHashCode(), dataLink.GetHashCode());
+                Assert.Equal(new PcapDataLink(dataLinkName), dataLink);
+                Assert.False(dataLink.Equals(null));
+                Assert.True(new PcapDataLink(dataLinkName) == dataLink);
+                Assert.False(new PcapDataLink(dataLinkName) != dataLink);
+                Assert.True(previousDataLinkName == null || new PcapDataLink(previousDataLinkName) != dataLink);
+                Assert.NotNull(dataLink.Description);
+                Assert.Equal(i, dataLink.Value);
+                Assert.Equal(dataLink.Value.GetHashCode(), dataLink.GetHashCode());
 
                 previousDataLinkName = dataLinkName;
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ValidKindsTest()
         {
             foreach (DataLinkKind kind in typeof(DataLinkKind).GetEnumValues())
             {
-                Assert.AreEqual(kind, new PcapDataLink(kind).Kind);
+                Assert.Equal(kind, new PcapDataLink(kind).Kind);
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(NotSupportedException), AllowDerivedTypes = false)]
+        [Fact]
         public void UnsupportedKindErrorTest()
         {
             PcapDataLink dataLink = new PcapDataLink();
-            Assert.IsNotNull(dataLink.Kind);
+            Assert.Throws<NotSupportedException>(() => dataLink.Kind);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void NoDescriptionErrorTest()
         {
             PcapDataLink dataLink = GetInvalidDataLink();
-            Assert.IsNotNull(dataLink.Description);
-            Assert.Fail();
+            Assert.Throws<InvalidOperationException>(() => dataLink.Description);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
+        [Fact]
         public void InvalidNameErrorTest()
         {
-            PcapDataLink dataLink = new PcapDataLink("Invalid Name");
-            Assert.IsNotNull(dataLink);
-            Assert.Fail();
+            Assert.Throws<ArgumentException>(() => new PcapDataLink("Invalid Name"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(NotSupportedException), AllowDerivedTypes = false)]
+        [Fact]
         public void InvalidKindTest()
         {
             const DataLinkKind InvalidKind = (DataLinkKind)100;
-            IDataLink dataLink = new PcapDataLink(InvalidKind);
-            Assert.IsNotNull(dataLink);
-            Assert.Fail();
+            Assert.Throws<NotSupportedException>(() => new PcapDataLink(InvalidKind));
         }
 
         private static PcapDataLink GetInvalidDataLink()
@@ -126,7 +88,7 @@ namespace PcapDotNet.Core.Test
                 try
                 {
                     string dataLinkName = dataLink.Name;
-                    Assert.IsNotNull(dataLinkName);
+                    Assert.NotNull(dataLinkName);
                 }
                 catch (InvalidOperationException)
                 {

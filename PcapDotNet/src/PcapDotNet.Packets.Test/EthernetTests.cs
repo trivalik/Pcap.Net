@@ -1,8 +1,6 @@
 using System;
-using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.Arp;
 using PcapDotNet.Packets.Ethernet;
@@ -10,45 +8,17 @@ using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.IpV6;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.Packets.Transport;
+using Xunit;
 
 namespace PcapDotNet.Packets.Test
 {
     /// <summary>
     /// Summary description for EthernetTests.
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class EthernetTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void RandomEthernetTest()
         {
             Random random = new Random();
@@ -64,44 +34,39 @@ namespace PcapDotNet.Packets.Test
                 Packet packet = PacketBuilder.Build(DateTime.Now, ethernetLayer, payloadLayer);
 
                 // Ethernet
-                Assert.IsTrue(new[] {EthernetType.IpV4, EthernetType.IpV6, EthernetType.Arp, EthernetType.VLanTaggedFrame}.Contains(packet.Ethernet.EtherType) ||
+                Assert.True(new[] {EthernetType.IpV4, EthernetType.IpV6, EthernetType.Arp, EthernetType.VLanTaggedFrame}.Contains(packet.Ethernet.EtherType) ||
                               packet.IsValid, "IsValid - EtherType = " + packet.Ethernet.EtherType);
-                Assert.AreEqual(packet.Length - EthernetDatagram.HeaderLengthValue, packet.Ethernet.PayloadLength, "PayloadLength");
-                Assert.AreEqual(ethernetLayer, packet.Ethernet.ExtractLayer(), "Ethernet Layer");
-                Assert.AreEqual(ethernetLayer.GetHashCode(), packet.Ethernet.ExtractLayer().GetHashCode(), "Ethernet Layer Hash Code");
-                Assert.AreNotEqual(random.NextEthernetLayer().GetHashCode(), packet.Ethernet.ExtractLayer().GetHashCode(), "Ethernet Layer Hash Code");
-                Assert.AreEqual(ethernetLayer.ToString(), packet.Ethernet.ExtractLayer().ToString(), "Ethernet Layer ToString()");
-                Assert.AreNotEqual(random.NextEthernetLayer().ToString(), packet.Ethernet.ExtractLayer().ToString(), "Ethernet Layer ToString()");
-                Assert.AreNotEqual(2, packet.Ethernet.Source, "Ethernet Source");
+                Assert.Equal(packet.Length - EthernetDatagram.HeaderLengthValue, packet.Ethernet.PayloadLength);
+                Assert.Equal(ethernetLayer, packet.Ethernet.ExtractLayer());
+                Assert.Equal(ethernetLayer.GetHashCode(), packet.Ethernet.ExtractLayer().GetHashCode());
+                Assert.NotEqual(random.NextEthernetLayer().GetHashCode(), packet.Ethernet.ExtractLayer().GetHashCode());
+                Assert.Equal(ethernetLayer.ToString(), packet.Ethernet.ExtractLayer().ToString());
+                Assert.NotEqual(random.NextEthernetLayer().ToString(), packet.Ethernet.ExtractLayer().ToString());
 
                 if (packet.Ethernet.EtherType == EthernetType.IpV4)
-                    Assert.IsInstanceOfType(packet.Ethernet.Ip, typeof(IpV4Datagram));
+                    Assert.IsType<IpV4Datagram>(packet.Ethernet.Ip);
                 else if (packet.Ethernet.EtherType == EthernetType.IpV6)
-                    Assert.IsInstanceOfType(packet.Ethernet.Ip, typeof(IpV6Datagram));
+                    Assert.IsType<IpV6Datagram>(packet.Ethernet.Ip);
                 else
-                    Assert.IsNull(packet.Ethernet.Ip);
+                    Assert.Null(packet.Ethernet.Ip);
 
-                Assert.AreEqual(payloadLayer.Data, packet.Ethernet.Payload);
+                Assert.Equal(payloadLayer.Data, packet.Ethernet.Payload);
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
+        [Fact]
         public void AutomaticEthernetTypeNoNextLayer()
         {
-            Packet packet = PacketBuilder.Build(DateTime.Now, new EthernetLayer());
-            Assert.IsTrue(packet.IsValid);
+            Assert.Throws<ArgumentException>(() => PacketBuilder.Build(DateTime.Now, new EthernetLayer()));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
+        [Fact]
         public void AutomaticEthernetTypeBadNextLayer()
         {
-            Packet packet = PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new TcpLayer());
-            Assert.IsTrue(packet.IsValid);
+            Assert.Throws<ArgumentException>(() => PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new TcpLayer()));
         }
 
-        [TestMethod]
+        [Fact]
         public void NoPayloadByEtherType()
         {
             Packet packet = PacketBuilder.Build(DateTime.Now,
@@ -113,14 +78,14 @@ namespace PcapDotNet.Packets.Test
                                                     {
                                                         Data = new Datagram(new byte[100])
                                                     });
-            Assert.IsTrue(packet.IsValid);
-            Assert.IsNull(packet.Ethernet.Padding);
-            Assert.IsNull(packet.Ethernet.Trailer);
-            Assert.IsNull(packet.Ethernet.FrameCheckSequence);
-            Assert.IsNull(packet.Ethernet.ExtraData);
+            Assert.True(packet.IsValid);
+            Assert.Null(packet.Ethernet.Padding);
+            Assert.Null(packet.Ethernet.Trailer);
+            Assert.Null(packet.Ethernet.FrameCheckSequence);
+            Assert.Null(packet.Ethernet.ExtraData);
         }
 
-        [TestMethod]
+        [Fact]
         public void EmptyPadding()
         {
             Packet packet = PacketBuilder.Build(DateTime.Now,
@@ -132,11 +97,11 @@ namespace PcapDotNet.Packets.Test
                                                 {
                                                     Data = new Datagram(new byte[10])
                                                 });
-            Assert.IsTrue(packet.IsValid);
-            Assert.AreEqual(DataSegment.Empty, packet.Ethernet.Padding);
+            Assert.True(packet.IsValid);
+            Assert.Equal(DataSegment.Empty, packet.Ethernet.Padding);
         }
 
-        [TestMethod]
+        [Fact]
         public void PayloadTooBigForPadding()
         {
             Packet packet = PacketBuilder.Build(DateTime.Now,
@@ -150,8 +115,8 @@ namespace PcapDotNet.Packets.Test
                                                     TargetHardwareAddress = new byte[12].AsReadOnly(),
                                                     TargetProtocolAddress = new byte[22].AsReadOnly(),
                                                 });
-            Assert.IsTrue(packet.IsValid);
-            Assert.AreEqual(DataSegment.Empty, packet.Ethernet.Padding);
+            Assert.True(packet.IsValid);
+            Assert.Equal(DataSegment.Empty, packet.Ethernet.Padding);
         }
     }
 }

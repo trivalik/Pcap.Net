@@ -1,49 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
     /// <summary>
     /// Summary description for PacketSendQueueTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class PacketSendQueueTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void TransmitQueueToLiveTest()
         {
             TestTransmitQueueToLive(0, 100, 0.5, false);
@@ -53,8 +24,7 @@ namespace PcapDotNet.Core.Test
             TestTransmitQueueToLive(10, 60, 0.5, true);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void TransmitQueueToOfflineTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -66,31 +36,27 @@ namespace PcapDotNet.Core.Test
                 using (PacketCommunicator communicator = OfflinePacketDeviceTests.OpenOfflineDevice())
                 {
                     communicator.SetFilter("ether src " + SourceMac + " and ether dst " + DestinationMac);
-                    communicator.Transmit(queue, false);
+                    Assert.Throws<InvalidOperationException>(() => communicator.Transmit(queue, false));
                 }
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void EnqueueNullTest()
         {
             using (PacketSendBuffer queue = new PacketSendBuffer(10))
             {
-                queue.Enqueue(null);
+                Assert.Throws<ArgumentNullException>(() => queue.Enqueue(null));
             }
-            Assert.Fail();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void TransmitNullTest()
         {
             using (PacketCommunicator communicator = LivePacketDeviceTests.OpenLiveDevice())
             {
-                communicator.Transmit(null, false);
+                Assert.Throws<ArgumentNullException>(() => communicator.Transmit(null, false));
             }
-            Assert.Fail();
         }
 
         private static void TestTransmitQueueToLive(int numPacketsToSend, int packetSize, double secondsBetweenTimestamps, bool isSynced)
@@ -113,7 +79,7 @@ namespace PcapDotNet.Core.Test
                         communicator.ReceiveSomePackets(out numPacketsGot, numPacketsToSend,
                                                     delegate(Packet packet)
                                                         {
-                                                            Assert.AreEqual(packetsToSend[numPacketsHandled], packet);
+                                                            Assert.Equal(packetsToSend[numPacketsHandled], packet);
                                                             if (numPacketsHandled > 0)
                                                             {
                                                                 TimeSpan expectedDiff;
@@ -137,9 +103,9 @@ namespace PcapDotNet.Core.Test
                                                             ++numPacketsHandled;
                                                         });
 
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                    Assert.AreEqual(numPacketsToSend, numPacketsGot, "numPacketsGot");
-                    Assert.AreEqual(numPacketsToSend, numPacketsHandled, "numPacketsHandled");
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                    Assert.True(numPacketsToSend == numPacketsGot, "numPacketsGot");
+                    Assert.True(numPacketsToSend == numPacketsHandled, "numPacketsHandled");
                 }
             }
         }

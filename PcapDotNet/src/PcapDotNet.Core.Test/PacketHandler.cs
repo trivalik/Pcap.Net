@@ -1,8 +1,8 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -31,7 +31,7 @@ namespace PcapDotNet.Core.Test
 
         public void Handle(Packet packet)
         {
-            Assert.AreEqual(_expectedPacket, packet);
+            Assert.Equal(_expectedPacket, packet);
             MoreAssert.IsInRange(_expectedMinTimestamp, _expectedMaxTimestamp, packet.Timestamp);
             ++_numPacketsHandled;
             if (NumPacketsHandled >= _numPacketsToBreakLoop)

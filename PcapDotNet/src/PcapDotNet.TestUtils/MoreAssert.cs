@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 
 namespace PcapDotNet.TestUtils
 {
@@ -13,21 +13,21 @@ namespace PcapDotNet.TestUtils
         public static void IsBigger<T>(T expectedMinimum, T actual) where T : IComparable<T>
         {
             if (expectedMinimum.CompareTo(actual) >= 0)
-                throw new AssertFailedException("MoreAssert.IsBigger failed. Expected minimum: <" + expectedMinimum +
+                throw new Exception("MoreAssert.IsBigger failed. Expected minimum: <" + expectedMinimum +
                                                 "> Actual: <" + actual + ">.");
         }
 
         public static void IsSmaller<T>(T expectedMaximum, T actual) where T : IComparable<T>
         {
             if (expectedMaximum.CompareTo(actual) <= 0)
-                throw new AssertFailedException("MoreAssert.IsSmaller failed. Expected maximum: <" + expectedMaximum +
+                throw new Exception("MoreAssert.IsSmaller failed. Expected maximum: <" + expectedMaximum +
                                                 "> Actual: <" + actual + ">.");
         }
 
         public static void IsBiggerOrEqual<T>(T expectedMinimum, T actual, string message) where T : IComparable<T>
         {
             if (expectedMinimum.CompareTo(actual) > 0)
-                throw new AssertFailedException("MoreAssert.IsBiggerOrEqual failed. Expected minimum: <" + expectedMinimum +
+                throw new Exception("MoreAssert.IsBiggerOrEqual failed. Expected minimum: <" + expectedMinimum +
                                                 "> Actual: <" + actual + ">. " + message);
         }
 
@@ -39,7 +39,7 @@ namespace PcapDotNet.TestUtils
         public static void IsSmallerOrEqual<T>(T expectedMaximum, T actual, string message) where T : IComparable<T>
         {
             if (expectedMaximum.CompareTo(actual) < 0)
-                throw new AssertFailedException("MoreAssert.IsSmallerOrEqual failed. Expected maximum: <" + expectedMaximum +
+                throw new Exception("MoreAssert.IsSmallerOrEqual failed. Expected maximum: <" + expectedMaximum +
                                                 "> Actual: <" + actual + ">. " + message);
         }
 
@@ -62,13 +62,13 @@ namespace PcapDotNet.TestUtils
         public static void IsContains(string expectedContained, string actualValue, string message = "")
         {
             if (!actualValue.Contains(expectedContained))
-                throw new AssertFailedException(string.Format("MoreAssert.IsContains failed. Expected contained: <{0}> Actual: <{1}>. {2}",
+                throw new Exception(string.Format("MoreAssert.IsContains failed. Expected contained: <{0}> Actual: <{1}>. {2}",
                                                               expectedContained, actualValue, message));
         }
 
         public static void IsMatch(string expectedPattern, string actualValue)
         {
-            Assert.IsTrue(Regex.IsMatch(actualValue, expectedPattern), "Expected pattern: <" + expectedPattern + ">. Actual value: <" + actualValue + ">.");
+            Assert.True(Regex.IsMatch(actualValue, expectedPattern), "Expected pattern: <" + expectedPattern + ">. Actual value: <" + actualValue + ">.");
         }
 
         public static void AreSequenceEqual<T>(IEnumerable<T> expectedSequence, IEnumerable<T> actualSequence, string message)
@@ -76,15 +76,16 @@ namespace PcapDotNet.TestUtils
             if (expectedSequence.SequenceEqual(actualSequence))
                 return;
 
-//            message = "Expected sequence: <" + expectedSequence.SequenceToString(",") + ">. Actual sequence: <" +
-//                      actualSequence.SequenceToString(",") + ">. " + message;
+            if(expectedSequence.Count() != actualSequence.Count())
+                Assert.Fail("Different Count. " + message);
 
-            Assert.AreEqual(expectedSequence.Count(), actualSequence.Count(), "Different Count. " + message);
             List<T> expectedList = expectedSequence.ToList();
             List<T> actualList = actualSequence.ToList();
             for (int i = 0; i != expectedList.Count; ++i)
-                Assert.AreEqual(expectedList[i], actualList[i], "Element " + (i + 1) + " is different in the sequence. " + message);
-
+            {
+                 if(!EqualityComparer<T>.Default.Equals(expectedList[i], actualList[i]))
+                    Assert.Fail("Element " + (i + 1) + " is different in the sequence. " + message);
+            }
             Assert.Fail(message);
         }
 

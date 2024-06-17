@@ -4,54 +4,23 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PcapDotNet.Base;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.Http;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.Packets.Transport;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Packets.Test
 {
     /// <summary>
     /// Summary description for HttpTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class HttpTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void RandomHttpTest()
         {
             int seed = new Random().Next();
@@ -69,73 +38,73 @@ namespace PcapDotNet.Packets.Test
                 HttpLayer httpLayer = random.NextHttpLayer();
 
                 Packet packet = PacketBuilder.Build(DateTime.Now, ethernetLayer, ipLayer, tcpLayer, httpLayer);
-                Assert.IsTrue(packet.IsValid, "IsValid");
+                Assert.True(packet.IsValid, "IsValid");
 
                 HttpDatagram httpDatagram = packet.Ethernet.Ip.Tcp.Http;
-                Assert.AreEqual(httpLayer.Version, httpDatagram.Version);
+                Assert.Equal(httpLayer.Version, httpDatagram.Version);
                 if (httpLayer.Version != null)
-                    Assert.AreEqual(httpLayer.Version.GetHashCode(), httpDatagram.Version.GetHashCode());
+                    Assert.Equal(httpLayer.Version.GetHashCode(), httpDatagram.Version.GetHashCode());
                 if (httpLayer is HttpRequestLayer)
                 {
-                    Assert.IsTrue(httpDatagram.IsRequest);
-                    Assert.IsTrue(httpLayer.IsRequest);
-                    Assert.IsFalse(httpDatagram.IsResponse);
-                    Assert.IsFalse(httpLayer.IsResponse);
+                    Assert.True(httpDatagram.IsRequest);
+                    Assert.True(httpLayer.IsRequest);
+                    Assert.False(httpDatagram.IsResponse);
+                    Assert.False(httpLayer.IsResponse);
 
                     HttpRequestLayer httpRequestLayer = (HttpRequestLayer)httpLayer;
                     HttpRequestDatagram httpRequestDatagram = (HttpRequestDatagram)httpDatagram;
-                    Assert.AreEqual(httpRequestLayer.Method, httpRequestDatagram.Method);
+                    Assert.Equal(httpRequestLayer.Method, httpRequestDatagram.Method);
                     if (httpRequestLayer.Method != null)
                     {
-                        Assert.AreEqual(httpRequestLayer.Method.GetHashCode(), httpRequestDatagram.Method.GetHashCode());
-                        Assert.AreEqual(httpRequestLayer.Method.KnownMethod, httpRequestDatagram.Method.KnownMethod);
+                        Assert.Equal(httpRequestLayer.Method.GetHashCode(), httpRequestDatagram.Method.GetHashCode());
+                        Assert.Equal(httpRequestLayer.Method.KnownMethod, httpRequestDatagram.Method.KnownMethod);
                     }
-                    Assert.AreEqual(httpRequestLayer.Uri, httpRequestDatagram.Uri);
+                    Assert.Equal(httpRequestLayer.Uri, httpRequestDatagram.Uri);
                 }
                 else
                 {
-                    Assert.IsFalse(httpDatagram.IsRequest);
-                    Assert.IsFalse(httpLayer.IsRequest);
-                    Assert.IsTrue(httpDatagram.IsResponse);
-                    Assert.IsTrue(httpLayer.IsResponse);
+                    Assert.False(httpDatagram.IsRequest);
+                    Assert.False(httpLayer.IsRequest);
+                    Assert.True(httpDatagram.IsResponse);
+                    Assert.True(httpLayer.IsResponse);
 
                     HttpResponseLayer httpResponseLayer = (HttpResponseLayer)httpLayer;
                     HttpResponseDatagram httpResponseDatagram = (HttpResponseDatagram)httpDatagram;
-                    Assert.AreEqual(httpResponseLayer.StatusCode, httpResponseDatagram.StatusCode);
-                    Assert.AreEqual(httpResponseLayer.ReasonPhrase, httpResponseDatagram.ReasonPhrase);
+                    Assert.Equal(httpResponseLayer.StatusCode, httpResponseDatagram.StatusCode);
+                    Assert.Equal(httpResponseLayer.ReasonPhrase, httpResponseDatagram.ReasonPhrase);
                 }
-                Assert.AreEqual(httpLayer.Header, httpDatagram.Header);
+                Assert.Equal(httpLayer.Header, httpDatagram.Header);
                 if (httpLayer.Header != null)
                 {
-                    Assert.AreEqual(httpLayer.Header.GetHashCode(), httpDatagram.Header.GetHashCode());
+                    Assert.Equal(httpLayer.Header.GetHashCode(), httpDatagram.Header.GetHashCode());
                     if (!httpDatagram.IsRequest || ((HttpRequestDatagram)httpDatagram).Uri != "") 
-                        Assert.IsTrue(httpDatagram.IsValidStart, "IsValidStart");
+                        Assert.True(httpDatagram.IsValidStart, "IsValidStart");
 
                     foreach (var field in httpLayer.Header)
-                        Assert.IsFalse(field.Equals("abc"));
+                        Assert.False(field.Equals("abc"));
                     foreach (var field in (IEnumerable)httpLayer.Header)
-                        Assert.IsFalse(field.Equals("abc"));
+                        Assert.False(field.Equals("abc"));
 
                     MoreAssert.AreSequenceEqual(httpLayer.Header.Select(field => field.GetHashCode()), httpDatagram.Header.Select(field => field.GetHashCode()));
 
                     if (httpLayer.Header.ContentType != null)
                     {
                         var parameters = httpLayer.Header.ContentType.Parameters;
-                        Assert.IsNotNull(((IEnumerable)parameters).GetEnumerator());
-                        Assert.AreEqual<object>(parameters, httpDatagram.Header.ContentType.Parameters);
-                        Assert.AreEqual(parameters.GetHashCode(), httpDatagram.Header.ContentType.Parameters.GetHashCode());
-                        Assert.AreEqual(parameters.Count, httpDatagram.Header.ContentType.Parameters.Count);
+                        Assert.NotNull(((IEnumerable)parameters).GetEnumerator());
+                        Assert.Equal<object>(parameters, httpDatagram.Header.ContentType.Parameters);
+                        Assert.Equal(parameters.GetHashCode(), httpDatagram.Header.ContentType.Parameters.GetHashCode());
+                        Assert.Equal(parameters.Count, httpDatagram.Header.ContentType.Parameters.Count);
                         int maxParameterNameLength = parameters.Any() ? parameters.Max(pair => pair.Key.Length) : 0;
-                        Assert.IsNull(parameters[new string('a', maxParameterNameLength + 1)]);
+                        Assert.Null(parameters[new string('a', maxParameterNameLength + 1)]);
                     }
                 }
-                Assert.AreEqual(httpLayer.Body, httpDatagram.Body);
-                Assert.AreEqual(httpLayer, httpDatagram.ExtractLayer(), "HTTP Layer");
-                Assert.AreEqual(httpLayer.Length, httpDatagram.Length);
+                Assert.Equal(httpLayer.Body, httpDatagram.Body);
+                Assert.Equal(httpLayer, httpDatagram.ExtractLayer());
+                Assert.Equal(httpLayer.Length, httpDatagram.Length);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpParsingTest()
         {
             // Request First Line
@@ -384,7 +353,7 @@ namespace PcapDotNet.Packets.Test
                              "--THIS_STRING_SEPARATES--");
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpParsingMultipeRequestsTest()
         {
             const string HttpString = "GET /url1 HTTP/1.1\r\n" +
@@ -398,26 +367,26 @@ namespace PcapDotNet.Packets.Test
 
             Packet packet = BuildPacket(HttpString);
             var https = packet.Ethernet.IpV4.Tcp.HttpCollection;
-            Assert.AreEqual(2, https.Count);
+            Assert.Equal(2, https.Count);
             foreach (HttpDatagram http in https)
             {
-                Assert.IsTrue(http.IsRequest);
-                Assert.IsFalse(http.IsResponse);
-                Assert.AreEqual(HttpVersion.Version11, http.Version);
-                Assert.AreEqual(Datagram.Empty, http.Body);
+                Assert.True(http.IsRequest);
+                Assert.False(http.IsResponse);
+                Assert.Equal(HttpVersion.Version11, http.Version);
+                Assert.Equal(Datagram.Empty, http.Body);
             }
             HttpRequestDatagram request = (HttpRequestDatagram)https[0];
-            Assert.AreEqual(new HttpRequestMethod(HttpRequestKnownMethod.Get), request.Method);
-            Assert.AreEqual("/url1", request.Uri);
-            Assert.AreEqual(new HttpHeader(HttpField.CreateField("A", "B"), HttpField.CreateField("B", "C")), request.Header);
+            Assert.Equal(new HttpRequestMethod(HttpRequestKnownMethod.Get), request.Method);
+            Assert.Equal("/url1", request.Uri);
+            Assert.Equal(new HttpHeader(HttpField.CreateField("A", "B"), HttpField.CreateField("B", "C")), request.Header);
 
             request = (HttpRequestDatagram)https[1];
-            Assert.AreEqual(new HttpRequestMethod(HttpRequestKnownMethod.Get), request.Method);
-            Assert.AreEqual("/url2", request.Uri);
-            Assert.AreEqual(new HttpHeader(HttpField.CreateField("C", "D"), HttpField.CreateField("D", "E")), request.Header);
+            Assert.Equal(new HttpRequestMethod(HttpRequestKnownMethod.Get), request.Method);
+            Assert.Equal("/url2", request.Uri);
+            Assert.Equal(new HttpHeader(HttpField.CreateField("C", "D"), HttpField.CreateField("D", "E")), request.Header);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpParsingMultipeResponsesTest()
         {
             const string HttpString = "HTTP/1.1 200 OK\r\n" +
@@ -439,117 +408,116 @@ namespace PcapDotNet.Packets.Test
 
             Packet packet = BuildPacket(HttpString);
             var https = packet.Ethernet.IpV4.Tcp.HttpCollection;
-            Assert.AreEqual(3, https.Count);
+            Assert.Equal(3, https.Count);
             foreach (HttpDatagram http in https)
             {
-                Assert.IsFalse(http.IsRequest);
-                Assert.IsTrue(http.IsResponse);
-                Assert.AreEqual(HttpVersion.Version11, http.Version);
+                Assert.False(http.IsRequest);
+                Assert.True(http.IsResponse);
+                Assert.Equal(HttpVersion.Version11, http.Version);
             }
             HttpResponseDatagram response = (HttpResponseDatagram)https[0];
-            Assert.AreEqual(new Datagram(Encoding.ASCII.GetBytes("b\r\n12345678901\r\n0\r\n")), response.Body);
-            Assert.AreEqual(new HttpHeader(new HttpTransferEncodingField("chunked")), response.Header);
-            Assert.AreEqual(new Datagram(Encoding.ASCII.GetBytes("OK")), response.ReasonPhrase);
-            Assert.AreEqual<uint>(200, response.StatusCode.Value);
+            Assert.Equal(new Datagram(Encoding.ASCII.GetBytes("b\r\n12345678901\r\n0\r\n")), response.Body);
+            Assert.Equal(new HttpHeader(new HttpTransferEncodingField("chunked")), response.Header);
+            Assert.Equal(new Datagram(Encoding.ASCII.GetBytes("OK")), response.ReasonPhrase);
+            Assert.Equal<uint>(200, response.StatusCode.Value);
 
             response = (HttpResponseDatagram)https[1];
-            Assert.AreEqual(new Datagram(Encoding.ASCII.GetBytes("123456")), response.Body);
-            Assert.AreEqual(new HttpHeader(new HttpContentLengthField(6)), response.Header);
-            Assert.AreEqual(new Datagram(Encoding.ASCII.GetBytes("Not Found")), response.ReasonPhrase);
-            Assert.AreEqual<uint>(404, response.StatusCode.Value);
+            Assert.Equal(new Datagram(Encoding.ASCII.GetBytes("123456")), response.Body);
+            Assert.Equal(new HttpHeader(new HttpContentLengthField(6)), response.Header);
+            Assert.Equal(new Datagram(Encoding.ASCII.GetBytes("Not Found")), response.ReasonPhrase);
+            Assert.Equal<uint>(404, response.StatusCode.Value);
 
             response = (HttpResponseDatagram)https[2];
-            Assert.AreEqual(new Datagram(Encoding.ASCII.GetBytes("8\r\n12345678\r\n0\r\n")), response.Body);
-            Assert.AreEqual(new HttpHeader(new HttpTransferEncodingField("chunked")), response.Header);
-            Assert.AreEqual(new Datagram(Encoding.ASCII.GetBytes("Moved")), response.ReasonPhrase);
-            Assert.AreEqual<uint>(302, response.StatusCode.Value);
+            Assert.Equal(new Datagram(Encoding.ASCII.GetBytes("8\r\n12345678\r\n0\r\n")), response.Body);
+            Assert.Equal(new HttpHeader(new HttpTransferEncodingField("chunked")), response.Header);
+            Assert.Equal(new Datagram(Encoding.ASCII.GetBytes("Moved")), response.ReasonPhrase);
+            Assert.Equal<uint>(302, response.StatusCode.Value);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
+        [Fact]
         public void HttpRequestMethodBadKnownTest()
         {
-            Assert.IsNotNull(new HttpRequestMethod(HttpRequestKnownMethod.Unknown));
+            Assert.Throws<ArgumentException>(() => new HttpRequestMethod(HttpRequestKnownMethod.Unknown));
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartRequestValidTest()
         {
             var packet = BuildPacket("UnknownMethod / HTTP/1.0\r\n\r\n");
 
-            Assert.IsTrue(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.True(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartRequestWithMissingUriNotAllowedTest()
         {
             var packet = BuildPacket("GET  HTTP/1.1\r\n\r\n");
 
-            Assert.IsFalse(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.False(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartRequestWithMissingVersionNumberNotAllowedTest()
         {
             var packet = BuildPacket("GET / HTTP/\r\n\r\n");
 
-            Assert.IsFalse(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.False(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartRequestWithMissingVersionNotAllowedTest()
         {
             var packet = BuildPacket("GET /\r\n\r\n");
 
-            Assert.IsFalse(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.False(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartRequestWithMissingMethodNotAllowedTest()
         {
             var packet = BuildPacket(" / HTTP/1.0\r\n\r\n");
 
-            Assert.IsFalse(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.False(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartResponseValidTest()
         {
             var packet = BuildPacket("HTTP/1.0 200 OK\r\n\r\n");
 
-            Assert.IsTrue(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.True(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartResponseMinimalValidTest()
         {
             var packet = BuildPacket("HTTP/1.0 200 \r\n\r\n");
 
-            Assert.IsTrue(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.True(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartResponseWithMissingVersionNumberNotAllowedTest()
         {
             var packet = BuildPacket("HTTP/ 200 OK\r\n\r\n");
 
-            Assert.IsFalse(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.False(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartResponseWithMissingVersionNotAllowed()
         {
             var packet = BuildPacket(" 200 OK\r\n\r\n");
 
-            Assert.IsFalse(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.False(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpIsValidStartResponseWithMissingStatusCodeNotAllowedTest()
         {
             var packet = BuildPacket("HTTP/1.0  OK \r\n\r\n");
 
-            Assert.IsFalse(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
+            Assert.False(packet.Ethernet.IpV4.Tcp.Http.IsValidStart);
         }
 
         private static void TestHttpRequest(string httpString, string expectedMethodString = null, string expectedUri = null, HttpVersion expectedVersion = null, HttpHeader expectedHeader = null, string expectedBodyString = null)
@@ -561,20 +529,20 @@ namespace PcapDotNet.Packets.Test
 
             // HTTP
             HttpDatagram http = packet.Ethernet.IpV4.Tcp.Http;
-            Assert.IsTrue(http.IsRequest, "IsRequest " + httpString);
-            Assert.IsFalse(http.IsResponse, "IsResponse " + httpString);
-            Assert.AreEqual(expectedVersion, http.Version, "Version " + httpString);
-            Assert.AreEqual(expectedHeader, http.Header, "Header " + httpString);
+            Assert.True(http.IsRequest, "IsRequest " + httpString);
+            Assert.False(http.IsResponse, "IsResponse " + httpString);
+            Assert.Equal(expectedVersion, http.Version);
+            Assert.Equal(expectedHeader, http.Header);
             if (expectedHeader != null)
-                Assert.AreEqual(expectedHeader.ToString(), http.Header.ToString(), "Header " + httpString);
+                Assert.Equal(expectedHeader.ToString(), http.Header.ToString());
 
             HttpRequestDatagram request = (HttpRequestDatagram)http;
-            Assert.AreEqual(expectedMethod, request.Method, "Method " + httpString);
-            Assert.AreEqual(expectedUri, request.Uri, "Uri " + httpString);
-            Assert.AreEqual(expectedBody, request.Body, "Body " + httpString);
+            Assert.Equal(expectedMethod, request.Method);
+            Assert.Equal(expectedUri, request.Uri);
+            Assert.Equal(expectedBody, request.Body);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpResponseWithoutVersionStatusCodeOrReasonPhraseTest()
         {
             HttpResponseLayer httpLayer = new HttpResponseLayer();
@@ -585,23 +553,23 @@ namespace PcapDotNet.Packets.Test
 
             // null version
             Packet packet = builder.Build(DateTime.Now);
-            Assert.IsNull(packet.Ethernet.IpV4.Tcp.Http.Version);
+            Assert.Null(packet.Ethernet.IpV4.Tcp.Http.Version);
 
             // null status code
             httpLayer.Version = HttpVersion.Version11;
             packet = builder.Build(DateTime.Now);
-            Assert.IsNotNull(packet.Ethernet.IpV4.Tcp.Http.Version);
-            Assert.IsNull(((HttpResponseDatagram)packet.Ethernet.IpV4.Tcp.Http).StatusCode);
+            Assert.NotNull(packet.Ethernet.IpV4.Tcp.Http.Version);
+            Assert.Null(((HttpResponseDatagram)packet.Ethernet.IpV4.Tcp.Http).StatusCode);
 
             // null reason phrase
             httpLayer.StatusCode = 200;
             packet = builder.Build(DateTime.Now);
-            Assert.IsNotNull(packet.Ethernet.IpV4.Tcp.Http.Version);
-            Assert.IsNotNull(((HttpResponseDatagram)packet.Ethernet.IpV4.Tcp.Http).StatusCode);
-            Assert.AreEqual(Datagram.Empty, ((HttpResponseDatagram)packet.Ethernet.IpV4.Tcp.Http).ReasonPhrase, "ReasonPhrase");
+            Assert.NotNull(packet.Ethernet.IpV4.Tcp.Http.Version);
+            Assert.NotNull(((HttpResponseDatagram)packet.Ethernet.IpV4.Tcp.Http).StatusCode);
+            Assert.Equal(Datagram.Empty, ((HttpResponseDatagram)packet.Ethernet.IpV4.Tcp.Http).ReasonPhrase);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpRequestWithoutUriTest()
         {
            PacketBuilder builder = new PacketBuilder(new EthernetLayer(),
@@ -613,39 +581,33 @@ namespace PcapDotNet.Packets.Test
                                                       });
 
             Packet packet = builder.Build(DateTime.Now);
-            Assert.IsNotNull(((HttpRequestDatagram)packet.Ethernet.IpV4.Tcp.Http).Method);
-            Assert.AreEqual(HttpRequestKnownMethod.Unknown, ((HttpRequestDatagram)packet.Ethernet.IpV4.Tcp.Http).Method.KnownMethod);
-            Assert.AreEqual(string.Empty, ((HttpRequestDatagram)packet.Ethernet.IpV4.Tcp.Http).Uri, "Uri");
+            Assert.NotNull(((HttpRequestDatagram)packet.Ethernet.IpV4.Tcp.Http).Method);
+            Assert.Equal(HttpRequestKnownMethod.Unknown, ((HttpRequestDatagram)packet.Ethernet.IpV4.Tcp.Http).Method.KnownMethod);
+            Assert.Equal(string.Empty, ((HttpRequestDatagram)packet.Ethernet.IpV4.Tcp.Http).Uri);
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpBadTransferCodingsRegexTest()
         {
             Packet packet = BuildPacket("GET /url HTTP/1.1\r\n" +
                                         "Transfer-Encoding: ///\r\n" +
                                         "\r\n");
-            Assert.IsNull(packet.Ethernet.IpV4.Tcp.Http.Header.TransferEncoding.TransferCodings);
+            Assert.Null(packet.Ethernet.IpV4.Tcp.Http.Header.TransferEncoding.TransferCodings);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void HttpCreateFieldNullEncodingTest()
         {
-            HttpField field = HttpField.CreateField("abc", "cde", null);
-            Assert.IsNull(field);
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => HttpField.CreateField("abc", "cde", null));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void HttpCreateFieldNullNameTest()
         {
-            HttpField field = HttpField.CreateField(null, "cde");
-            Assert.IsNull(field);
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => HttpField.CreateField(null, "cde"));
         }
 
-        [TestMethod]
+        [Fact]
         public void HttpNonAsciiUriTest()
         {
             Packet packet = Packet.FromHexadecimalString(
@@ -657,10 +619,10 @@ namespace PcapDotNet.Packets.Test
                 "e656374696f6e3a204b6565702d416c6976650d0a0d0a",
                 DateTime.Now, DataLinkKind.Ethernet);
 
-            Assert.AreEqual("/D%C3%BCrst/?ï¼¡", ((HttpRequestDatagram)packet.Ethernet.IpV4.Tcp.Http).Uri);
+            Assert.Equal("/D%C3%BCrst/?ï¼¡", ((HttpRequestDatagram)packet.Ethernet.IpV4.Tcp.Http).Uri);
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleHttpLayersTest()
         {
             var httpLayer1 = new HttpResponseLayer
@@ -680,9 +642,9 @@ namespace PcapDotNet.Packets.Test
                                  Body = new Datagram(new byte[20])
                              };
             Packet packet = PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(), new TcpLayer(), httpLayer1, httpLayer2);
-            Assert.AreEqual(2, packet.Ethernet.IpV4.Tcp.HttpCollection.Count);
-            Assert.AreEqual(httpLayer1, packet.Ethernet.IpV4.Tcp.Http.ExtractLayer());
-            Assert.AreEqual(httpLayer2, packet.Ethernet.IpV4.Tcp.HttpCollection[1].ExtractLayer());
+            Assert.Equal(2, packet.Ethernet.IpV4.Tcp.HttpCollection.Count);
+            Assert.Equal(httpLayer1, packet.Ethernet.IpV4.Tcp.Http.ExtractLayer());
+            Assert.Equal(httpLayer2, packet.Ethernet.IpV4.Tcp.HttpCollection[1].ExtractLayer());
         }
 
         private static void TestHttpResponse(string httpString, HttpVersion expectedVersion = null, uint? expectedStatusCode = null, string expectedReasonPhrase = null, HttpHeader expectedHeader = null, string expectedBodyString = null)
@@ -693,17 +655,17 @@ namespace PcapDotNet.Packets.Test
 
             // HTTP
             HttpDatagram http = packet.Ethernet.IpV4.Tcp.Http;
-            Assert.IsFalse(http.IsRequest, "IsRequest " + httpString);
-            Assert.IsTrue(http.IsResponse, "IsResponse " + httpString);
-            Assert.AreEqual(expectedVersion, http.Version, "Version " + httpString);
-            Assert.AreEqual(expectedHeader, http.Header, "Header " + httpString);
+            Assert.False(http.IsRequest, "IsRequest " + httpString);
+            Assert.True(http.IsResponse, "IsResponse " + httpString);
+            Assert.Equal(expectedVersion, http.Version);
+            Assert.Equal(expectedHeader, http.Header);
             if (expectedHeader != null)
-                Assert.IsNotNull(http.Header.ToString());
+                Assert.NotNull(http.Header.ToString());
 
             HttpResponseDatagram response = (HttpResponseDatagram)http;
-            Assert.AreEqual(expectedStatusCode, response.StatusCode, "StatusCode " + httpString);
-            Assert.AreEqual(expectedReasonPhrase == null ? null : new Datagram(Encoding.ASCII.GetBytes(expectedReasonPhrase)), response.ReasonPhrase, "ReasonPhrase " + httpString);
-            Assert.AreEqual(expectedBody, response.Body, "Body " + httpString);
+            Assert.Equal(expectedStatusCode, response.StatusCode);
+            Assert.Equal(expectedReasonPhrase == null ? null : new Datagram(Encoding.ASCII.GetBytes(expectedReasonPhrase)), response.ReasonPhrase);
+            Assert.Equal(expectedBody, response.Body);
         }
 
         private static Packet BuildPacket(string httpString)
@@ -730,21 +692,21 @@ namespace PcapDotNet.Packets.Test
 
             Packet packet = PacketBuilder.Build(DateTime.Now, ethernetLayer, ipV4Layer, tcpLayer, payloadLayer);
 
-            Assert.IsTrue(packet.IsValid);
+            Assert.True(packet.IsValid);
 
             // Ethernet
             ethernetLayer.EtherType = EthernetType.IpV4;
-            Assert.AreEqual(ethernetLayer, packet.Ethernet.ExtractLayer(), "Ethernet Layer");
+            Assert.Equal(ethernetLayer, packet.Ethernet.ExtractLayer());
 
             // IpV4
             ipV4Layer.Protocol = IpV4Protocol.Tcp;
             ipV4Layer.HeaderChecksum = ((IpV4Layer)packet.Ethernet.IpV4.ExtractLayer()).HeaderChecksum;
-            Assert.AreEqual(ipV4Layer, packet.Ethernet.IpV4.ExtractLayer(), "IP Layer");
+            Assert.Equal(ipV4Layer, packet.Ethernet.IpV4.ExtractLayer());
             ipV4Layer.HeaderChecksum = null;
 
             // TCP
             tcpLayer.Checksum = packet.Ethernet.IpV4.Tcp.Checksum;
-            Assert.AreEqual(tcpLayer, packet.Ethernet.IpV4.Tcp.ExtractLayer(), "TCP Layer");
+            Assert.Equal(tcpLayer, packet.Ethernet.IpV4.Tcp.ExtractLayer());
 
             return packet;
         }

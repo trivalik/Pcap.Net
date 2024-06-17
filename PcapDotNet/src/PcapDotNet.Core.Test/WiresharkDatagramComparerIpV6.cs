@@ -3,12 +3,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.IpV6;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -92,7 +92,7 @@ namespace PcapDotNet.Core.Test
 
                 case "ipv6.addr":
                 case "ipv6.host":
-                    Assert.IsTrue(field.Show() == ipV6Datagram.Source.GetWiresharkString() ||
+                    Assert.True(field.Show() == ipV6Datagram.Source.GetWiresharkString() ||
                                   field.Show() == ipV6Datagram.CurrentDestination.GetWiresharkString());
                     field.AssertNoFields();
                     break;
@@ -100,7 +100,7 @@ namespace PcapDotNet.Core.Test
                 case "ipv6.hop_opt":
                     if (_currentExtensionHeaderIndex >= ipV6Datagram.ExtensionHeaders.Headers.Count)
                     {
-                        Assert.IsFalse(ipV6Datagram.ExtensionHeaders.IsValid);
+                        Assert.False(ipV6Datagram.ExtensionHeaders.IsValid);
                         int maxLength = ipV6Datagram.Length - IpV6Datagram.HeaderLength - ipV6Datagram.ExtensionHeaders.BytesLength;
                         if (field.Fields().Any(subfield => subfield.Name() == "ipv6.opt.length"))
                         {
@@ -109,7 +109,7 @@ namespace PcapDotNet.Core.Test
                         }
                         else 
                         {
-                            Assert.AreEqual(6, maxLength);
+                            Assert.Equal(6, maxLength);
                         }
                     }
                     else
@@ -201,7 +201,7 @@ namespace PcapDotNet.Core.Test
                                 {
                                     IpV6Address actualAddress =
                                         new IpV6Address(UInt128.Parse(headerField.Value(), NumberStyles.HexNumber, CultureInfo.InvariantCulture));
-                                    Assert.AreEqual(routingProtocolLowPowerAndLossyNetworks.Addresses[routingProtocolLowPowerAndLossyNetworksAddressIndex],
+                                    Assert.Equal(routingProtocolLowPowerAndLossyNetworks.Addresses[routingProtocolLowPowerAndLossyNetworksAddressIndex],
                                                     actualAddress);
                                 }
                                 break;
@@ -242,7 +242,7 @@ namespace PcapDotNet.Core.Test
 //                                    byte[] fullAddressBytes = destinationAddressBytes.Subsegment(0, commonPrefixLength).Concat(routingAddressBytes.Subsegment(commonPrefixLength, IpV6Address.SizeOf - commonPrefixLength)).ToArray();
 //                                    IpV6Address expectedFullAddress = fullAddressBytes.ReadIpV6Address(0, Endianity.Big);
 //                                    
-//                                    Assert.AreEqual(expectedFullAddress, actualFullAddress);
+//                                    Assert.Equal(expectedFullAddress, actualFullAddress);
 //                                }
 
                                 ++routingProtocolLowPowerAndLossyNetworksAddressIndex;
@@ -274,11 +274,11 @@ namespace PcapDotNet.Core.Test
                     IpV4Protocol nextHeader = _currentExtensionHeaderIndex > 0
                                                   ? ipV6Datagram.ExtensionHeaders[_currentExtensionHeaderIndex - 1].NextHeader.Value
                                                   : ipV6Datagram.NextHeader;
-                    Assert.IsTrue(nextHeader == IpV4Protocol.Shim6);
+                    Assert.True(nextHeader == IpV4Protocol.Shim6);
                     break;
 
                 case "ipv6.unknown_hdr":
-                    Assert.AreEqual(ipV6Datagram.ExtensionHeaders.Count(), _currentExtensionHeaderIndex);
+                    Assert.Equal(ipV6Datagram.ExtensionHeaders.Count(), _currentExtensionHeaderIndex);
                     // TODO: Fix according to https://bugs.wireshark.org/bugzilla/show_bug.cgi?id=9996
                     return false;
 
@@ -503,7 +503,7 @@ namespace PcapDotNet.Core.Test
                                 case "ipv6.opt.pad1":
                                     headerSubfield.AssertNoFields();
                                     headerSubfield.AssertShow("");
-                                    Assert.IsTrue(option is IpV6OptionPad1);
+                                    Assert.True(option is IpV6OptionPad1);
                                     ++optionsIndex;
                                     break;
 
@@ -521,7 +521,7 @@ namespace PcapDotNet.Core.Test
                                
                                 case "ipv6.opt.unknown":
                                     headerSubfield.AssertNoFields();
-                                    Assert.IsTrue(new[]
+                                    Assert.True(new[]
                                                       {
                                                           IpV6OptionType.LineIdentification,
                                                           IpV6OptionType.IdentifierLocatorNetworkProtocolNonce,
@@ -580,7 +580,7 @@ namespace PcapDotNet.Core.Test
 
                 case "Length":
                     if (header.IsValid)
-                        Assert.IsTrue(headerFieldShowValue.EndsWith(" (" + header.Length + " bytes)"));
+                        Assert.EndsWith(" (" + header.Length + " bytes)", headerFieldShowValue);
                     break;
 
                 case "Router alert":
@@ -588,11 +588,11 @@ namespace PcapDotNet.Core.Test
                     switch (headerFieldShowValue)
                     {
                         case " MLD (4 bytes)":
-                            Assert.AreEqual(IpV6RouterAlertType.MulticastListenerDiscovery, routerAlert.RouterAlertType);
+                            Assert.Equal(IpV6RouterAlertType.MulticastListenerDiscovery, routerAlert.RouterAlertType);
                             break;
 
                         case " RSVP (4 bytes)":
-                            Assert.AreEqual(IpV6RouterAlertType.Rsvp, routerAlert.RouterAlertType);
+                            Assert.Equal(IpV6RouterAlertType.Rsvp, routerAlert.RouterAlertType);
                             break;
 
                         case " Unknown (4 bytes)":
@@ -607,7 +607,7 @@ namespace PcapDotNet.Core.Test
 
                 case "Jumbo payload":
                     IpV6OptionJumboPayload jumboPayload = (IpV6OptionJumboPayload)headerOptions.Options[optionsIndex++];
-                    Assert.AreEqual(" " + jumboPayload.JumboPayloadLength + " (6 bytes)", headerFieldShowValue);
+                    Assert.Equal(" " + jumboPayload.JumboPayloadLength + " (6 bytes)", headerFieldShowValue);
                     break;
 
                 default:

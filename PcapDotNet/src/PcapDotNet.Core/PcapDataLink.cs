@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
 using PcapDotNet.Core.Native;
 using PcapDotNet.Packets;
 
@@ -9,7 +9,7 @@ namespace PcapDotNet.Core
     /// <summary>
     /// A packet communicator datalink.
     /// </summary>
-    public sealed class PcapDataLink : IDataLink, IEquatable<PcapDataLink>
+    public struct PcapDataLink : IDataLink, IEquatable<PcapDataLink>
     {
         private const int DLT_PPP_WITH_DIR = 204;
 
@@ -40,7 +40,7 @@ namespace PcapDotNet.Core
         public PcapDataLink(string name)
         {
             var value = Interop.Pcap.pcap_datalink_name_to_val(name);
-            if(value != -1)
+            if (value != -1)
             {
                 _value = value;
                 return;
@@ -102,13 +102,13 @@ namespace PcapDotNet.Core
                 if (!string.IsNullOrEmpty(name))
                     return name;
 
-                switch(Value)
+                switch (Value)
                 {
-                case DLT_PPP_WITH_DIR:
-                    return "PPP_WITH_DIR";
+                    case DLT_PPP_WITH_DIR:
+                        return "PPP_WITH_DIR";
 
-                default:
-                    throw new InvalidOperationException("PcapDataLink " + Value.ToString(CultureInfo.InvariantCulture) + " has no name");
+                    default:
+                        throw new InvalidOperationException("PcapDataLink " + Value.ToString(CultureInfo.InvariantCulture) + " has no name");
                 }
             }
         }
@@ -142,17 +142,36 @@ namespace PcapDotNet.Core
 
         public bool Equals(PcapDataLink other)
         {
-            return other != null && other._value == _value;
+            return Equals(this, other);
         }
 
         public override bool Equals(object obj)
         {
-            return Equals(obj as PcapDataLink);            
+            if (!(obj is PcapDataLink link))
+                return false;
+
+            return Equals(link);
         }
 
         public override int GetHashCode()
         {
             return _value.GetHashCode();
+        }
+
+        public static bool operator ==(PcapDataLink dataLink1, PcapDataLink dataLink2)
+        {
+            return Equals(dataLink1, dataLink2);
+        }
+
+        public static bool operator !=(PcapDataLink dataLink1, PcapDataLink dataLink2)
+        {
+            return !Equals(dataLink1, dataLink2);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool Equals(PcapDataLink dataLink1, PcapDataLink dataLink2)
+        {
+            return dataLink1._value == dataLink2._value;
         }
 
         private static int KindToValue(DataLinkKind kind)

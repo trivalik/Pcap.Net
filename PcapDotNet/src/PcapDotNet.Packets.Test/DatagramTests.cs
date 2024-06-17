@@ -3,50 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.Packets.Transport;
+using Xunit;
 
 namespace PcapDotNet.Packets.Test
 {
     /// <summary>
     /// Summary description for DatagramTests.
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class DatagramTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void RandomDatagramTest()
         {
             Random random = new Random();
@@ -55,31 +26,31 @@ namespace PcapDotNet.Packets.Test
             {
                 Datagram datagram = random.NextDatagram(random.Next(1024));
 
-                Assert.AreEqual(datagram, new Datagram(new List<byte>(datagram).ToArray()));
-                Assert.AreEqual(datagram.GetHashCode(), new Datagram(new List<byte>(datagram).ToArray()).GetHashCode());
+                Assert.Equal(datagram, new Datagram(new List<byte>(datagram).ToArray()));
+                Assert.Equal(datagram.GetHashCode(), new Datagram(new List<byte>(datagram).ToArray()).GetHashCode());
 
-                Assert.AreNotEqual(datagram, random.NextDatagram(random.Next(10 * 1024)));
-                Assert.AreNotEqual(datagram.GetHashCode(), random.NextDatagram(random.Next(10 * 1024)).GetHashCode());
+                Assert.NotEqual(datagram, random.NextDatagram(random.Next(10 * 1024)));
+                Assert.NotEqual(datagram.GetHashCode(), random.NextDatagram(random.Next(10 * 1024)).GetHashCode());
 
                 if (datagram.Length != 0)
                 {
-                    Assert.AreNotEqual(datagram, Datagram.Empty);
-                    Assert.AreNotEqual(datagram, random.NextDatagram(datagram.Length));
+                    Assert.NotEqual(datagram, Datagram.Empty);
+                    Assert.NotEqual(datagram, random.NextDatagram(datagram.Length));
                     if (datagram.Length > 2)
-                        Assert.AreNotEqual(datagram.GetHashCode(), random.NextDatagram(datagram.Length).GetHashCode());
+                        Assert.NotEqual(datagram.GetHashCode(), random.NextDatagram(datagram.Length).GetHashCode());
                 }
                 else
-                    Assert.AreEqual(datagram, Datagram.Empty);
+                    Assert.Equal(datagram, Datagram.Empty);
 
                 // Check Enumerable
                 IEnumerable enumerable = datagram;
                 int offset = 0;
                 foreach (byte b in enumerable)
-                    Assert.AreEqual(datagram[offset++], b);
+                    Assert.Equal(datagram[offset++], b);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void DatagramExtractLayerTest()
         {
             PayloadLayer payloadLayer = new PayloadLayer
@@ -91,17 +62,17 @@ namespace PcapDotNet.Packets.Test
                                                                   {
                                                                       EtherType = EthernetType.IpV4
                                                                   }, payloadLayer);
-            Assert.AreEqual(payloadLayer, packet.Ethernet.Payload.ExtractLayer());
+            Assert.Equal(payloadLayer, packet.Ethernet.Payload.ExtractLayer());
         }
 
-        [TestMethod]
+        [Fact]
         public void DatagramCalculateIsValidTest()
         {
             Datagram data = new Datagram(new byte[]{1,2,3});
-            Assert.IsTrue(data.IsValid);
+            Assert.True(data.IsValid);
         }
 
-        [TestMethod]
+        [Fact]
         public void DatagramToMemoryStreamTest()
         {
             Datagram tcpPayload = new Datagram(new byte[] {1, 2, 3});
@@ -112,25 +83,23 @@ namespace PcapDotNet.Packets.Test
                                                 new PayloadLayer {Data = tcpPayload});
             using (MemoryStream stream = packet.Ethernet.IpV4.Tcp.Payload.ToMemoryStream())
             {
-                Assert.IsTrue(stream.CanRead, "CanRead");
-                Assert.IsTrue(stream.CanSeek, "CanSeek");
-                Assert.IsFalse(stream.CanTimeout, "CanTimeout");
-                Assert.IsFalse(stream.CanWrite, "CanWrite");
-                Assert.AreEqual(tcpPayload.Length, stream.Length);
+                Assert.True(stream.CanRead, "CanRead");
+                Assert.True(stream.CanSeek, "CanSeek");
+                Assert.False(stream.CanTimeout, "CanTimeout");
+                Assert.False(stream.CanWrite, "CanWrite");
+                Assert.Equal(tcpPayload.Length, stream.Length);
                 for (int i = 0; i != tcpPayload.Length; ++i)
                 {
-                    Assert.AreEqual(i, stream.Position);
-                    Assert.AreEqual(i + 1, stream.ReadByte());
+                    Assert.Equal(i, stream.Position);
+                    Assert.Equal(i + 1, stream.ReadByte());
                 }
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void DatagramConstructorNullBufferTest()
         {
-            Assert.IsNotNull(new Datagram(null));
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => new Datagram(null));
         }
     }
 }

@@ -2,10 +2,10 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Igmp;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -139,7 +139,7 @@ namespace PcapDotNet.Core.Test
                 case "igmp.mtrace.resp_ttl":
                 case "igmp.mtrace.q_id":
                     // todo support IGMP traceroute http://www.ietf.org/proceedings/48/I-D/idmr-traceroute-ipm-07.txt.
-                    Assert.IsTrue(new[] { IgmpMessageType.MulticastTraceRouteResponse, IgmpMessageType.MulticastTraceRoute }.Contains(igmpDatagram.MessageType));
+                    Assert.Contains(igmpDatagram.MessageType, new[] { IgmpMessageType.MulticastTraceRouteResponse, IgmpMessageType.MulticastTraceRoute });
                     break;
 
                 default:

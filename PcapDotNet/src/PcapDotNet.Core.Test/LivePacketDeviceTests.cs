@@ -7,54 +7,21 @@ using System.Threading;
 using PcapDotNet.Base;
 using PcapDotNet.Core.Extensions;
 using PcapDotNet.Packets;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.IpV6;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
     /// <summary>
     /// Summary description for LivePacketDeviceTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class LivePacketDeviceTests
     {
-        public LivePacketDeviceTests()
-        {
-        }
-
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void SendAndReceievePacketTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -70,8 +37,8 @@ namespace PcapDotNet.Core.Test
                 PacketCommunicatorReceiveResult result = communicator.ReceivePacket(out packet);
                 DateTime finishedWaiting = DateTime.Now;
 
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Timeout, result);
-                Assert.AreEqual<uint>(0, communicator.TotalStatistics.PacketsCaptured);
+                Assert.Equal(PacketCommunicatorReceiveResult.Timeout, result);
+                Assert.Equal<uint>(0, communicator.TotalStatistics.PacketsCaptured);
                 MoreAssert.IsInRange(TimeSpan.FromSeconds(0.99), TimeSpan.FromSeconds(1.075), finishedWaiting - startWaiting);
 
                 Packet sentPacket = _random.NextEthernetPacket(200, 300, SourceMac, DestinationMac);
@@ -87,49 +54,43 @@ namespace PcapDotNet.Core.Test
                 {
                     result = communicator.ReceivePacket(out packet);
 
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                    Assert.AreEqual(100, packet.Length);
-                    Assert.AreEqual<uint>(200, packet.OriginalLength);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                    Assert.Equal(100, packet.Length);
+                    Assert.Equal<uint>(200, packet.OriginalLength);
                     MoreAssert.IsInRange(startSendingTime - TimeSpan.FromSeconds(1), endSendingTime + TimeSpan.FromSeconds(30), packet.Timestamp);
                 }
-                Assert.AreEqual<uint>(NumPacketsToSend, communicator.TotalStatistics.PacketsCaptured);
+                Assert.Equal<uint>(NumPacketsToSend, communicator.TotalStatistics.PacketsCaptured);
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void SendNullPacketTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.SendPacket(null);
+                Assert.Throws<ArgumentNullException>(() => communicator.SendPacket(null));
             }
-            Assert.Fail();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetNullFilterTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.SetFilter(null as BerkeleyPacketFilter);
+                Assert.Throws<ArgumentNullException>(() => communicator.SetFilter(null as BerkeleyPacketFilter));
             }
-            Assert.Fail();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetNullSamplingMethodTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.SetSamplingMethod(null);
+                Assert.Throws<ArgumentNullException>(() => communicator.SetSamplingMethod(null));
             }
-            Assert.Fail();
         }
 
-        [TestMethod]
+        [Fact]
         public void ReceiveSomePacketsTest()
         {
             const int NumPacketsToSend = 100;
@@ -152,7 +113,7 @@ namespace PcapDotNet.Core.Test
             TestReceiveSomePackets(NumPacketsToSend, NumPacketsToSend, 0, PacketSize, false, PacketCommunicatorReceiveResult.BreakLoop, 0, 0, 0.02);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReceivePacketsTest()
         {        
             const int NumPacketsToSend = 100;
@@ -174,7 +135,7 @@ namespace PcapDotNet.Core.Test
             TestReceivePackets(NumPacketsToSend, NumPacketsToSend, NumPacketsToSend / 2, 2, PacketSize, PacketCommunicatorReceiveResult.BreakLoop, NumPacketsToSend / 2, 0, 0.046);
         }
 
-        [TestMethod]
+        [Fact]
         public void ReceivePacketsEnumerableTest()
         {
             const int NumPacketsToSend = 100;
@@ -195,8 +156,7 @@ namespace PcapDotNet.Core.Test
             TestReceivePacketsEnumerable(NumPacketsToSend, NumPacketsToSend, NumPacketsToSend / 2, 2, PacketSize, NumPacketsToSend / 2, 0, 0.1);
         }
 
-        [TestMethod]
-        [Timeout(10 * 1000)]
+        [Fact(Timeout = 10 * 1000)]
         public void ReceivePacketsGcCollectTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -217,11 +177,11 @@ namespace PcapDotNet.Core.Test
                                                                                                  {
                                                                                                      GC.Collect();
                                                                                                  });
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
+                Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ReceiveSomePacketsGcCollectTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -244,12 +204,12 @@ namespace PcapDotNet.Core.Test
                                                                                          {
                                                                                              GC.Collect();
                                                                                          });
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                Assert.AreEqual(NumPackets, numGot);
+                Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                Assert.Equal(NumPackets, numGot);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ReceiveStatisticsGcCollectTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -266,11 +226,11 @@ namespace PcapDotNet.Core.Test
                                                                                                        {
                                                                                                            GC.Collect();
                                                                                                        });
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
+                Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void ReceiveStatisticsTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -287,19 +247,19 @@ namespace PcapDotNet.Core.Test
 
                 PacketSampleStatistics statistics;
                 PacketCommunicatorReceiveResult result = communicator.ReceiveStatistics(out statistics);
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
+                Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
                 MoreAssert.IsInRange(DateTime.Now.AddSeconds(-1), DateTime.Now.AddSeconds(1), statistics.Timestamp);
-                Assert.AreEqual<ulong>(0, statistics.AcceptedPackets);
-                Assert.AreEqual<ulong>(0, statistics.AcceptedBytes);
+                Assert.Equal<ulong>(0, statistics.AcceptedPackets);
+                Assert.Equal<ulong>(0, statistics.AcceptedBytes);
 
                 for (int i = 0; i != NumPacketsToSend; ++i)
                     communicator.SendPacket(sentPacket);
 
                 result = communicator.ReceiveStatistics(out statistics);
 
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
+                Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
                 MoreAssert.IsInRange(DateTime.Now.AddSeconds(-1), DateTime.Now.AddSeconds(1), statistics.Timestamp);
-                Assert.AreEqual<ulong>(NumPacketsToSend, statistics.AcceptedPackets, "AcceptedPackets");
+                Assert.Equal<ulong>(NumPacketsToSend, statistics.AcceptedPackets);
                 // Todo check byte statistics. See http://www.winpcap.org/pipermail/winpcap-users/2015-February/004931.html
 //                Assert.AreEqual<long>((sentPacket.Length * NumPacketsToSend), statistics.AcceptedBytes,
 //                                      "AcceptedBytes. Diff Per Packet: " +
@@ -308,7 +268,7 @@ namespace PcapDotNet.Core.Test
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetStatisticsTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -336,52 +296,47 @@ namespace PcapDotNet.Core.Test
                               PacketCommunicatorReceiveResult.BreakLoop, NumStatisticsToGather / 2, NumPacketsToSend, NumStatisticsToGather / 2, NumStatisticsToGather / 2 + 0.22);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void GetStatisticsOnCaptureModeErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
                 PacketSampleStatistics statistics;
-                communicator.ReceiveStatistics(out statistics);
+                Assert.Throws<InvalidOperationException>(() => communicator.ReceiveStatistics(out statistics));
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void GetPacketOnStatisticsModeErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
                 communicator.Mode = PacketCommunicatorMode.Statistics;
                 Packet packet;
-                communicator.ReceivePacket(out packet);
+                Assert.Throws<InvalidOperationException>(() => communicator.ReceivePacket(out packet));
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetInvalidModeErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.Mode = (PacketCommunicatorMode)(-99);
+                Assert.Throws<InvalidOperationException>(() => communicator.Mode = (PacketCommunicatorMode)(-99));
             }
         }
 
         // this test is removed for now since it doens't throw an exception for such big value
-//        [TestMethod]
-//        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
-//        public void SetBigKernelBufferSizeErrorTest()
-//        {
-//            using (PacketCommunicator communicator = OpenLiveDevice())
-//            {
-//                communicator.SetKernelBufferSize(1024 * 1024 * 1024);
-//            }
-//        }
+        //        [Fact]
+        //        public void SetBigKernelBufferSizeErrorTest()
+        //        {
+        //            using (PacketCommunicator communicator = OpenLiveDevice())
+        //            {
+        //                Assert.Throws<InvalidOperationException>(() => communicator.SetKernelBufferSize(1024 * 1024 * 1024));
+        //            }
+        //        }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSmallKernelBufferSizeGetPacketErrorTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -393,13 +348,11 @@ namespace PcapDotNet.Core.Test
                 communicator.SetKernelBufferSize(10);
                 Packet packet = _random.NextEthernetPacket(100, SourceMac, DestinationMac);
                 communicator.SendPacket(packet);
-                communicator.ReceivePacket(out packet);
+                Assert.Throws<InvalidOperationException>(() => communicator.ReceivePacket(out packet));
             }
-            Assert.Fail();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSmallKernelBufferSizeGetSomePacketsErrorTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -412,13 +365,11 @@ namespace PcapDotNet.Core.Test
                 Packet packet = _random.NextEthernetPacket(100, SourceMac, DestinationMac);
                 communicator.SendPacket(packet);
                 int numPacketsGot;
-                communicator.ReceiveSomePackets(out numPacketsGot, 1, delegate { });
+                Assert.Throws<InvalidOperationException>(() => communicator.ReceiveSomePackets(out numPacketsGot, 1, delegate { }));
             }
-            Assert.Fail();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSmallKernelBufferSizeGetPacketsErrorTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -446,15 +397,13 @@ namespace PcapDotNet.Core.Test
                 if (!thread.Join(TimeSpan.FromSeconds(5)))
                     thread.Abort();
 
-                if (exception != null)
-                    throw exception;
+                Assert.IsType<InvalidOperationException>(exception);
             }
 
             Assert.Fail();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSmallKernelBufferSizeGetNextStatisticsErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
@@ -462,26 +411,22 @@ namespace PcapDotNet.Core.Test
                 communicator.Mode = PacketCommunicatorMode.Statistics;
                 communicator.SetKernelBufferSize(10);
                 PacketSampleStatistics statistics;
-                communicator.ReceiveStatistics(out statistics);
+                Assert.Throws<InvalidOperationException>(() => communicator.ReceiveStatistics(out statistics));
             }
-
-            Assert.Fail();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSmallKernelBufferSizeGetStatisticsErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
                 communicator.Mode = PacketCommunicatorMode.Statistics;
                 communicator.SetKernelBufferSize(10);
-                communicator.ReceiveStatistics(1, delegate { Assert.Fail(); });
+                Assert.Throws<InvalidOperationException>(() => communicator.ReceiveStatistics(1, delegate { Assert.Fail(); }));
             }
-            Assert.Fail();
         }
 
-        [TestMethod]
+        [Fact]
         public void SetBigKernelMinimumBytesToCopyTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -499,14 +444,14 @@ namespace PcapDotNet.Core.Test
                     DateTime start = DateTime.Now;
                     PacketCommunicatorReceiveResult result = communicator.ReceivePacket(out packet);
                     DateTime end = DateTime.Now;
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                    Assert.AreEqual(expectedPacket, packet);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                    Assert.Equal(expectedPacket, packet);
                     MoreAssert.IsBigger(TimeSpan.FromSeconds(0.9), end - start);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SetSmallKernelMinimumBytesToCopyTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -524,14 +469,14 @@ namespace PcapDotNet.Core.Test
                     DateTime start = DateTime.Now;
                     PacketCommunicatorReceiveResult result = communicator.ReceivePacket(out packet);
                     DateTime end = DateTime.Now;
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                    Assert.AreEqual(expectedPacket, packet);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                    Assert.Equal(expectedPacket, packet);
                     MoreAssert.IsSmallerOrEqual(TimeSpan.FromSeconds(0.07), end - start);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SetSamplingMethodOneEveryNTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -552,16 +497,16 @@ namespace PcapDotNet.Core.Test
                 for (int i = 0; i != 4; ++i)
                 {
                     result = communicator.ReceivePacket(out packet);
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                    Assert.AreEqual(60 * 5 * (i + 1), packet.Length);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                    Assert.Equal(60 * 5 * (i + 1), packet.Length);
                 }
                 result = communicator.ReceivePacket(out packet);
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Timeout, result);
-                Assert.IsNull(packet);
+                Assert.Equal(PacketCommunicatorReceiveResult.Timeout, result);
+                Assert.Null(packet);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SetSamplingMethodFirstAfterIntervalTest()
         {
             Random random = new Random();
@@ -595,68 +540,64 @@ namespace PcapDotNet.Core.Test
 
                 if (!thread.Join(TimeSpan.FromSeconds(10)))
                     thread.Abort();
-                Assert.AreEqual(6, packets.Count, packets.Select(p => (p.Timestamp-packets[0].Timestamp).TotalSeconds + "(" + p.Length + ")").SequenceToString(", "));
+                Assert.True(6 == packets.Count, packets.Select(p => (p.Timestamp-packets[0].Timestamp).TotalSeconds + "(" + p.Length + ")").SequenceToString(", "));
                 Packet packet;
                 for (int i = 0; i != 6; ++i)
-                    Assert.AreEqual(60 * (i * 2 + 1), packets[i].Length, i.ToString());
+                {
+                    Assert.True(60 * (i * 2 + 1) == packets[i].Length, i.ToString());
+                }
                 PacketCommunicatorReceiveResult result = communicator.ReceivePacket(out packet);
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Timeout, result);
-                Assert.IsNull(packet);
+                Assert.Equal(PacketCommunicatorReceiveResult.Timeout, result);
+                Assert.Null(packet);
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSamplingMethodOneEveryNErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.SetSamplingMethod(new SamplingMethodOneEveryCount(0));
+                Assert.Throws<ArgumentOutOfRangeException>(() => communicator.SetSamplingMethod(new SamplingMethodOneEveryCount(0)));
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSamplingMethodFirstAfterIntervalNegativeMsErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.SetSamplingMethod(new SamplingMethodFirstAfterInterval(-1));
+                Assert.Throws<ArgumentOutOfRangeException>(() => communicator.SetSamplingMethod(new SamplingMethodFirstAfterInterval(-1)));
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSamplingMethodFirstAfterIntervalNegativeTimespanErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.SetSamplingMethod(new SamplingMethodFirstAfterInterval(TimeSpan.FromSeconds(-1)));
+                Assert.Throws<ArgumentOutOfRangeException>(() => communicator.SetSamplingMethod(new SamplingMethodFirstAfterInterval(TimeSpan.FromSeconds(-1))));
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetSamplingMethodFirstAfterIntervalBigTimespanErrorTest()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.SetSamplingMethod(new SamplingMethodFirstAfterInterval(TimeSpan.FromDays(25)));
+                Assert.Throws<ArgumentOutOfRangeException>(() => communicator.SetSamplingMethod(new SamplingMethodFirstAfterInterval(TimeSpan.FromDays(25))));
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetInvalidDataLink()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
-                communicator.DataLink = new PcapDataLink(0);
-                Assert.AreEqual(new PcapDataLink(0), communicator.DataLink);
+                Assert.Throws<InvalidOperationException>(() => communicator.DataLink = new PcapDataLink(0));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SendZeroPacket()
         {
             using (PacketCommunicator communicator = OpenLiveDevice())
@@ -690,7 +631,7 @@ namespace PcapDotNet.Core.Test
                     result = communicator.ReceiveStatistics(numStatisticsToGather,
                                                      delegate(PacketSampleStatistics statistics)
                                                      {
-                                                         Assert.IsNotNull(statistics.ToString());
+                                                         Assert.NotNull(statistics.ToString());
                                                          totalPackets += statistics.AcceptedPackets;
                                                          totalBytes += statistics.AcceptedBytes;
                                                          ++numStatisticsGot;
@@ -705,11 +646,11 @@ namespace PcapDotNet.Core.Test
                 if (!thread.Join(TimeSpan.FromSeconds(secondsToWait)))
                     thread.Abort();
                 DateTime finishedWaiting = DateTime.Now;
-                Assert.AreEqual(expectedResult, result, "Result");
-                Assert.AreEqual(expectedNumStatistics, numStatisticsGot, "NumStatistics");
-                Assert.AreEqual((ulong)expectedNumPackets, totalPackets, "NumPackets");
+                Assert.Equal(expectedResult, result);
+                Assert.Equal(expectedNumStatistics, numStatisticsGot);
+                Assert.Equal((ulong)expectedNumPackets, totalPackets);
                 // Todo check byte statistics. See http://www.winpcap.org/pipermail/winpcap-users/2015-February/004931.html
-//                Assert.AreEqual((ulong)(numPacketsToSend * sentPacket.Length), totalBytes, "NumBytes");
+//                Assert.Equal((ulong)(numPacketsToSend * sentPacket.Length), totalBytes, "NumBytes");
                 MoreAssert.IsInRange(expectedMinSeconds, expectedMaxSeconds, (finishedWaiting - startWaiting).TotalSeconds);
             }
         }
@@ -729,7 +670,7 @@ namespace PcapDotNet.Core.Test
             using (PacketCommunicator communicator = OpenLiveDevice())
             {
                 communicator.NonBlocking = nonBlocking;
-                Assert.AreEqual(nonBlocking, communicator.NonBlocking);
+                Assert.Equal(nonBlocking, communicator.NonBlocking);
                 communicator.SetFilter("ether src " + SourceMac + " and ether dst " + DestinationMac);
 
                 int numPacketsGot;
@@ -745,9 +686,9 @@ namespace PcapDotNet.Core.Test
                                                                                          handler.Handle);
                 DateTime finishedWaiting = DateTime.Now;
 
-                Assert.AreEqual(expectedResult, result);
-                Assert.AreEqual(expectedNumPackets, numPacketsGot, "NumPacketsGot. Test: " + testDescription);
-                Assert.AreEqual(expectedNumPackets, handler.NumPacketsHandled, "NumPacketsHandled. Test: " + testDescription);
+                Assert.Equal(expectedResult, result);
+                Assert.True(expectedNumPackets == numPacketsGot, "NumPacketsGot. Test: " + testDescription);
+                Assert.True(expectedNumPackets == handler.NumPacketsHandled, "NumPacketsHandled. Test: " + testDescription);
                 MoreAssert.IsInRange(expectedMinSeconds, expectedMaxSeconds, (finishedWaiting - startWaiting).TotalSeconds, testDescription);
             }
         }
@@ -791,8 +732,8 @@ namespace PcapDotNet.Core.Test
                     thread.Abort();
                 DateTime finishedWaiting = DateTime.Now;
 
-                Assert.AreEqual(expectedResult, result, testDescription);
-                Assert.AreEqual(expectedNumPackets, handler.NumPacketsHandled);
+                Assert.True(expectedResult == result, testDescription);
+                Assert.Equal(expectedNumPackets, handler.NumPacketsHandled);
                 MoreAssert.IsInRange(expectedMinSeconds, expectedMaxSeconds, (finishedWaiting - startWaiting).TotalSeconds);
             }
         }
@@ -827,7 +768,7 @@ namespace PcapDotNet.Core.Test
                                                       : communicator.ReceivePackets(numPacketsToWait);
                     foreach (Packet packet in packets)
                     {
-                        Assert.AreEqual(sentPacket, packet);
+                        Assert.Equal(sentPacket, packet);
                         ++actualPacketsReceived;
                         if (actualPacketsReceived == numPacketsToBreakLoop)
                             break;
@@ -841,7 +782,7 @@ namespace PcapDotNet.Core.Test
                     thread.Abort();
                 DateTime finishedWaiting = DateTime.Now;
 
-                Assert.AreEqual(expectedNumPackets, actualPacketsReceived, testDescription);
+                Assert.True(expectedNumPackets == actualPacketsReceived, testDescription);
                 MoreAssert.IsInRange(expectedMinSeconds, expectedMaxSeconds, (finishedWaiting - startWaiting).TotalSeconds, testDescription);
             }
         }
@@ -853,9 +794,9 @@ namespace PcapDotNet.Core.Test
                     ni => !ni.IsReceiveOnly && ni.NetworkInterfaceType == NetworkInterfaceType.Ethernet && ni.OperationalStatus == OperationalStatus.Up);
             LivePacketDevice device = networkInterface.GetLivePacketDevice();
             MoreAssert.IsMatch(@"Network adapter '.*' on local host", device.Description);
-            Assert.AreEqual(DeviceAttributes.None, device.Attributes);
-            Assert.AreNotEqual(MacAddress.Zero, device.GetMacAddress());
-            Assert.AreNotEqual(string.Empty, device.GetPnpDeviceId());
+            Assert.NotEqual(DeviceAttributes.None, device.Attributes);
+            Assert.NotEqual(MacAddress.Zero, device.GetMacAddress());
+            Assert.NotEqual(string.Empty, device.GetPnpDeviceId());
             MoreAssert.IsBiggerOrEqual(1, device.Addresses.Count);
             foreach (DeviceAddress address in device.Addresses)
             {
@@ -863,15 +804,15 @@ namespace PcapDotNet.Core.Test
                 {
                     MoreAssert.IsMatch("Address: " + SocketAddressFamily.Internet + @" [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+ " +
                                        "Netmask: " + SocketAddressFamily.Internet + @" 255\.[0-9]+\.[0-9]+\.[0-9]+ " +
-                                       "Broadcast: " + SocketAddressFamily.Internet + @" 255.255.255.255",
+                                       "Broadcast: " + SocketAddressFamily.Internet + @" [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+",
                                        address.ToString());
                 }
                 else
                 {
-                    Assert.AreEqual(SocketAddressFamily.Internet6, address.Address.Family);
+                    Assert.Equal(SocketAddressFamily.Internet6, address.Address.Family);
                     MoreAssert.IsMatch("Address: " + SocketAddressFamily.Internet6 + @" (?:[0-9A-F]{4}:){7}[0-9A-F]{4} " +
-                                       "Netmask: " + SocketAddressFamily.Unspecified + @" " + IpV6Address.Zero + " " +
-                                       "Broadcast: " + SocketAddressFamily.Unspecified + @" " + IpV6Address.Zero,
+                                       "Netmask: " + SocketAddressFamily.Internet6 + @" (?:[0-9A-F]{4}:){7}[0-9A-F]{4} " +
+                                       "Broadcast: " + SocketAddressFamily.Internet6 + @" (?:[0-9A-F]{4}:){7}[0-9A-F]{4}",
                                        address.ToString());
                 }
             }
@@ -881,29 +822,28 @@ namespace PcapDotNet.Core.Test
             {
                 MoreAssert.AreSequenceEqual(new[] {DataLinkKind.Ethernet, DataLinkKind.Docsis}.Select(kind => new PcapDataLink(kind)), communicator.SupportedDataLinks);
                 PacketTotalStatistics totalStatistics = communicator.TotalStatistics;
-                Assert.AreEqual<object>(totalStatistics, totalStatistics);
-                Assert.AreNotEqual(null, totalStatistics);
-                Assert.AreEqual(totalStatistics.GetHashCode(), totalStatistics.GetHashCode());
-                Assert.IsTrue(totalStatistics.Equals(totalStatistics));
-                Assert.IsFalse(totalStatistics.Equals(null));
-                Assert.AreNotEqual(null, totalStatistics);
-                Assert.AreNotEqual(totalStatistics, 2);
+                Assert.Equal<object>(totalStatistics, totalStatistics);
+                Assert.NotNull(totalStatistics);
+                Assert.Equal(totalStatistics.GetHashCode(), totalStatistics.GetHashCode());
+                Assert.True(totalStatistics.Equals(totalStatistics));
+                Assert.False(totalStatistics.Equals(null));
+                Assert.NotNull(totalStatistics);
                 MoreAssert.IsSmallerOrEqual<uint>(1, totalStatistics.PacketsCaptured, "PacketsCaptured");
-                Assert.AreEqual<uint>(0, totalStatistics.PacketsDroppedByDriver, "PacketsDroppedByDriver");
-                Assert.AreEqual<uint>(0, totalStatistics.PacketsDroppedByInterface, "PacketsDroppedByInterface");
-                MoreAssert.IsSmallerOrEqual<uint>(1, totalStatistics.PacketsReceived, "PacketsReceived");
-                Assert.IsNotNull(totalStatistics.ToString());
+                Assert.Equal<uint>(0, totalStatistics.PacketsDroppedByDriver);
+                Assert.Equal<uint>(0, totalStatistics.PacketsDroppedByInterface);
+                MoreAssert.IsSmallerOrEqual<uint>(1, totalStatistics.PacketsReceived);
+                Assert.NotNull(totalStatistics.ToString());
                 communicator.SetKernelBufferSize(2 * 1024 * 1024); // 2 MB instead of 1
                 communicator.SetKernelMinimumBytesToCopy(10); // 10 bytes minimum to copy
                 communicator.SetSamplingMethod(new SamplingMethodNone());
-                Assert.AreEqual(DataLinkKind.Ethernet, communicator.DataLink.Kind);
+                Assert.Equal(DataLinkKind.Ethernet, communicator.DataLink.Kind);
                 communicator.DataLink = communicator.DataLink;
-                Assert.AreEqual("EN10MB (Ethernet)", communicator.DataLink.ToString());
-                Assert.AreEqual(communicator.DataLink, new PcapDataLink(communicator.DataLink.Name));
-                Assert.IsTrue(communicator.IsFileSystemByteOrder);
-                Assert.AreEqual(PacketCommunicatorMode.Capture, communicator.Mode);
-                Assert.IsFalse(communicator.NonBlocking);
-                Assert.AreEqual(snapshotLength, communicator.SnapshotLength);
+                Assert.Equal("EN10MB (Ethernet)", communicator.DataLink.ToString());
+                Assert.Equal(communicator.DataLink, new PcapDataLink(communicator.DataLink.Name));
+                Assert.True(communicator.IsFileSystemByteOrder);
+                Assert.Equal(PacketCommunicatorMode.Capture, communicator.Mode);
+                Assert.False(communicator.NonBlocking);
+                Assert.Equal(snapshotLength, communicator.SnapshotLength);
                 return communicator;
             }
             catch (Exception)

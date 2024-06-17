@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.IpV6;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -33,7 +33,7 @@ namespace PcapDotNet.Core.Test
                     ++_currentExtensionHeaderIndex;
                     if (_currentExtensionHeaderIndex >= ipV6Datagram.ExtensionHeaders.Headers.Count)
                     {
-                        Assert.IsFalse(ipV6Datagram.ExtensionHeaders.IsValid);
+                        Assert.False(ipV6Datagram.ExtensionHeaders.IsValid);
                         return false;
                     }
                 } while (ipV6Datagram.ExtensionHeaders[_currentExtensionHeaderIndex].Protocol != IpV4Protocol.AuthenticationHeader);
@@ -54,7 +54,7 @@ namespace PcapDotNet.Core.Test
                             break;
 
                         case "Length":
-                            Assert.AreEqual(string.Format(" {0}", authenticationHeader.Length), headerFieldShowValue);
+                            Assert.Equal(string.Format(" {0}", authenticationHeader.Length), headerFieldShowValue);
                             break;
 
                         default:

@@ -7,7 +7,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Dns;
 using PcapDotNet.Packets.Ethernet;
@@ -19,13 +18,13 @@ using PcapDotNet.Packets.IpV6;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.Packets.Transport;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
     /// <summary>
     /// Summary description for WiresharkCompareTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class WiresharkCompareTests
     {
@@ -39,35 +38,7 @@ namespace PcapDotNet.Core.Test
 
         private const int RetryNumber = -1;
 
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void ComparePacketsToWiresharkTest()
         {
 #pragma warning disable 162 // This code is unreachable on purpose
@@ -94,7 +65,7 @@ namespace PcapDotNet.Core.Test
                     }
                     catch (Exception exception)
                     {
-                        throw new AssertFailedException("Failed creating packets. " + exception, exception);
+                        throw new Exception("Failed creating packets. " + exception, exception);
                     }
 
                     try
@@ -104,17 +75,17 @@ namespace PcapDotNet.Core.Test
                     }
                     catch (Exception exception)
                     {
-                        throw new AssertFailedException("Failed comparing packets. " + exception, exception);
+                        throw new Exception("Failed comparing packets. " + exception, exception);
                     }
                 }
             }
             catch (Exception exception)
             {
-                throw new AssertFailedException("Failed test with seed " + seed + ". " + exception, exception);
+                throw new Exception("Failed test with seed " + seed + ". " + exception, exception);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareTimestampPacketsToWiresharkTest()
         {
             const long Ticks = 633737178954260865;
@@ -132,7 +103,7 @@ namespace PcapDotNet.Core.Test
 //            ComparePacketsToWireshark(new[] { packet });
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareEthernetTrailerToWiresharkTest()
         {
             const string PacketString = "001120cf0900000c29566988080045000029627b00008006de80c0a8640bc0a81477a42cc03bdd3c481c6cfcd72050104278a5a90000000e01bf0101";
@@ -140,7 +111,7 @@ namespace PcapDotNet.Core.Test
             ComparePacketsToWireshark(packet);
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareVLanTaggedFrameTrailerToWiresharkTest()
         {
             const string PacketString =
@@ -149,7 +120,7 @@ namespace PcapDotNet.Core.Test
             ComparePacketsToWireshark(packet);
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareEthernetFcsToWiresharkTest()
         {
             Packet packet = PacketBuilder.Build(DateTime.Now,
@@ -165,7 +136,7 @@ namespace PcapDotNet.Core.Test
             ComparePacketsToWireshark(packet);
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareHInvalidHttpRequestUriToWiresharkTest()
         {
             Packet packet = Packet.FromHexadecimalString(
@@ -180,7 +151,7 @@ namespace PcapDotNet.Core.Test
             ComparePacketsToWireshark(packet);
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareWiresharkSupportedDNSLocPacketTest()
         {
             Packet packet = Packet.FromHexadecimalString(
@@ -190,7 +161,7 @@ namespace PcapDotNet.Core.Test
             ComparePacketsToWireshark(packet);
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareIpV4DataLinkToWiresharkTest()
         {
             ComparePacketsToWireshark(
@@ -210,7 +181,7 @@ namespace PcapDotNet.Core.Test
                     DateTime.Now, DataLinkKind.IpV4));
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareLinuxSllDataLinkToWiresharkTest()
         {
             ComparePacketsToWireshark(
@@ -219,7 +190,7 @@ namespace PcapDotNet.Core.Test
                     DateTime.Now, new DataLink(DataLinkKind.LinuxSll)));
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareMdnsQueryToWiresharkTest()
         {
             ComparePacketsToWireshark(
@@ -228,7 +199,7 @@ namespace PcapDotNet.Core.Test
                     DateTime.Now, new DataLink(DataLinkKind.Ethernet)));
         }
 
-        [TestMethod]
+        [Fact]
         public void CompareTcpZeroChecksumToWiresharkTest()
         {
             ComparePacketsToWireshark(
@@ -497,13 +468,13 @@ namespace PcapDotNet.Core.Test
                                             CreateNoWindow = true
                                         };
                 Console.WriteLine("Starting process " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);
-                Assert.IsTrue(process.Start());
+                Assert.True(process.Start());
                 string output = process.StandardOutput.ReadToEnd();
                 string errorOutput = process.StandardError.ReadToEnd();
                 process.WaitForExit();
                 Console.WriteLine(errorOutput);
                 File.WriteAllText(documentFilename, output);
-                Assert.AreEqual(0, process.ExitCode);
+                Assert.Equal(0, process.ExitCode);
             }
 
             // Fix pdml file
@@ -519,7 +490,7 @@ namespace PcapDotNet.Core.Test
             }
             catch (Exception exception)
             {
-                throw new AssertFailedException("Failed comparing packets in file " + pcapFilename + ". " + exception, exception);
+                throw new Exception("Failed comparing packets in file " + pcapFilename + ". " + exception, exception);
             }
         }
 
@@ -544,7 +515,7 @@ namespace PcapDotNet.Core.Test
                 catch (Exception e)
                 {
                     failedPackets.Add(packet);
-                    failureMessage.Append(new AssertFailedException("Failed comparing packet " + i + ". " + e.Message, e) + Environment.NewLine);
+                    failureMessage.Append(new Exception("Failed comparing packet " + i + ". " + e.Message, e) + Environment.NewLine);
                 }
                 ++i;
             }
@@ -552,7 +523,7 @@ namespace PcapDotNet.Core.Test
             if (failedPackets.Any())
             {
                 PacketDumpFile.Dump(Path.GetTempPath() + "temp." + 1000 + ".pcap", failedPackets.First().DataLink.Kind, 65536, failedPackets);
-                throw new AssertFailedException("Failed comparing " + failedPackets.Count + " packets:" + Environment.NewLine + failureMessage);
+                throw new Exception("Failed comparing " + failedPackets.Count + " packets:" + Environment.NewLine + failureMessage);
             }
         }
 

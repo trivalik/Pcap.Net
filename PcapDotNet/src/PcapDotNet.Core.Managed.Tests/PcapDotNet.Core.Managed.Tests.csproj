@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PcapDotNet.Core.Managed\PcapDotNet.Core.Managed.csproj" />
+    <ProjectReference Include="..\PcapDotNet.Core\PcapDotNet.Core.csproj" />
   </ItemGroup>
 
 </Project>

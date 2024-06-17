@@ -2,15 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Ip;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.Transport;
-using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -45,7 +43,7 @@ namespace PcapDotNet.Core.Test
                     break;
 
                 case "tcp.port":
-                    Assert.IsTrue(ushort.Parse(field.Show()) == tcpDatagram.SourcePort ||
+                    Assert.True(ushort.Parse(field.Show()) == tcpDatagram.SourcePort ||
                                   ushort.Parse(field.Show()) == tcpDatagram.DestinationPort);
                     field.AssertNoFields();
                     break;
@@ -264,8 +262,8 @@ namespace PcapDotNet.Core.Test
                     continue;
                 if (currentOptionIndex >= options.Count)
                 {
-                    Assert.IsFalse(options.IsValid, "Options IsValid");
-                    Assert.IsTrue(
+                    Assert.False(options.IsValid, "Options IsValid");
+                    Assert.True(
                         field.Show().StartsWith("Unknown (0x09) ") || // Unknown in Wireshark but known (and invalid) in Pcap.Net.
                         field.Show().StartsWith("Unknown (0x0a) ") || // Unknown in Wireshark but known (and invalid) in Pcap.Net.
                         field.Show().StartsWith("Unknown (0x19) ") || // Unknown in Wireshark but known (and invalid) in Pcap.Net.
@@ -277,7 +275,7 @@ namespace PcapDotNet.Core.Test
                         field.Show().Contains(") (with too-short option length = ") ||
                         field.Show().EndsWith(" (length byte past end of options)"),
                         "Options show: " + field.Show());
-                    Assert.AreEqual(options.Count, currentOptionIndex, "Options Count");
+                    Assert.Equal(options.Count, currentOptionIndex);
                     return;
                 }
 
@@ -492,7 +490,7 @@ namespace PcapDotNet.Core.Test
                                 break;
 
                             case TcpOptionType.SelectiveNegativeAcknowledgements: // TODO: Support Selective Negative Acknowledgements.
-                                Assert.IsTrue(field.Show().StartsWith("SACK permitted"));
+                                Assert.StartsWith("SACK permitted", field.Show());
                                 field.AssertNoFields();
                                 break;
 
@@ -515,7 +513,7 @@ namespace PcapDotNet.Core.Test
 
                             case (TcpOptionType)30:
                                 // TODO: Support 30.
-                                Assert.IsTrue(field.Show().StartsWith("Multipath TCP"));
+                                Assert.StartsWith("Multipath TCP", field.Show());
                                 break;
 
                             case (TcpOptionType)78:
@@ -542,7 +540,7 @@ namespace PcapDotNet.Core.Test
                         break;
 
                     case "tcp.options.mss":
-                        Assert.AreEqual(TcpOptionType.MaximumSegmentSize, option.OptionType);
+                        Assert.Equal(TcpOptionType.MaximumSegmentSize, option.OptionType);
                         var maximumSegmentSize = (TcpOptionMaximumSegmentSize)option;
                         field.AssertShowname("Maximum segment size: " + maximumSegmentSize.MaximumSegmentSize + " bytes");
                         foreach (var subField in field.Fields())
@@ -570,20 +568,20 @@ namespace PcapDotNet.Core.Test
                         break;
 
                     case "tcp.options.echo":
-                        Assert.IsTrue(option is TcpOptionEchoReply || option is TcpOptionEcho);
+                        Assert.True(option is TcpOptionEchoReply || option is TcpOptionEcho);
                         field.AssertShowDecimal(1);
                         field.AssertNoFields();
                         break;
 
                     case "tcp.options.cc":
-                        Assert.IsTrue(option is TcpOptionConnectionCountBase);
+                        Assert.True(option is TcpOptionConnectionCountBase);
                         field.AssertShowDecimal(1);
                         field.AssertNoFields();
                         break;
 
                     case "tcp.options.scps.vector":
                         // TODO: Support 20.
-                        Assert.AreEqual((TcpOptionType)20, option.OptionType);
+                        Assert.Equal((TcpOptionType)20, option.OptionType);
 //                        if (field.Show() == "0")
 //                            ++currentOptionIndex;
                         ++currentOptionIndex;
@@ -591,19 +589,19 @@ namespace PcapDotNet.Core.Test
 
                     case "tcp.options.scps":
                         // TODO: Support 20.
-                        Assert.AreEqual((TcpOptionType)20, option.OptionType);
-                        Assert.IsFalse(field.Fields().Any());
+                        Assert.Equal((TcpOptionType)20, option.OptionType);
+                        Assert.False(field.Fields().Any());
                         break;
 
                     case "tcp.options.snack": // TODO: Support Selective Negative Acknowledgements.
                     case "tcp.options.snack.offset":
                     case "tcp.options.snack.size":
-                        Assert.AreEqual(TcpOptionType.SelectiveNegativeAcknowledgements, option.OptionType);
+                        Assert.Equal(TcpOptionType.SelectiveNegativeAcknowledgements, option.OptionType);
                         field.AssertNoFields();
                         break;
 
                     case "tcp.options.sack_perm":
-                        Assert.AreEqual(TcpOptionType.SelectiveAcknowledgmentPermitted, option.OptionType);
+                        Assert.Equal(TcpOptionType.SelectiveAcknowledgmentPermitted, option.OptionType);
                         foreach (var subField in field.Fields())
                         {
                             if (HandleOptionCommonFields(subField, option))
@@ -615,19 +613,19 @@ namespace PcapDotNet.Core.Test
                         break;
 
                     case "tcp.options.rvbd.probe":
-                        Assert.AreEqual((TcpOptionType)76, option.OptionType);
+                        Assert.Equal((TcpOptionType)76, option.OptionType);
                         // TODO: Support Riverbed.
                         ++currentOptionIndex;
                         break;
 
                     case "tcp.options.rvbd.trpy":
-                        Assert.AreEqual((TcpOptionType)78, option.OptionType);
+                        Assert.Equal((TcpOptionType)78, option.OptionType);
                         // TODO: Support Riverbed.
                         ++currentOptionIndex;
                         break;
 
                     case "tcp.options.experimental":
-                        Assert.IsTrue(new []{(TcpOptionType)253, (TcpOptionType)254}.Contains(option.OptionType));
+                        Assert.Contains(option.OptionType, new[] { (TcpOptionType)253, (TcpOptionType)254 });
                         // TODO: Support Experimental.
                         ++currentOptionIndex;
                         break;

@@ -1,52 +1,23 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.IpV6;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.Packets.Transport;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Packets.Test
 {
     /// <summary>
     /// Summary description for TcpTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class TcpTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void RandomTcpTest()
         {
             MacAddress ethernetSource = new MacAddress("00:01:02:03:04:05");
@@ -76,11 +47,11 @@ namespace PcapDotNet.Packets.Test
 
                 Packet packet = PacketBuilder.Build(DateTime.Now, ethernetLayer, ipLayer, tcpLayer, payloadLayer);
 
-                Assert.IsTrue(packet.IsValid);
+                Assert.True(packet.IsValid);
 
                 // Ethernet
                 ethernetLayer.EtherType = ethernetType;
-                Assert.AreEqual(ethernetLayer, packet.Ethernet.ExtractLayer(), "Ethernet Layer");
+                Assert.Equal(ethernetLayer, packet.Ethernet.ExtractLayer());
                 ethernetLayer.EtherType = EthernetType.None;
 
                 // Ip.
@@ -89,91 +60,88 @@ namespace PcapDotNet.Packets.Test
                     // IpV4.
                     ipV4Layer.Protocol = IpV4Protocol.Tcp;
                     ipV4Layer.HeaderChecksum = ((IpV4Layer)packet.Ethernet.IpV4.ExtractLayer()).HeaderChecksum;
-                    Assert.AreEqual(ipV4Layer, packet.Ethernet.IpV4.ExtractLayer(), "IPv4 Layer");
+                    Assert.Equal(ipV4Layer, packet.Ethernet.IpV4.ExtractLayer());
                     ipV4Layer.HeaderChecksum = null;
                 } 
                 else
                 {
-                    Assert.AreEqual(ipV6Layer, packet.Ethernet.IpV6.ExtractLayer(), "IPv6 Layer");
+                    Assert.Equal(ipV6Layer, packet.Ethernet.IpV6.ExtractLayer());
                 }
 
                 // TCP
                 tcpLayer.Checksum = packet.Ethernet.Ip.Tcp.Checksum;
-                Assert.AreEqual(tcpLayer, packet.Ethernet.Ip.Tcp.ExtractLayer(), "TCP Layer");
-                Assert.AreNotEqual(random.NextTcpLayer(), packet.Ethernet.Ip.Tcp.ExtractLayer(), "TCP Layer");
-                Assert.AreEqual(tcpLayer.GetHashCode(), packet.Ethernet.Ip.Tcp.ExtractLayer().GetHashCode(), "TCP Layer");
-                Assert.AreNotEqual(random.NextTcpLayer().GetHashCode(), packet.Ethernet.Ip.Tcp.ExtractLayer().GetHashCode(), "TCP Layer");
-                Assert.AreEqual((uint)(packet.Ethernet.Ip.Tcp.SequenceNumber + packet.Ethernet.Ip.Tcp.PayloadLength), packet.Ethernet.Ip.Tcp.NextSequenceNumber);
+                Assert.Equal(tcpLayer, packet.Ethernet.Ip.Tcp.ExtractLayer());
+                Assert.NotEqual(random.NextTcpLayer(), packet.Ethernet.Ip.Tcp.ExtractLayer());
+                Assert.Equal(tcpLayer.GetHashCode(), packet.Ethernet.Ip.Tcp.ExtractLayer().GetHashCode());
+                Assert.NotEqual(random.NextTcpLayer().GetHashCode(), packet.Ethernet.Ip.Tcp.ExtractLayer().GetHashCode());
+                Assert.Equal((uint)(packet.Ethernet.Ip.Tcp.SequenceNumber + packet.Ethernet.Ip.Tcp.PayloadLength), packet.Ethernet.Ip.Tcp.NextSequenceNumber);
                 foreach (TcpOption option in packet.Ethernet.Ip.Tcp.Options.OptionsCollection)
                 {
-                    Assert.AreEqual(option, option);
-                    Assert.AreEqual(option.GetHashCode(), option.GetHashCode());
-                    Assert.IsFalse(string.IsNullOrEmpty(option.ToString()));
-                    Assert.IsFalse(option.Equals(null));
-                    Assert.IsFalse(option.Equals(2));
+                    Assert.Equal(option, option);
+                    Assert.Equal(option.GetHashCode(), option.GetHashCode());
+                    Assert.False(string.IsNullOrEmpty(option.ToString()));
+                    Assert.False(option.Equals(null));
+                    Assert.False(option.Equals(2));
                 }
-                Assert.AreEqual(tcpLayer.Options, packet.Ethernet.Ip.Tcp.Options, "Options");
-                Assert.AreEqual((tcpLayer.ControlBits & TcpControlBits.Acknowledgment) == TcpControlBits.Acknowledgment, packet.Ethernet.Ip.Tcp.IsAcknowledgment, "IsAcknowledgment");
-                Assert.AreEqual((tcpLayer.ControlBits & TcpControlBits.CongestionWindowReduced) == TcpControlBits.CongestionWindowReduced, packet.Ethernet.Ip.Tcp.IsCongestionWindowReduced, "IsCongestionWindowReduced");
-                Assert.AreEqual((tcpLayer.ControlBits & TcpControlBits.ExplicitCongestionNotificationEcho) == TcpControlBits.ExplicitCongestionNotificationEcho, packet.Ethernet.Ip.Tcp.IsExplicitCongestionNotificationEcho, "IsExplicitCongestionNotificationEcho");
-                Assert.AreEqual((tcpLayer.ControlBits & TcpControlBits.Fin) == TcpControlBits.Fin, packet.Ethernet.Ip.Tcp.IsFin, "IsFin");
-                Assert.AreEqual((tcpLayer.ControlBits & TcpControlBits.Push) == TcpControlBits.Push, packet.Ethernet.Ip.Tcp.IsPush, "IsPush");
-                Assert.AreEqual((tcpLayer.ControlBits & TcpControlBits.Reset) == TcpControlBits.Reset, packet.Ethernet.Ip.Tcp.IsReset, "IsReset");
-                Assert.AreEqual((tcpLayer.ControlBits & TcpControlBits.Synchronize) == TcpControlBits.Synchronize, packet.Ethernet.Ip.Tcp.IsSynchronize, "IsSynchronize");
-                Assert.AreEqual((tcpLayer.ControlBits & TcpControlBits.Urgent) == TcpControlBits.Urgent, packet.Ethernet.Ip.Tcp.IsUrgent, "IsUrgent");
-                Assert.AreEqual(0, packet.Ethernet.Ip.Tcp.Reserved);
-                Assert.IsFalse(packet.Ethernet.Ip.Tcp.IsChecksumOptional, "IsChecksumOptional");
-                Assert.AreEqual(TcpDatagram.HeaderMinimumLength + tcpLayer.Options.BytesLength + payloadLayer.Length, packet.Ethernet.Ip.Tcp.Length, "Total Length");
-                Assert.IsTrue(packet.Ethernet.Ip.IsTransportChecksumCorrect, "IsTransportChecksumCorrect");
+                Assert.Equal(tcpLayer.Options, packet.Ethernet.Ip.Tcp.Options);
+                Assert.Equal((tcpLayer.ControlBits & TcpControlBits.Acknowledgment) == TcpControlBits.Acknowledgment, packet.Ethernet.Ip.Tcp.IsAcknowledgment);
+                Assert.Equal((tcpLayer.ControlBits & TcpControlBits.CongestionWindowReduced) == TcpControlBits.CongestionWindowReduced, packet.Ethernet.Ip.Tcp.IsCongestionWindowReduced);
+                Assert.Equal((tcpLayer.ControlBits & TcpControlBits.ExplicitCongestionNotificationEcho) == TcpControlBits.ExplicitCongestionNotificationEcho, packet.Ethernet.Ip.Tcp.IsExplicitCongestionNotificationEcho);
+                Assert.Equal((tcpLayer.ControlBits & TcpControlBits.Fin) == TcpControlBits.Fin, packet.Ethernet.Ip.Tcp.IsFin);
+                Assert.Equal((tcpLayer.ControlBits & TcpControlBits.Push) == TcpControlBits.Push, packet.Ethernet.Ip.Tcp.IsPush);
+                Assert.Equal((tcpLayer.ControlBits & TcpControlBits.Reset) == TcpControlBits.Reset, packet.Ethernet.Ip.Tcp.IsReset);
+                Assert.Equal((tcpLayer.ControlBits & TcpControlBits.Synchronize) == TcpControlBits.Synchronize, packet.Ethernet.Ip.Tcp.IsSynchronize);
+                Assert.Equal((tcpLayer.ControlBits & TcpControlBits.Urgent) == TcpControlBits.Urgent, packet.Ethernet.Ip.Tcp.IsUrgent);
+                Assert.Equal(0, packet.Ethernet.Ip.Tcp.Reserved);
+                Assert.False(packet.Ethernet.Ip.Tcp.IsChecksumOptional, "IsChecksumOptional");
+                Assert.Equal(TcpDatagram.HeaderMinimumLength + tcpLayer.Options.BytesLength + payloadLayer.Length, packet.Ethernet.Ip.Tcp.Length);
+                Assert.True(packet.Ethernet.Ip.IsTransportChecksumCorrect, "IsTransportChecksumCorrect");
 
-                Assert.AreEqual(payloadLayer.Data, packet.Ethernet.Ip.Tcp.Payload, "Payload");
+                Assert.Equal(payloadLayer.Data, packet.Ethernet.Ip.Tcp.Payload);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void TcpTooShort()
         {
             Packet packet = PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(), new TcpLayer());
-            Assert.IsTrue(packet.IsValid);
-            Assert.IsNotNull(packet.Ethernet.IpV4.Tcp.Payload);
+            Assert.True(packet.IsValid);
+            Assert.NotNull(packet.Ethernet.IpV4.Tcp.Payload);
             packet = new Packet(packet.Take(packet.Length - 1).ToArray(), DateTime.Now, DataLinkKind.Ethernet);
-            Assert.IsFalse(packet.IsValid);
-            Assert.IsNull(packet.Ethernet.IpV4.Tcp.Payload);
+            Assert.False(packet.IsValid);
+            Assert.Null(packet.Ethernet.IpV4.Tcp.Payload);
         }
         
-        [TestMethod]
+        [Fact]
         public void TcpOptionSelectiveAcknowledgmentBlockTest()
         {
             TcpOptionSelectiveAcknowledgmentBlock block1 = new TcpOptionSelectiveAcknowledgmentBlock();
-            Assert.AreEqual<uint>(0, block1.LeftEdge);
-            Assert.AreEqual<uint>(0, block1.RightEdge);
+            Assert.Equal<uint>(0, block1.LeftEdge);
+            Assert.Equal<uint>(0, block1.RightEdge);
 
             block1 = new TcpOptionSelectiveAcknowledgmentBlock(1, 2);
-            Assert.AreEqual<uint>(1, block1.LeftEdge);
-            Assert.AreEqual<uint>(2, block1.RightEdge);
+            Assert.Equal<uint>(1, block1.LeftEdge);
+            Assert.Equal<uint>(2, block1.RightEdge);
 
             TcpOptionSelectiveAcknowledgmentBlock block2 = new TcpOptionSelectiveAcknowledgmentBlock();
-            Assert.AreNotEqual(block1, block2);
-            Assert.IsTrue(block1 != block2);
-            Assert.IsFalse(block1 == block2);
-            Assert.AreNotEqual(block1.ToString(), block2.ToString());
-            Assert.AreNotEqual(block1, 0);
+            Assert.NotEqual(block1, block2);
+            Assert.True(block1 != block2);
+            Assert.False(block1 == block2);
+            Assert.NotEqual(block1.ToString(), block2.ToString());
 
             block2 = new TcpOptionSelectiveAcknowledgmentBlock(1, 2);
-            Assert.AreEqual(block1, block2);
-            Assert.IsFalse(block1 != block2);
-            Assert.IsTrue(block1 == block2);
+            Assert.Equal(block1, block2);
+            Assert.False(block1 != block2);
+            Assert.True(block1 == block2);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException), AllowDerivedTypes = false)]
+        [Fact]
         public void TcpOptionMd5SignatureConstructorErrorDataLengthTest()
         {
-            new TcpOptionMd5Signature(new byte[10]);
-            Assert.Fail();
+            Assert.Throws<ArgumentException>(() => new TcpOptionMd5Signature(new byte[10]));
         }
 
-        [TestMethod]
+        [Fact]
         public void TcpOptionMd5SignatureCreateInstanceErrorDataLengthTest()
         {
             Packet packet =
@@ -185,33 +153,29 @@ namespace PcapDotNet.Packets.Test
                                                  new TcpOptionMd5Signature(new byte[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}))
                                          });
 
-            Assert.IsTrue(packet.IsValid);
-            Assert.IsTrue(packet.Ethernet.IpV4.Tcp.Options.IsValid);
+            Assert.True(packet.IsValid);
+            Assert.True(packet.Ethernet.IpV4.Tcp.Options.IsValid);
 
             byte[] buffer = packet.Buffer;
             buffer[buffer.Length - packet.Ethernet.IpV4.Tcp.Length + TcpDatagram.HeaderMinimumLength + 1] = 2;
             packet = new Packet(buffer, packet.Timestamp, packet.DataLink);
 
-            Assert.IsFalse(packet.Ethernet.IpV4.Tcp.Options.IsValid);
+            Assert.False(packet.Ethernet.IpV4.Tcp.Options.IsValid);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void TcpOptionMd5SignatureConstructorNullTest()
         {
-            Assert.IsNotNull(new TcpOptionMd5Signature(null));
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => new TcpOptionMd5Signature(null));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void TcpOptionMoodConstructorBadEmotionStringTest()
         {
-            Assert.IsNotNull(new TcpOptionMood((TcpOptionMoodEmotion)202).EmotionString);
-            Assert.Fail();
+            Assert.Throws<InvalidOperationException>(() => new TcpOptionMood((TcpOptionMoodEmotion)202).EmotionString);
         }
 
-        [TestMethod]
+        [Fact]
         public void TcpOptionMoodReadFromBufferBadEmotionStringTest()
         {
             Packet packet = PacketBuilder.Build(DateTime.Now,
@@ -220,8 +184,8 @@ namespace PcapDotNet.Packets.Test
                                                 {
                                                     Options = new TcpOptions(new TcpOptionMood(TcpOptionMoodEmotion.Happy))
                                                 });
-            Assert.IsTrue(packet.IsValid);
-            Assert.AreEqual(1, packet.IpV4.Tcp.Options.Count);
+            Assert.True(packet.IsValid);
+            Assert.Equal(1, packet.IpV4.Tcp.Options.Count);
 
             byte[] newPacketBuffer = new byte[packet.Length];
             packet.CopyTo(newPacketBuffer, 0);
@@ -229,18 +193,18 @@ namespace PcapDotNet.Packets.Test
             newPacketBuffer[packet.Length - 2] = (byte)'a';
             Packet newPacket = new Packet(newPacketBuffer, DateTime.Now, DataLinkKind.IpV4);
 
-            Assert.IsFalse(newPacket.IsValid);
-            Assert.AreEqual(0, newPacket.IpV4.Tcp.Options.Count);
+            Assert.False(newPacket.IsValid);
+            Assert.Equal(0, newPacket.IpV4.Tcp.Options.Count);
         }
 
-        [TestMethod]
+        [Fact]
         public void TcpChecksumTest()
         {
             Packet packet = Packet.FromHexadecimalString(
                 "72ad58bae3b13638b5e35a3f08004a6c0055fd5400000e0622f341975faa3bfb25ed83130cb2e02103adfc7efbac1c2bb0f402e64800bb641bc8de8fa185e8ff716b60faf864bfe85901040205021ceec26d916419de400347f33fcca9ad44e9ffae8f",
                 DateTime.Now, DataLinkKind.Ethernet);
 
-            Assert.IsFalse(packet.Ethernet.IpV4.IsTransportChecksumCorrect);
+            Assert.False(packet.Ethernet.IpV4.IsTransportChecksumCorrect);
         }
     }
 }

@@ -1,50 +1,21 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
     /// <summary>
     /// Summary description for PacketDumpFileTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class PacketDumpFileTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void DumpWithoutDeviceTest()
         {
             string filename = Path.GetTempPath() + @"dump.pcap";
@@ -67,26 +38,22 @@ namespace PcapDotNet.Core.Test
             {
                 Packet actualPacket;
                 PacketCommunicatorReceiveResult result = communicator.ReceivePacket(out actualPacket);
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                Assert.AreEqual(expectedPacket, actualPacket);
+                Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                Assert.Equal(expectedPacket, actualPacket);
                 MoreAssert.IsInRange(expectedPacket.Timestamp.AddMicroseconds(-2), expectedPacket.Timestamp.AddMicroseconds(1), actualPacket.Timestamp);
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void SendNullPacketTest()
         {
-            PacketDumpFile.Dump(@"dump.pcap", new PcapDataLink(DataLinkKind.Ethernet), PacketDevice.DefaultSnapshotLength, new Packet[1]);
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => PacketDumpFile.Dump(@"dump.pcap", new PcapDataLink(DataLinkKind.Ethernet), PacketDevice.DefaultSnapshotLength, new Packet[1]));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void SendNullPacketsTest()
         {
-            PacketDumpFile.Dump(@"dump.pcap", new PcapDataLink(DataLinkKind.Ethernet), PacketDevice.DefaultSnapshotLength, null);
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => PacketDumpFile.Dump(@"dump.pcap", new PcapDataLink(DataLinkKind.Ethernet), PacketDevice.DefaultSnapshotLength, null));
         }
     }
 }

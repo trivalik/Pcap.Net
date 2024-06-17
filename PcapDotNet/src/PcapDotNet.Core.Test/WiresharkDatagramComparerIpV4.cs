@@ -4,10 +4,9 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.IpV4;
-using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -105,7 +104,7 @@ namespace PcapDotNet.Core.Test
                     field.AssertShowDecimal(ipV4Datagram.HeaderChecksum);
                     if (field.Showname().EndsWith(" [not all data available]"))
                     {
-                        Assert.IsFalse(ipV4Datagram.IsValid);
+                        Assert.False(ipV4Datagram.IsValid);
                         break;
                     }
                     foreach (var checksumField in field.Fields())
@@ -156,7 +155,7 @@ namespace PcapDotNet.Core.Test
                     if (ipV4Datagram.Options == null || !ipV4Datagram.Options.Any(option => option.OptionType == IpV4OptionType.MaximumTransmissionUnitReply ||
                                                                                             option.OptionType == IpV4OptionType.CommercialSecurity))
                     {
-                        Assert.IsTrue(field.Show() == ipV4Datagram.Source.ToString() ||
+                        Assert.True(field.Show() == ipV4Datagram.Source.ToString() ||
                                       field.Show() == ipV4Datagram.Destination.ToString());
                     }
                     field.AssertNoFields();
@@ -185,8 +184,8 @@ namespace PcapDotNet.Core.Test
             {
                 if (currentOptionIndex >= options.Count)
                 {
-                    Assert.IsFalse(options.IsValid);
-                    Assert.IsTrue(field.Show() == "Commercial IP security option" ||
+                    Assert.False(options.IsValid);
+                    Assert.True(field.Show() == "Commercial IP security option" ||
                                   field.Show() == "Loose source route (length byte past end of options)" ||
                                   field.Show() == "Loose Source Route (5 bytes)" ||
                                   field.Show() == "Time stamp:" ||
@@ -494,26 +493,26 @@ namespace PcapDotNet.Core.Test
                                     switch (subfieldParts[0].Trim())
                                     {
                                         case "Pointer":
-                                            Assert.AreEqual(timestamp.PointedIndex, int.Parse(subfieldValue) / 4 - 1);
+                                            Assert.Equal(timestamp.PointedIndex, int.Parse(subfieldValue) / 4 - 1);
                                             break;
 
                                         case "Overflow":
-                                            Assert.AreEqual(timestamp.Overflow.ToString(), subfieldValue);
+                                            Assert.Equal(timestamp.Overflow.ToString(), subfieldValue);
                                             break;
 
                                         case "Flag":
                                             switch (timestamp.TimestampType)
                                             {
                                                 case IpV4OptionTimestampType.AddressAndTimestamp:
-                                                    Assert.AreEqual("Time stamp and address", subfieldValue);
+                                                    Assert.Equal("Time stamp and address", subfieldValue);
                                                     break;
 
                                                 case IpV4OptionTimestampType.TimestampOnly:
-                                                    Assert.AreEqual("Time stamps only", subfieldValue);
+                                                    Assert.Equal("Time stamps only", subfieldValue);
                                                     break;
 
                                                 case IpV4OptionTimestampType.AddressPrespecified:
-                                                    Assert.AreEqual("Time stamps for prespecified addresses", subfieldValue);
+                                                    Assert.Equal("Time stamps for prespecified addresses", subfieldValue);
                                                     break;
 
                                                 default:
@@ -523,16 +522,16 @@ namespace PcapDotNet.Core.Test
 
                                         case "Time stamp":
                                             var timestampOnly = (IpV4OptionTimestampOnly)timestamp;
-                                            Assert.AreEqual(timestampOnly.Timestamps[timestampIndex].MillisecondsSinceMidnightUniversalTime, uint.Parse(subfieldValue));
+                                            Assert.Equal(timestampOnly.Timestamps[timestampIndex].MillisecondsSinceMidnightUniversalTime, uint.Parse(subfieldValue));
                                             ++timestampIndex;
                                             break;
 
                                         case "Address":
-                                            Assert.AreEqual(4, subfieldParts.Length);
+                                            Assert.Equal(4, subfieldParts.Length);
                                             var timestampAndAddress = (IpV4OptionTimestampAndAddress)timestamp;
-                                            Assert.AreEqual(timestampAndAddress.TimedRoute[timestampIndex].Address.ToString(), subfieldParts[1].Trim());
-                                            Assert.AreEqual("time stamp", subfieldParts[2].Trim());
-                                            Assert.AreEqual(timestampAndAddress.TimedRoute[timestampIndex].TimeOfDay.MillisecondsSinceMidnightUniversalTime,
+                                            Assert.Equal(timestampAndAddress.TimedRoute[timestampIndex].Address.ToString(), subfieldParts[1].Trim());
+                                            Assert.Equal("time stamp", subfieldParts[2].Trim());
+                                            Assert.Equal(timestampAndAddress.TimedRoute[timestampIndex].TimeOfDay.MillisecondsSinceMidnightUniversalTime,
                                                             uint.Parse(subfieldParts[3]));
                                             ++timestampIndex;
                                             break;
@@ -601,7 +600,7 @@ namespace PcapDotNet.Core.Test
 
                     case IpV4OptionType.MaximumTransmissionUnitProbe:
                         // TODO: Support MTU Proble.
-                        Assert.IsTrue(field.Show().StartsWith("MTU Probe (" + option.Length + " bytes): "));
+                        Assert.StartsWith("MTU Probe (" + option.Length + " bytes): ", field.Show());
                         break;
 
                     case (IpV4OptionType)12:
@@ -609,7 +608,7 @@ namespace PcapDotNet.Core.Test
                         if (option.Length != 4)
                             field.AssertShow("MTU Reply (with option length = " + option.Length + " bytes; should be 4)");
                         else
-                            Assert.IsTrue(field.Show().StartsWith("MTU Reply (4 bytes): "));
+                            Assert.StartsWith("MTU Reply (4 bytes): ", field.Show());
                         break;
 
                     case (IpV4OptionType)133:

@@ -3,49 +3,20 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
     /// <summary>
     /// Summary description for OfflinePacketDeviceTests
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class OfflinePacketDeviceTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
         private static void TestOpenMultipleTimes(int numTimes, string filename)
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -62,33 +33,33 @@ namespace PcapDotNet.Core.Test
                     for (int i = 0; i != NumPackets; ++i)
                     {
                         result = communicator.ReceivePacket(out actualPacket);
-                        Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                        Assert.AreEqual(expectedPacket, actualPacket);
+                        Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                        Assert.Equal(expectedPacket, actualPacket);
                         MoreAssert.IsInRange(expectedPacket.Timestamp.AddSeconds(-0.05), expectedPacket.Timestamp.AddSeconds(0.05),
                                              actualPacket.Timestamp);
                     }
 
                     result = communicator.ReceivePacket(out actualPacket);
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Eof, result);
-                    Assert.IsNull(actualPacket);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Eof, result);
+                    Assert.Null(actualPacket);
                 }
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void OpenOfflineMultipleTimes()
         {
             TestOpenMultipleTimes(1000, @"dump.pcap");
         }
 
-        [TestMethod]
+        [Fact]
         public void OpenOfflineMultipleTimesUnicode()
         {
             // TODO: Fix so we can go beyond 509 when using unicode filenames. See http://www.winpcap.org/pipermail/winpcap-bugs/2012-December/001547.html
             TestOpenMultipleTimes(100, @"דמפ.pcap");
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPacketTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
@@ -106,19 +77,19 @@ namespace PcapDotNet.Core.Test
                 for (int i = 0; i != NumPackets; ++i)
                 {
                     result = communicator.ReceivePacket(out actualPacket);
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                    Assert.AreEqual(expectedPacket, actualPacket);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                    Assert.Equal(expectedPacket, actualPacket);
                     MoreAssert.IsInRange(expectedPacket.Timestamp.AddSeconds(-0.05), expectedPacket.Timestamp.AddSeconds(0.05),
                                             actualPacket.Timestamp);
                 }
 
                 result = communicator.ReceivePacket(out actualPacket);
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Eof, result);
-                Assert.IsNull(actualPacket);
+                Assert.Equal(PacketCommunicatorReceiveResult.Eof, result);
+                Assert.Null(actualPacket);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void GetSomePacketsTest()
         {
             const int NumPacketsToSend = 100;
@@ -137,7 +108,7 @@ namespace PcapDotNet.Core.Test
             TestGetSomePackets(NumPacketsToSend, NumPacketsToSend, 0, PacketCommunicatorReceiveResult.BreakLoop, 0, 0.05, 0.05);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetPacketsTest()
         {
             const int NumPacketsToSend = 100;
@@ -157,90 +128,77 @@ namespace PcapDotNet.Core.Test
             TestReceivePackets(NumPacketsToSend, NumPacketsToSend, 0, PacketCommunicatorReceiveResult.BreakLoop, 0, 0.05, 0.05);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void StatisticsModeErrorTest()
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                communicator.Mode = PacketCommunicatorMode.Statistics;
+                Assert.Throws<InvalidOperationException>(() => communicator.Mode = PacketCommunicatorMode.Statistics);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SetNonBlockTest()
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                Assert.AreEqual(false, communicator.NonBlocking);
+                Assert.False(communicator.NonBlocking);
                 communicator.NonBlocking = false;
-                Assert.AreEqual(false, communicator.NonBlocking);
+                Assert.False(communicator.NonBlocking);
                 communicator.NonBlocking = true;
-                Assert.AreEqual(false, communicator.NonBlocking);
+                Assert.False(communicator.NonBlocking);
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void GetTotalStatisticsErrorTest()
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                Assert.IsNotNull(communicator.TotalStatistics);
+                Assert.Throws<InvalidOperationException>(() => communicator.TotalStatistics);
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void OpenInvalidFileTest()
         {
-            using (new OfflinePacketDevice("myinvalidfile").Open())
-            {
-            }
-            Assert.Fail();
+            Assert.Throws<InvalidOperationException>(() => new OfflinePacketDevice("myinvalidfile").Open());
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException), AllowDerivedTypes = false)]
+        [Fact]
         public void OpenNullFilenameTest()
         {
-            using (new OfflinePacketDevice(null).Open())
-            {
-            }
-            Assert.Fail();
+            Assert.Throws<ArgumentNullException>(() => new OfflinePacketDevice(null).Open());
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SendPacketErrorTest()
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                communicator.SendPacket(_random.NextEthernetPacket(100));
+                Assert.Throws<ArgumentNullException>(() => communicator.SendPacket(_random.NextEthernetPacket(100)));
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetKernelBufferSizeErrorTest()
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                communicator.SetKernelBufferSize(1024 * 1024);
+                Assert.Throws<ArgumentNullException>(() => communicator.SetKernelBufferSize(1024 * 1024));
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void SetlKernelMinimumBytesToCopyErrorTest()
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                communicator.SetKernelMinimumBytesToCopy(1024);
+                Assert.Throws<ArgumentNullException>(() => communicator.SetKernelMinimumBytesToCopy(1024));
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SetSamplingMethodOneEveryNTest()
         {
             Packet expectedPacket = _random.NextEthernetPacket(100);
@@ -252,16 +210,16 @@ namespace PcapDotNet.Core.Test
                 for (int i = 0; i != 10; ++i)
                 {
                     result = communicator.ReceivePacket(out packet);
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                    Assert.AreEqual(expectedPacket, packet);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                    Assert.Equal(expectedPacket, packet);
                 }
                 result = communicator.ReceivePacket(out packet);
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Eof, result);
-                Assert.IsNull(packet);
+                Assert.Equal(PacketCommunicatorReceiveResult.Eof, result);
+                Assert.Null(packet);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void SetSamplingMethodFirstAfterIntervalTest()
         {
             const int NumPackets = 10;
@@ -276,32 +234,30 @@ namespace PcapDotNet.Core.Test
                 for (int i = 0; i != 5; ++i)
                 {
                     result = communicator.ReceivePacket(out packet);
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, result);
-                    Assert.AreEqual(expectedPacket, packet);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, result);
+                    Assert.Equal(expectedPacket, packet);
                     DateTime expectedTimestamp = expectedPacket.Timestamp.AddSeconds(i * 2);
                     MoreAssert.IsInRange(expectedTimestamp.AddSeconds(-0.01), expectedTimestamp.AddSeconds(0.01), packet.Timestamp);
                 }
                 result = communicator.ReceivePacket(out packet);
-                Assert.AreEqual(PacketCommunicatorReceiveResult.Eof, result);
-                Assert.IsNull(packet);
+                Assert.Equal(PacketCommunicatorReceiveResult.Eof, result);
+                Assert.Null(packet);
             }
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void DumpToBadFileTest()
         {
-            OpenOfflineDevice(10, _random.NextEthernetPacket(100), TimeSpan.Zero, "??");
+            Assert.Throws<InvalidOperationException>(() => OpenOfflineDevice(10, _random.NextEthernetPacket(100), TimeSpan.Zero, "??"));
         }
         
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void EmptyNameTest()
         {
-            OpenOfflineDevice(10, _random.NextEthernetPacket(100), TimeSpan.Zero, string.Empty);
+            Assert.Throws<InvalidOperationException>(() => OpenOfflineDevice(10, _random.NextEthernetPacket(100), TimeSpan.Zero, string.Empty));
         }
 
-        [TestMethod]
+        [Fact]
         public void ReadWriteIso88591FilenameTest()
         {
             const string DumpFilename = "abc_\u00F9\u00E8.pcap";
@@ -312,16 +268,16 @@ namespace PcapDotNet.Core.Test
                 for (int i = 0; i != NumPackets; ++i)
                 {
                     Packet actualPacket;
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, communicator.ReceivePacket(out actualPacket));
-                    Assert.AreEqual(expectedPacket, actualPacket);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, communicator.ReceivePacket(out actualPacket));
+                    Assert.Equal(expectedPacket, actualPacket);
                 }
             }
 
-            Assert.IsTrue(File.Exists(DumpFilename), string.Format("File {0} doesn't exist", DumpFilename));
+            Assert.True(File.Exists(DumpFilename), string.Format("File {0} doesn't exist", DumpFilename));
         }
 
         // TODO: Add this test once Dumping to files with Unicode filenames is supported. See http://www.winpcap.org/pipermail/winpcap-users/2011-February/004273.html
-//        [TestMethod]
+//        [Fact]
 //        public void ReadWriteUnicodeFilenameTest()
 //        {
 //            const string DumpFilename = "abc_\u00F9_\u05D0\u05D1\u05D2.pcap";
@@ -332,15 +288,15 @@ namespace PcapDotNet.Core.Test
 //                for (int i = 0; i != NumPackets; ++i)
 //                {
 //                    Packet actualPacket;
-//                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, communicator.ReceivePacket(out actualPacket));
-//                    Assert.AreEqual(expectedPacket, actualPacket);
+//                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, communicator.ReceivePacket(out actualPacket));
+//                    Assert.Equal(expectedPacket, actualPacket);
 //                }
 //            }
 //
-//            Assert.IsTrue(File.Exists(DumpFilename), "File " + DumpFilename, " doesn't exist");
+//            Assert.True(File.Exists(DumpFilename), "File " + DumpFilename, " doesn't exist");
 //        }
 
-        [TestMethod]
+        [Fact]
         public void ReadUnicodeFilenameTest()
         {
             const string ReadUnicodeFilename = "abc_\u00F9_\u05D0\u05D1\u05D2.pcap";
@@ -352,25 +308,21 @@ namespace PcapDotNet.Core.Test
                 for (int i = 0; i != NumPackets; ++i)
                 {
                     Packet actualPacket;
-                    Assert.AreEqual(PacketCommunicatorReceiveResult.Ok, communicator.ReceivePacket(out actualPacket));
-                    Assert.AreEqual(expectedPacket, actualPacket);
+                    Assert.Equal(PacketCommunicatorReceiveResult.Ok, communicator.ReceivePacket(out actualPacket));
+                    Assert.Equal(expectedPacket, actualPacket);
                 }
             }
 
-            Assert.IsTrue(File.Exists(ReadUnicodeFilename), string.Format("File {0} doesn't exist", ReadUnicodeFilename));
+            Assert.True(File.Exists(ReadUnicodeFilename), string.Format("File {0} doesn't exist", ReadUnicodeFilename));
         }
 
 
-        [TestMethod]
-        [ExpectedException(typeof(InvalidOperationException), AllowDerivedTypes = false)]
+        [Fact]
         public void ReadNonExistingUnicodeFilenameTest()
         {
             const string ReadUnicodeFilename = "abc_non_existing_\u00F9_\u05D0\u05D1\u05D2.pcap";
             OfflinePacketDevice device = new OfflinePacketDevice(ReadUnicodeFilename);
-            using (PacketCommunicator communicator = device.Open())
-            {
-                Assert.Fail();
-            }
+            Assert.Throws<InvalidOperationException>(() => device.Open());
         }
 
         private static void TestGetSomePackets(int numPacketsToSend, int numPacketsToGet, int numPacketsToBreakLoop,
@@ -395,9 +347,9 @@ namespace PcapDotNet.Core.Test
 
                 int numPacketsGot;
                 PacketCommunicatorReceiveResult result = communicator.ReceiveSomePackets(out numPacketsGot, numPacketsToGet, handler.Handle);
-                Assert.AreEqual(expectedResult, result);
-                Assert.AreEqual(expectedNumPackets, numPacketsGot, "NumPacketsGot. Test: " + testDescription);
-                Assert.AreEqual(expectedNumPackets, handler.NumPacketsHandled, "NumPacketsHandled. Test: " + testDescription);
+                Assert.Equal(expectedResult, result);
+                Assert.True(expectedNumPackets == numPacketsGot, "NumPacketsGot. Test: " + testDescription);
+                Assert.True(expectedNumPackets == handler.NumPacketsHandled, "NumPacketsHandled. Test: " + testDescription);
             }
         }
 
@@ -433,8 +385,8 @@ namespace PcapDotNet.Core.Test
                     thread.Abort();
                 }
 
-                Assert.AreEqual(expectedResult, result, testDescription);
-                Assert.AreEqual(expectedNumPackets, handler.NumPacketsHandled);
+                Assert.True(expectedResult == result, testDescription);
+                Assert.Equal(expectedNumPackets, handler.NumPacketsHandled);
             }
         }
 
@@ -482,10 +434,10 @@ namespace PcapDotNet.Core.Test
             }
 
             OfflinePacketDevice device = new OfflinePacketDevice(readFilename);
-            Assert.AreEqual(0, device.Addresses.Count);
-            Assert.AreEqual(string.Empty, device.Description);
-            Assert.AreEqual(DeviceAttributes.None, device.Attributes);
-            Assert.AreEqual(readFilename, device.Name);
+            Assert.Empty(device.Addresses);
+            Assert.Equal(string.Empty, device.Description);
+            Assert.Equal(DeviceAttributes.None, device.Attributes);
+            Assert.Equal(readFilename, device.Name);
 
             return device;
         }
@@ -512,15 +464,15 @@ namespace PcapDotNet.Core.Test
             try
             {
                 MoreAssert.AreSequenceEqual(new[] {DataLinkKind.Ethernet}.Select(kind => new PcapDataLink(kind)), communicator.SupportedDataLinks);
-                Assert.AreEqual(DataLinkKind.Ethernet, communicator.DataLink.Kind);
-                Assert.AreEqual("EN10MB (Ethernet)", communicator.DataLink.ToString());
-                Assert.AreEqual(communicator.DataLink, new PcapDataLink(communicator.DataLink.Name));
-                Assert.IsTrue(communicator.IsFileSystemByteOrder);
-                Assert.AreEqual(PacketCommunicatorMode.Capture, communicator.Mode);
-                Assert.IsFalse(communicator.NonBlocking);
-                Assert.AreEqual(PacketDevice.DefaultSnapshotLength, communicator.SnapshotLength);
-                Assert.AreEqual(2, communicator.FileMajorVersion);
-                Assert.AreEqual(4, communicator.FileMinorVersion);
+                Assert.Equal(DataLinkKind.Ethernet, communicator.DataLink.Kind);
+                Assert.Equal("EN10MB (Ethernet)", communicator.DataLink.ToString());
+                Assert.Equal(communicator.DataLink, new PcapDataLink(communicator.DataLink.Name));
+                Assert.True(communicator.IsFileSystemByteOrder);
+                Assert.Equal(PacketCommunicatorMode.Capture, communicator.Mode);
+                Assert.False(communicator.NonBlocking);
+                Assert.Equal(PacketDevice.DefaultSnapshotLength, communicator.SnapshotLength);
+                Assert.Equal(2, communicator.FileMajorVersion);
+                Assert.Equal(4, communicator.FileMinorVersion);
                 return communicator;
             }
             catch (Exception)

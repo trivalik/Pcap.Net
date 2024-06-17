@@ -1,50 +1,19 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.TestUtils;
-using PcapDotNet.Packets.Transport;
+using Xunit;
 
 namespace PcapDotNet.Packets.Test
 {
     /// <summary>
     /// Summary description for VLanTaggedFrameTests.
     /// </summary>
-    [TestClass]
     [ExcludeFromCodeCoverage]
     public class VLanTaggedFrameTests
     {
-        /// <summary>
-        /// Gets or sets the test context which provides
-        /// information about and functionality for the current test run.
-        /// </summary>
-        public TestContext TestContext { get; set; }
-
-        #region Additional test attributes
-        //
-        // You can use the following additional attributes as you write your tests:
-        //
-        // Use ClassInitialize to run code before running the first test in the class
-        // [ClassInitialize()]
-        // public static void MyClassInitialize(TestContext testContext) { }
-        //
-        // Use ClassCleanup to run code after all tests in a class have run
-        // [ClassCleanup()]
-        // public static void MyClassCleanup() { }
-        //
-        // Use TestInitialize to run code before running each test 
-        // [TestInitialize()]
-        // public void MyTestInitialize() { }
-        //
-        // Use TestCleanup to run code after each test has run
-        // [TestCleanup()]
-        // public void MyTestCleanup() { }
-        //
-        #endregion
-
-        [TestMethod]
+        [Fact]
         public void RandomVLanTaggedFrameTest()
         {
             Random random = new Random();
@@ -63,16 +32,16 @@ namespace PcapDotNet.Packets.Test
                 ethernetLayer.EtherType = EthernetType.VLanTaggedFrame;
 
                 // Test output.
-                Assert.AreEqual(ethernetLayer, packet.Ethernet.ExtractLayer());
-                Assert.AreEqual(vLanTaggedFrameLayer, packet.Ethernet.VLanTaggedFrame.ExtractLayer());
-                Assert.AreEqual(vLanTaggedFrameLayer.GetHashCode(), packet.Ethernet.VLanTaggedFrame.ExtractLayer().GetHashCode());
-                Assert.AreNotEqual(random.NextVLanTaggedFrameLayer().GetHashCode(), packet.Ethernet.VLanTaggedFrame.ExtractLayer().GetHashCode());
-                Assert.AreEqual(vLanTaggedFrameLayer.TagControlInformation, packet.Ethernet.VLanTaggedFrame.TagControlInformation);
-                Assert.AreEqual(payloadLayer.Data, packet.Ethernet.VLanTaggedFrame.Payload);
+                Assert.Equal(ethernetLayer, packet.Ethernet.ExtractLayer());
+                Assert.Equal(vLanTaggedFrameLayer, packet.Ethernet.VLanTaggedFrame.ExtractLayer());
+                Assert.Equal(vLanTaggedFrameLayer.GetHashCode(), packet.Ethernet.VLanTaggedFrame.ExtractLayer().GetHashCode());
+                Assert.NotEqual(random.NextVLanTaggedFrameLayer().GetHashCode(), packet.Ethernet.VLanTaggedFrame.ExtractLayer().GetHashCode());
+                Assert.Equal(vLanTaggedFrameLayer.TagControlInformation, packet.Ethernet.VLanTaggedFrame.TagControlInformation);
+                Assert.Equal(payloadLayer.Data, packet.Ethernet.VLanTaggedFrame.Payload);
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void AutoSetEtherTypeTest()
         {
             Random random = new Random();
@@ -85,14 +54,14 @@ namespace PcapDotNet.Packets.Test
             vLanTaggedFrameLayer.EtherType = EthernetType.IpV4;
 
             // Test equality.
-            Assert.AreEqual(ethernetLayer, packet.Ethernet.ExtractLayer());
-            Assert.AreEqual(EthernetType.IpV4, packet.Ethernet.VLanTaggedFrame.EtherType);
-            Assert.AreEqual(vLanTaggedFrameLayer, packet.Ethernet.VLanTaggedFrame.ExtractLayer());
+            Assert.Equal(ethernetLayer, packet.Ethernet.ExtractLayer());
+            Assert.Equal(EthernetType.IpV4, packet.Ethernet.VLanTaggedFrame.EtherType);
+            Assert.Equal(vLanTaggedFrameLayer, packet.Ethernet.VLanTaggedFrame.ExtractLayer());
             ipV4Layer.HeaderChecksum = packet.Ethernet.VLanTaggedFrame.IpV4.HeaderChecksum;
-            Assert.AreEqual(ipV4Layer, packet.Ethernet.VLanTaggedFrame.IpV4.ExtractLayer());
+            Assert.Equal(ipV4Layer, packet.Ethernet.VLanTaggedFrame.IpV4.ExtractLayer());
         }
 
-        [TestMethod]
+        [Fact]
         public void DontAutoSetEthernetDestinationTest()
         {
             Random random = new Random();
@@ -104,8 +73,8 @@ namespace PcapDotNet.Packets.Test
             ethernetLayer.EtherType = EthernetType.VLanTaggedFrame;
 
             // Test equality.
-            Assert.AreEqual(ethernetLayer, packet.Ethernet.ExtractLayer());
-            Assert.AreEqual(vLanTaggedFrameLayer, packet.Ethernet.VLanTaggedFrame.ExtractLayer());
+            Assert.Equal(ethernetLayer, packet.Ethernet.ExtractLayer());
+            Assert.Equal(vLanTaggedFrameLayer, packet.Ethernet.VLanTaggedFrame.ExtractLayer());
         }
     }
 }

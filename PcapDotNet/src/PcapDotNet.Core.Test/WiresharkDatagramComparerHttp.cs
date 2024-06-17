@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Http;
 using PcapDotNet.Packets.TestUtils;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -36,7 +35,7 @@ namespace PcapDotNet.Core.Test
                     field.AssertNoShow();
 
                 MoreAssert.AreSequenceEqual(httpDatagram.Subsegment(0, _data.Length / 2), HexEncoding.Instance.GetBytes(_data.ToString()));
-                Assert.AreEqual(httpDatagram.Subsegment(_data.Length / 2 + 2, httpDatagram.Length - _data.Length / 2 - 2).ToHexadecimalString(), field.Value().Substring(0, 2 * (httpDatagram.Length - _data.Length / 2 - 2)));
+                Assert.Equal(httpDatagram.Subsegment(_data.Length / 2 + 2, httpDatagram.Length - _data.Length / 2 - 2).ToHexadecimalString(), field.Value().Substring(0, 2 * (httpDatagram.Length - _data.Length / 2 - 2)));
                 // TODO: Uncomment instead of the above line once https://bugs.wireshark.org/bugzilla/show_bug.cgi?id=11801 is fixed.
 //                field.AssertValue(httpDatagram.Subsegment(_data.Length / 2 + 2, httpDatagram.Length - _data.Length / 2 - 2));
                 return false;
@@ -81,19 +80,19 @@ namespace PcapDotNet.Core.Test
                         if (httpDatagram.Header == null)
                         {
                             if (httpDatagram.IsRequest)
-                                Assert.IsNull(httpDatagram.Version);
+                                Assert.Null(httpDatagram.Version);
                             else
-                                Assert.IsTrue(IsBadHttp(httpDatagram));
+                                Assert.True(IsBadHttp(httpDatagram));
                             break;
                         }
                         httpFieldName = fieldShow.Substring(0, colonIndex);
                         if (!field.Value().EndsWith("0d0a"))
-                            Assert.IsNull(httpDatagram.Header[httpFieldName]);
+                            Assert.Null(httpDatagram.Header[httpFieldName]);
                         else
                         {
                             string fieldValue = fieldShow.Substring(colonIndex + 1).SkipWhile(c => c == ' ').TakeWhile(c => c != '\\').SequenceToString();
                             string expectedFieldValue = httpDatagram.Header[httpFieldName].ValueString;
-                            Assert.IsTrue(expectedFieldValue.Contains(fieldValue),
+                            Assert.True(expectedFieldValue.Contains(fieldValue),
                                           string.Format("{0} <{1}> doesn't contain <{2}>", field.Name(), expectedFieldValue, fieldValue));
                         }
                     }
@@ -122,12 +121,12 @@ namespace PcapDotNet.Core.Test
                     httpFieldName = field.Name().Substring(5).Replace('_', '-');
                     HttpField httpField = httpDatagram.Header[httpFieldName];
                     if (!field.Value().EndsWith("0d0a"))
-                        Assert.IsNull(httpField);
+                        Assert.Null(httpField);
                     else
                     {
                         string fieldValue = field.Show().Replace("\\\"", "\"");
                         string expectedFieldValue = httpField.ValueString;
-                        Assert.IsTrue(expectedFieldValue.Contains(fieldValue),
+                        Assert.True(expectedFieldValue.Contains(fieldValue),
                                       string.Format("{0} <{1}> doesn't contain <{2}>", field.Name(), expectedFieldValue, fieldValue));
                     }
                     break;
@@ -137,7 +136,7 @@ namespace PcapDotNet.Core.Test
                     if (!IsBadHttp(httpDatagram))
                     {
                         if (!field.Value().EndsWith("0d0a"))
-                            Assert.IsNull(httpDatagram.Header.ContentLength);
+                            Assert.Null(httpDatagram.Header.ContentLength);
                         else
                             field.AssertShowDecimal(httpDatagram.Header.ContentLength.ContentLength.Value);
                     }
@@ -149,20 +148,20 @@ namespace PcapDotNet.Core.Test
                     if (!IsBadHttp(httpDatagram))
                     {
                         if (!field.Value().EndsWith("0d0a"))
-                            Assert.IsNull(httpDatagram.Header.ContentType);
+                            Assert.Null(httpDatagram.Header.ContentType);
                         else
                         {
-                            Assert.AreEqual(httpDatagram.Header.ContentType.MediaType, mediaType[0]);
-                            Assert.AreEqual(httpDatagram.Header.ContentType.MediaSubtype, mediaType[1]);
+                            Assert.Equal(httpDatagram.Header.ContentType.MediaType, mediaType[0]);
+                            Assert.Equal(httpDatagram.Header.ContentType.MediaSubtype, mediaType[1]);
                             int fieldShowParametersStart = fieldShow.IndexOf(';');
                             if (fieldShowParametersStart == -1)
-                                Assert.IsFalse(httpDatagram.Header.ContentType.Parameters.Any());
+                                Assert.False(httpDatagram.Header.ContentType.Parameters.Any());
                             else
                             {
                                 string expected =
                                     httpDatagram.Header.ContentType.Parameters.Select(pair => pair.Key + '=' + pair.Value.ToWiresharkLiteral()).
                                         SequenceToString(';');
-                                Assert.AreEqual(expected, fieldShow.Substring(fieldShowParametersStart + 1));
+                                Assert.Equal(expected, fieldShow.Substring(fieldShowParametersStart + 1));
                             }
                         }
                     }
@@ -180,14 +179,14 @@ namespace PcapDotNet.Core.Test
                 case "http.transfer_encoding":
                     if (!IsBadHttp(httpDatagram))
                     {
-                        Assert.AreEqual(fieldShow.ToWiresharkLowerLiteral(),
+                        Assert.Equal(fieldShow.ToWiresharkLowerLiteral(),
                                         httpDatagram.Header.TransferEncoding.TransferCodings.SequenceToString(',').ToLowerInvariant().ToWiresharkLiteral());
                     }
                     break;
 
                 case "http.request.full_uri":
                     // TODO: Uncomment when https://bugs.wireshark.org/bugzilla/show_bug.cgi?id=10681 is fixed.
-                    // Assert.AreEqual(fieldShow, ("http://" + httpDatagram.Header["Host"].ValueString + ((HttpRequestDatagram)httpDatagram).Uri).ToWiresharkLiteral());
+                    // Assert.Equal(fieldShow, ("http://" + httpDatagram.Header["Host"].ValueString + ((HttpRequestDatagram)httpDatagram).Uri).ToWiresharkLiteral());
                     break;
 
                 default:
@@ -205,13 +204,13 @@ namespace PcapDotNet.Core.Test
                 {
                     case "http.request.method":
                         field.AssertNoFields();
-                        Assert.IsTrue(httpDatagram.IsRequest, field.Name() + " IsRequest");
+                        Assert.True(httpDatagram.IsRequest, field.Name() + " IsRequest");
                         field.AssertShow(((HttpRequestDatagram)httpDatagram).Method.Method);
                         break;
 
                     case "http.request.uri":
                         field.AssertNoFields();
-                        Assert.IsTrue(httpDatagram.IsRequest, field.Name() + " IsRequest");
+                        Assert.True(httpDatagram.IsRequest, field.Name() + " IsRequest");
                         // TODO: Uncomment when https://bugs.wireshark.org/bugzilla/show_bug.cgi?id=10681 is fixed.
 //                        field.AssertShow(((HttpRequestDatagram)httpDatagram).Uri.ToWiresharkLiteral());
                         break;
@@ -221,7 +220,7 @@ namespace PcapDotNet.Core.Test
                         if (httpDatagram.Version == null)
                         {
                             if (field.Show() != string.Empty)
-                                Assert.IsTrue(field.Show().Contains(" ") || field.Show().Length < 8);
+                                Assert.True(field.Show().Contains(" ") || field.Show().Length < 8);
                         }
                         else
                             field.AssertShow(httpDatagram.Version.ToString());
@@ -229,7 +228,7 @@ namespace PcapDotNet.Core.Test
 
                     case "http.response.code":
                         field.AssertNoFields();
-                        Assert.IsTrue(httpDatagram.IsResponse, field.Name() + " IsResponse");
+                        Assert.True(httpDatagram.IsResponse, field.Name() + " IsResponse");
                         field.AssertShowDecimal(IsBadHttp(httpDatagram) ? 0 : ((HttpResponseDatagram)httpDatagram).StatusCode.Value);
                         break;
 
@@ -237,7 +236,7 @@ namespace PcapDotNet.Core.Test
                         field.AssertNoFields();
                         Datagram reasonPhrase = ((HttpResponseDatagram)httpDatagram).ReasonPhrase;
                         if (reasonPhrase == null)
-                            Assert.IsTrue(IsBadHttp(httpDatagram));
+                            Assert.True(IsBadHttp(httpDatagram));
                         else
                             field.AssertValue(reasonPhrase);
                         break;
@@ -258,7 +257,7 @@ namespace PcapDotNet.Core.Test
                 HttpResponseDatagram httpResponseDatagram = (HttpResponseDatagram)httpDatagram;
                 if (httpResponseDatagram.StatusCode == null)
                 {
-                    Assert.IsNull(httpResponseDatagram.Header);
+                    Assert.Null(httpResponseDatagram.Header);
                     return true;
                 }
             }
@@ -272,7 +271,7 @@ namespace PcapDotNet.Core.Test
             return false;
         }
 
-        readonly StringBuilder _data = new StringBuilder();
+        readonly System.Text.StringBuilder _data = new System.Text.StringBuilder();
         bool _isFirstEmptyName = true;
     }
 }

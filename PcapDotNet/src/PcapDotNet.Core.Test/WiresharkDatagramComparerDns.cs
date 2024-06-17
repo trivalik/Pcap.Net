@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Dns;
 using PcapDotNet.Packets.IpV6;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -149,9 +149,9 @@ namespace PcapDotNet.Core.Test
             {
                 var queryNameField = resourceRecordFieldsArray[resourceRecordsArray.Length].Fields().First();
                 if (queryNameField.Name() == "dns.qry.name")
-                    Assert.AreEqual("<Unknown extended label>", queryNameField.Show());
+                    Assert.Equal("<Unknown extended label>", queryNameField.Show());
                 else
-                    Assert.AreEqual("dns.resp.name", queryNameField.Name());
+                    Assert.Equal("dns.resp.name", queryNameField.Name());
             }
             else if (resourceRecordFieldsArray.Length < resourceRecordsArray.Length)
             {
@@ -159,7 +159,7 @@ namespace PcapDotNet.Core.Test
                 XElement lastDnsTypeField = resourceRecordFieldsArray.Last().Fields().Skip(1).First();
                 lastDnsTypeField.AssertName("dns.resp.type");
                 DnsType lastDnsType = (DnsType)ushort.Parse(lastDnsTypeField.Show());
-                Assert.IsTrue(new[] {DnsType.NextDomain, DnsType.Opt}.Contains(lastDnsType));
+                Assert.Contains(lastDnsType, new[] {DnsType.NextDomain, DnsType.Opt});
             }
             for (int i = 0; i != resourceRecordsArray.Length; ++i)
             {
@@ -228,19 +228,19 @@ namespace PcapDotNet.Core.Test
                             break;
 
                         case "dns.srv.service":
-                            Assert.AreEqual(resourceRecord.DnsType, DnsType.ServerSelection);
+                            Assert.Equal(DnsType.ServerSelection, resourceRecord.DnsType);
                             resourceRecordAttributeField.AssertShow(resourceRecord.DomainName.IsRoot ? "<Root>" : resourceRecord.DomainName.ToString().Split('.')[0]);
                             resourceRecordAttributeField.AssertNoFields();
                             break;
 
                         case "dns.srv.proto":
-                            Assert.AreEqual(resourceRecord.DnsType, DnsType.ServerSelection);
+                            Assert.Equal(DnsType.ServerSelection, resourceRecord.DnsType);
                             resourceRecordAttributeField.AssertShow(resourceRecord.DomainName.ToString().Split('.')[1]);
                             resourceRecordAttributeField.AssertNoFields();
                             break;
 
                         case "dns.srv.name":
-                            Assert.AreEqual(resourceRecord.DnsType, DnsType.ServerSelection);
+                            Assert.Equal(DnsType.ServerSelection, resourceRecord.DnsType);
                             resourceRecordAttributeField.AssertShow(
                                 resourceRecord.DomainName.ToString().Split(new[] {'.'}, StringSplitOptions.RemoveEmptyEntries).Skip(2).SequenceToString("."));
                             resourceRecordAttributeField.AssertNoFields();
@@ -838,39 +838,39 @@ namespace PcapDotNet.Core.Test
                             break;
 
                         case "dns.loc.unknown_data":
-                            Assert.AreNotEqual(0, locData.Version);
+                            Assert.NotEqual(0, locData.Version);
                             break;
 
                         case "dns.loc.size":
-                            Assert.AreEqual(0, locData.Version);
+                            Assert.Equal(0, locData.Version);
                             string sizeValue = dataField.Showname().Split('(', ')')[1];
-                            Assert.AreEqual(GetPrecisionValueString(locData.Size), sizeValue);
+                            Assert.Equal(GetPrecisionValueString(locData.Size), sizeValue);
                             break;
 
                         case "dns.loc.horizontal_precision":
-                            Assert.AreEqual(0, locData.Version);
+                            Assert.Equal(0, locData.Version);
                             string horizontalPrecisionValue = dataField.Showname().Split('(', ')')[1];
-                            Assert.AreEqual(GetPrecisionValueString(locData.HorizontalPrecision), horizontalPrecisionValue);
+                            Assert.Equal(GetPrecisionValueString(locData.HorizontalPrecision), horizontalPrecisionValue);
                             break;
 
                         case "dns.loc.vertial_precision":
-                            Assert.AreEqual(0, locData.Version);
+                            Assert.Equal(0, locData.Version);
                             string verticalPrecisionValue = dataField.Showname().Split('(', ')')[1];
-                            Assert.AreEqual(GetPrecisionValueString(locData.VerticalPrecision), verticalPrecisionValue);
+                            Assert.Equal(GetPrecisionValueString(locData.VerticalPrecision), verticalPrecisionValue);
                             break;
 
                         case "dns.loc.latitude":
-                            Assert.AreEqual(0, locData.Version);
+                            Assert.Equal(0, locData.Version);
                             dataField.AssertShowDecimal(locData.Latitude);
                             break;
 
                         case "dns.loc.longitude":
-                            Assert.AreEqual(0, locData.Version);
+                            Assert.Equal(0, locData.Version);
                             dataField.AssertShowDecimal(locData.Longitude);
                             break;
 
                         case "dns.loc.altitude":
-                            Assert.AreEqual(0, locData.Version);
+                            Assert.Equal(0, locData.Version);
                             dataField.AssertShowDecimal(locData.Altitude);
                             break;
 
@@ -892,7 +892,7 @@ namespace PcapDotNet.Core.Test
                             DnsType expectedType;
                             if (!TryGetDnsType(dataFieldShow, out expectedType))
                                 throw new InvalidOperationException(string.Format("Can't parse DNS field {0} : {1}", dataFieldShow, actualType));
-                            Assert.AreEqual(expectedType, actualType);
+                            Assert.Equal(expectedType, actualType);
                             return false;
 
                         default:
@@ -1030,7 +1030,7 @@ namespace PcapDotNet.Core.Test
                             break;
 
                         case "dns.a6.address_suffix":
-                            Assert.AreEqual(new IpV6Address(dataFieldShow), a6Data.AddressSuffix);
+                            Assert.Equal(new IpV6Address(dataFieldShow), a6Data.AddressSuffix);
                             break;
 
                         case "dns.a6.prefix_name":
@@ -1108,7 +1108,7 @@ namespace PcapDotNet.Core.Test
                                         subfield.AssertShowDecimal(dnsOption.DataLength);
                                         if (subfield.Fields().Any())
                                         {
-                                            Assert.AreEqual(1, subfield.Fields().Count());
+                                            Assert.Single(subfield.Fields());
                                             subfield.Fields().First().AssertName("_ws.expert");
                                         }
                                         break;
@@ -1221,7 +1221,7 @@ namespace PcapDotNet.Core.Test
                         case "dns.apl.afdpart.ipv6":
                             if (dataFieldName != "dns.apl.afdpart.data")
                             {
-                                Assert.AreEqual(dataFieldName == "dns.apl.afdpart.ipv4" ? AddressFamily.IpV4 : AddressFamily.IpV6,
+                                Assert.Equal(dataFieldName == "dns.apl.afdpart.ipv4" ? AddressFamily.IpV4 : AddressFamily.IpV6,
                                                 aplData.Items[_aplItemIndex - 1].AddressFamily);
                             }
                             dataField.AssertValue(aplData.Items[_aplItemIndex - 1].AddressFamilyDependentPart);
@@ -1334,7 +1334,7 @@ namespace PcapDotNet.Core.Test
                             if (!TryGetDnsType(dataFieldShow, out expectedType))
                                 throw new InvalidOperationException(string.Format("Failed parsing type from {0} : {1}", dataFieldShow, actualType));
 
-                            Assert.AreEqual(expectedType, actualType);
+                            Assert.Equal(expectedType, actualType);
                             break;
 
                         default:
@@ -1464,11 +1464,11 @@ namespace PcapDotNet.Core.Test
 
                         case "":
                             DnsType expectedType = nSec3Data.TypesExist[_nSec3TypeIndex++];
-                            Assert.IsTrue(dataField.Show().StartsWith("RR type in bit map: "));
+                            Assert.StartsWith("RR type in bit map: ", dataField.Show());
                             if (dataField.Show().EndsWith(string.Format("({0})", (ushort)expectedType)))
                                 dataField.AssertShow(string.Format("RR type in bit map: Unknown ({0})", (ushort)expectedType));
                             else
-                                Assert.IsTrue(
+                                Assert.True(
                                     dataFieldShow.Replace("-", "").StartsWith("RR type in bit map: " + GetWiresharkDnsType(expectedType).Replace("-", "")),
                                     string.Format("{0} : {1}", dataFieldShow, GetWiresharkDnsType(expectedType)));
                             dataField.AssertNoFields();
@@ -1623,7 +1623,7 @@ namespace PcapDotNet.Core.Test
 
                         case "dns.tsig.mac":
                             dataField.AssertShow("");
-                            Assert.AreEqual(1, dataField.Fields().Count());
+                            Assert.Single(dataField.Fields());
                             var tsigSubfield = dataField.Fields().First();
                             tsigSubfield.AssertName("_ws.expert");
                             break;

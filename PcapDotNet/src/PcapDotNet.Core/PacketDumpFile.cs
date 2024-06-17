@@ -28,7 +28,7 @@ namespace PcapDotNet.Core
         /// Outputs a packet to the "savefile" opened with PacketCommunicator.OpenDump().
         /// </summary>
         /// <param name="packet">The packet to write to disk.</param>
-        void Dump(Packet packet)
+        public void Dump(Packet packet)
         {
             if (packet == null)
                 throw new ArgumentNullException(nameof(packet));
@@ -47,7 +47,7 @@ namespace PcapDotNet.Core
         /// Flushes the output buffer to the ``savefile,'' so that any packets written with Dump() but not yet written to the ``savefile'' will be written.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown on error.</exception>
-        void Flush()
+        public void Flush()
         {
             if (Interop.Pcap.pcap_dump_flush(_pcapDumper) != 0)
                 throw new InvalidOperationException("Failed flushing to file " + _filename);
@@ -58,14 +58,14 @@ namespace PcapDotNet.Core
         /// Returns the current file position for the "savefile", representing the number of bytes written by PacketCommunicator.OpenDump() and Dump().
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown on error.</exception>
-        public long Position
+        public int Position
         {
             get
             {
                 long position = Interop.Pcap.pcap_dump_ftell(_pcapDumper);
                 if (position == -1)
                     throw new InvalidOperationException("Failed getting position");
-                return position;
+                return (int)position;
             }
         }
 

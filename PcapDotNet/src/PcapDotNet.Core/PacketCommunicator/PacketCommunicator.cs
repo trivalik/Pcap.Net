@@ -1,106 +1,150 @@
-#pragma once
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using PcapDotNet.Core.Native;
+using PcapDotNet.Packets;
 
-#include "DeviceAddress.h"
-#include "BerkeleyPacketFilter.h"
-#include "PacketDumpFile.h"
-#include "PacketDeviceOpenAttributes.h"
-#include "PacketSampleStatistics.h"
-#include "PacketTotalStatistics.h"
-#include "PcapDataLink.h"
-#include "PacketSendBuffer.h"
-#include "PacketCommunicatorMode.h"
-#include "PacketCommunicatorReceiveResult.h"
-#include "SamplingMethod.h"
-
-namespace PcapDotNet { namespace Core 
+namespace PcapDotNet.Core
 {
-    public delegate void HandlePacket(Packets::Packet^ packet);
-    public delegate void HandleStatistics(PacketSampleStatistics^ statistics);
+    public delegate void HandlePacket(Packet packet);
+    public delegate void HandleStatistics(PacketSampleStatistics statistics);
 
-    /// <summary>
-    /// Used to receive and send packets accross the network or to read and write packets to a pcap file.
-    /// </summary>
-    public ref class PacketCommunicator abstract : System::IDisposable
+    public abstract class PacketCommunicator : IDisposable
     {
-	public:
+        private readonly IpV4SocketAddress _ipV4Netmask;
+        private PacketCommunicatorMode _mode;
+
+        internal PacketCommunicator(PcapHandle /* pcap_t* */ pcapDescriptor, SocketAddress netmask)
+        {
+            PcapDescriptor = pcapDescriptor;
+            _ipV4Netmask = netmask as IpV4SocketAddress;
+        }
+
+        /// <summary>
+        /// Close the files associated with the capture and deallocates resources. 
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            PcapDescriptor.Dispose();
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        ~PacketCommunicator()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// pointer to a pcap_t struct
+        /// </summary>
+        internal PcapHandle /* pcap_t* */ PcapDescriptor { get; }
+
         /// <summary>
         /// The link layer of an adapter.
         /// </summary>
-        /// <exception cref="System::InvalidOperationException">Thrown when setting the datalink fails.</exception>
-        property PcapDataLink DataLink
+        /// <exception cref="InvalidOperationException">Thrown when setting the datalink fails.</exception>
+        public PcapDataLink DataLink
         {
-            PcapDataLink get();
-            void set(PcapDataLink value);
+            get
+            {
+                return new PcapDataLink(Interop.Pcap.pcap_datalink(PcapDescriptor));
+            }
+            set
+            {
+                if (Interop.Pcap.pcap_set_datalink(PcapDescriptor, value.Value) != 0)
+                {
+                    ThrowInvalidOperation($"Failed setting datalink {value}");
+                }
+            }
         }
 
         /// <summary>
         /// List of the supported data link types of the interface associated with the packet communicator.
         /// This property is currently unsupported to avoid memory leakage until a bug fix will be released in winpcap.
         /// </summary>
-        /// <exception cref="System::InvalidOperationException">Thrown on failure.</exception>
-        property System::Collections::ObjectModel::ReadOnlyCollection<PcapDataLink>^ SupportedDataLinks
+        /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
+        public ReadOnlyCollection<PcapDataLink> SupportedDataLinks
         {
-            System::Collections::ObjectModel::ReadOnlyCollection<PcapDataLink>^ get();
+            get
+            {
+                IntPtr dataLinks = IntPtr.Zero;
+                var numDataLinks = Interop.Pcap.pcap_list_datalinks(PcapDescriptor, ref dataLinks);
+                if (numDataLinks < 0)
+                {
+                    ThrowInvalidOperation("Failed getting supported datalinks");
+                }
+
+                try
+                {
+                    var results = new List<PcapDataLink>(numDataLinks);
+                    for (int i = 0; i != numDataLinks; ++i)
+                        results.Add(new PcapDataLink(Marshal.ReadInt32(dataLinks, i)));
+                    return new ReadOnlyCollection<PcapDataLink>(results);
+                }
+                finally
+                {
+                    Interop.Pcap.pcap_free_datalinks(dataLinks);
+                }
+            }
         }
 
         /// <summary>
         /// The dimension of the packet portion (in bytes) that is delivered to the application. 
         /// </summary>
-        property int SnapshotLength
-        {
-            int get();
-        }
+        public int SnapshotLength { get => Interop.Pcap.pcap_snapshot(PcapDescriptor); }
 
         /// <summary>
         /// The IPv4 netmask of the network on which packets are being captured; useful for filters when checking for IPv4 broadcast addresses in the filter program. If the netmask of the network on which packets are being captured isn't known to the program, or if packets are being captured on the Linux "any" pseudo-interface that can capture on more than one network, the value will be null and a filter that tests for IPv4 broadcast addreses won't be done correctly, but all other tests in the filter program will be OK.
         /// </summary>
-        property IpV4SocketAddress^ IpV4Netmask
-        {
-            IpV4SocketAddress^ get();
-        }
+        public IpV4SocketAddress IpV4Netmask { get => _ipV4Netmask; }
 
         /// <summary>
         /// True if the current file uses a different byte order than the current system. 
         /// </summary>
-        property bool IsFileSystemByteOrder
-        {
-            bool get();
-        }
+        public bool IsFileSystemByteOrder { get => Interop.Pcap.pcap_is_swapped(PcapDescriptor) == 0; }
 
         /// <summary>
         /// The major version number of the pcap library used to write the file.
         /// </summary>
-        property int FileMajorVersion
-        {
-            int get();
-        }
+        public int FileMajorVersion { get => Interop.Pcap.pcap_major_version(PcapDescriptor); }
 
         /// <summary>
         /// The minor version number of the pcap library used to write the file.
         /// </summary>
-        property int FileMinorVersion
-        {
-            int get();
-        }
+        public int FileMinorVersion { get => Interop.Pcap.pcap_minor_version(PcapDescriptor); }
 
         /// <summary>
         /// Statistics on current capture.
         /// The values represent packet statistics from the start of the run to the time of the call. 
         /// Supported only on live captures, not on offline. No statistics are stored in offline, so no statistics are available when reading from an offline device.
         /// </summary>
-        /// <exception cref="System::InvalidOperationException">Thrown if there is an error or the underlying packet capture doesn't support packet statistics.</exception>
-        virtual property PacketTotalStatistics^ TotalStatistics
-        {
-            PacketTotalStatistics^ get() = 0;
-        }
+        /// <exception cref="InvalidOperationException">Thrown if there is an error or the underlying packet capture doesn't support packet statistics.</exception>
+        public abstract PacketTotalStatistics TotalStatistics { get; }
 
         /// <summary>
         /// The working mode of the interface.
         /// </summary>
-        property PacketCommunicatorMode Mode
+        public PacketCommunicatorMode Mode
         {
-            PacketCommunicatorMode get();
-            void set(PacketCommunicatorMode value);
+            get
+            {
+                return _mode;
+            }
+            set
+            {
+                if (Interop.Pcap.pcap_setmode(PcapDescriptor, value) < 0)
+                {
+                    ThrowInvalidOperation($"Error setting mode {value}");
+                }
+                _mode = value;
+            }
         }
 
         /// <summary>
@@ -110,11 +154,27 @@ namespace PcapDotNet { namespace Core
         /// ReceivePacket and ReceivePackets will not work in "non-blocking" mode.
         /// <seealso cref="ReceiveSomePackets"/>
         /// </summary>
-        /// <exception cref="System::InvalidOperationException">Thrown if there is an error.</exception>
-        property bool NonBlocking
+        /// <exception cref="InvalidOperationException">Thrown if there is an error.</exception>
+        public bool NonBlocking
         {
-            bool get();
-            void set(bool value);
+            get
+            {
+                var errorBuffer = Pcap.CreateErrorBuffer();
+                var nonBlockValue = Interop.Pcap.pcap_getnonblock(PcapDescriptor, errorBuffer);
+                if (nonBlockValue < 0)
+                {
+                    ThrowInvalidOperation("Error getting NonBlocking value: " + errorBuffer.ToString());
+                }
+                return nonBlockValue != 0;
+            }
+            set
+            {
+                var errorBuffer = Pcap.CreateErrorBuffer();
+                if (Interop.Pcap.pcap_setnonblock(PcapDescriptor, value ? 1 : 0, errorBuffer) < 0)
+                {
+                    ThrowInvalidOperation($"Error setting NonBlocking to {value}: {errorBuffer}");
+                }
+            }
         }
 
         /// <summary>
@@ -124,8 +184,14 @@ namespace PcapDotNet { namespace Core
         /// <!--seealso cref="LivePacketDevice::Open"/-->
         /// </summary>
         /// <param name="size">the size of the buffer in bytes</param>
-        /// <exception cref="System::InvalidOperationException">Thrown on failure.</exception>
-        void SetKernelBufferSize(int size);
+        /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
+        public void SetKernelBufferSize(int size)
+        {
+            if (Interop.Pcap.pcap_setbuff(PcapDescriptor, size) != 0)
+            {
+                ThrowInvalidOperation($"Error setting kernel buffer size to {size.ToString(CultureInfo.InvariantCulture)}");
+            }
+        }
 
         /// <summary>
         /// Set the minumum amount of data received by the kernel in a single call.
@@ -136,8 +202,14 @@ namespace PcapDotNet { namespace Core
         /// This is useful for real time applications that need the best responsiveness from the kernel.
         /// </summary>
         /// <param name="size">minimum number of bytes to copy</param>
-        /// <exception cref="System::InvalidOperationException">Thrown on failure.</exception>
-        void SetKernelMinimumBytesToCopy(int size);
+        /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
+        public void SetKernelMinimumBytesToCopy(int size)
+        {
+            if (Interop.Pcap.pcap_setmintocopy(PcapDescriptor, size) != 0)
+            {
+                ThrowInvalidOperation($"Error setting kernel minimum bytes to copy to {size.ToString(CultureInfo.InvariantCulture)}");
+            }
+        }
 
         /// <summary>
         /// Define a sampling method for packet capture.
@@ -149,7 +221,17 @@ namespace PcapDotNet { namespace Core
         /// Warning: Sampling works only when capturing data on Win32 or reading from a file. It has not been implemented on other platforms. Sampling works on remote machines provided that the probe (i.e. the capturing device) is a Win32 workstation. 
         /// </remarks>
         /// <param name="method">The sampling method to be applied</param>
-        void SetSamplingMethod(SamplingMethod^ method);
+        public void SetSamplingMethod(SamplingMethod method)
+        {
+            if (method == null) throw new ArgumentNullException(nameof(method));
+
+            unsafe
+            {
+                var samplingMethod = (PcapUnmanagedStructures.pcap_samp*)Interop.Pcap.pcap_setsampling(PcapDescriptor);
+                samplingMethod->method = method.Method;
+                samplingMethod->value = method.Value;
+            }
+        }
 
         /// <summary>
         /// Read a packet from an interface or from an offline capture.
@@ -170,8 +252,24 @@ namespace PcapDotNet { namespace Core
         ///     <item><term>Eof</term><description>EOF was reached reading from an offline capture. In this case the packet out parameter will be null.</description></item>
         ///   </list>
         /// </returns>
-        /// <exception cref="System::InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
-        PacketCommunicatorReceiveResult ReceivePacket([System::Runtime::InteropServices::Out] Packets::Packet^% packet);
+        /// <exception cref="InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
+        public PacketCommunicatorReceiveResult ReceivePacket(out Packet packet)
+        {
+            AssertMode(PacketCommunicatorMode.Capture);
+
+            IntPtr packetHeader = IntPtr.Zero;
+            IntPtr packetData = IntPtr.Zero;
+            var result = RunPcapNextEx(ref packetHeader, ref packetData);
+
+            if (result != PacketCommunicatorReceiveResult.Ok)
+            {
+                packet = null;
+                return result;
+            }
+
+            packet = CreatePacket(packetHeader, packetData, DataLink);
+            return result;
+        }
 
         /// <summary>
         /// Collect a group of packets.
@@ -203,12 +301,42 @@ namespace PcapDotNet { namespace Core
         ///     <item><term>BreakLoop</term><description>Indicates that the loop terminated due to a call to Break() before any packets were processed.</description></item>
         ///   </list>
         /// </returns>
-        /// <exception cref="System::InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
         /// <remarks>
         ///   <para>Only the first bytes of data from the packet might be in the received packet (which won't necessarily be the entire packet; to capture the entire packet, you will have to provide a value for snapshortLength in your call to PacketDevice.Open() that is sufficiently large to get all of the packet's data - a value of 65536 should be sufficient on most if not all networks).</para>
         ///   <para>When reading a live capture, ReceiveSomePackets() will not necessarily return when the read times out; on some platforms, the read timeout isn't supported, and, on other platforms, the timer doesn't start until at least one packet arrives. This means that the read timeout should NOT be used in, for example, an interactive application, to allow the packet capture loop to ``poll'' for user input periodically, as there's no guarantee that ReceiveSomePackets() will return after the timeout expires.</para>
         /// </remarks>
-        PacketCommunicatorReceiveResult ReceiveSomePackets([System::Runtime::InteropServices::Out] int% countGot, int maxPackets, HandlePacket^ callback);
+        public PacketCommunicatorReceiveResult ReceiveSomePackets(out int countGot, int maxPackets, HandlePacket callback)
+        {
+            AssertMode(PacketCommunicatorMode.Capture);
+            var packetHandler = new PacketHandler(callback, DataLink);
+            var handlerDelegate = new PcapUnmanagedStructures.pcap_handler(packetHandler.Handle);
+
+            countGot = Interop.Pcap.pcap_dispatch(
+                PcapDescriptor,
+                maxPackets,
+                handlerDelegate,
+                IntPtr.Zero);
+
+            switch (countGot)
+            {
+                case -2:
+                    countGot = 0;
+                    return PacketCommunicatorReceiveResult.BreakLoop;
+                case -1:
+                    ThrowInvalidOperation("Failed reading from device");
+                    break;
+                case 0:
+                    if (packetHandler.PacketCounter != 0)
+                    {
+                        countGot = packetHandler.PacketCounter;
+                        return PacketCommunicatorReceiveResult.Eof;
+                    }
+                    break;
+            }
+
+            return PacketCommunicatorReceiveResult.Ok;
+        }
 
         /// <summary>
         /// Collect a group of packets.
@@ -230,9 +358,37 @@ namespace PcapDotNet { namespace Core
         ///     <item><term>BreakLoop</term><description>Indicates that the loop terminated due to a call to Break() before count packets were processed.</description></item>
         ///   </list>
         /// </returns>
-        /// <exception cref="System::InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
-        PacketCommunicatorReceiveResult ReceivePackets(int count, HandlePacket^ callback);
-        
+        /// <exception cref="InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
+        public PacketCommunicatorReceiveResult ReceivePackets(int count, HandlePacket callback)
+        {
+            AssertMode(PacketCommunicatorMode.Capture);
+            var packetHandler = new PacketHandler(callback, DataLink);
+            var handlerDelegate = new PcapUnmanagedStructures.pcap_handler(packetHandler.Handle);
+
+            var result = Interop.Pcap.pcap_loop(
+                PcapDescriptor,
+                count,
+                handlerDelegate,
+                IntPtr.Zero);
+
+            switch (result)
+            {
+                case -2:
+                    return PacketCommunicatorReceiveResult.BreakLoop;
+                case -1:
+                    ThrowInvalidOperation("Failed reading from device");
+                    break;
+                case 0:
+                    if (packetHandler.PacketCounter != count)
+                    {
+                        return PacketCommunicatorReceiveResult.Eof;
+                    }
+                    break;
+            }
+
+            return PacketCommunicatorReceiveResult.Ok;
+        }
+
         /// <summary>
         /// Receives a single statistics data on packets from an interface instead of receiving the packets.
         /// The statistics can be received in the resolution set by readTimeout when calling LivePacketDevice.Open().
@@ -247,8 +403,23 @@ namespace PcapDotNet { namespace Core
         ///     <item><term>Ok</term><description>The statistics has been read without problems. In statistics mode the readTimeout is always used and it never runs on offline captures so Ok is the only valid result.</description></item>
         ///   </list>
         /// </returns>
-        /// <exception cref="System::InvalidOperationException">Thrown if the mode is not Statistics or an error occurred.</exception>
-        PacketCommunicatorReceiveResult ReceiveStatistics([System::Runtime::InteropServices::Out] PacketSampleStatistics^% statistics);
+        /// <exception cref="InvalidOperationException">Thrown if the mode is not Statistics or an error occurred.</exception>
+        public PacketCommunicatorReceiveResult ReceiveStatistics(out PacketSampleStatistics statistics)
+        {
+            AssertMode(PacketCommunicatorMode.Statistics);
+
+            IntPtr packetHeader = IntPtr.Zero;
+            IntPtr packetData = IntPtr.Zero;
+            var result = RunPcapNextEx(ref packetHeader, ref packetData);
+
+            if (result != PacketCommunicatorReceiveResult.Ok)
+            {
+                throw new InvalidOperationException($"Got result {result} in statistics mode");
+            }
+
+            statistics = new PacketSampleStatistics(packetHeader, packetData);
+            return result;
+        }
 
         /// <summary>
         /// Collect a group of statistics every readTimeout given in LivePacketDevice.Open().
@@ -263,11 +434,30 @@ namespace PcapDotNet { namespace Core
         ///         <description>description</description>
         ///     </listheader>
         ///     <item><term>Ok</term><description>Count is exhausted</description></item>
-        ///     <item><term>BreakLoop</term><description>Indicates that the loop terminated due to a call to Break() before count statistics were processed.</description></item>
+        ///     <item><term>BreakLoop</term><descrition>Indicates that the loop terminated due to a call to Break() before count statistics were processed.</description></item>
         ///   </list>
         /// </returns>
-        /// <exception cref="System::InvalidOperationException">Thrown if the mode is not Statistics or an error occurred.</exception>
-        PacketCommunicatorReceiveResult ReceiveStatistics(int count, HandleStatistics^ callback);
+        /// <exception cref="InvalidOperationException">Thrown if the mode is not Statistics or an error occurred.</exception>
+        public PacketCommunicatorReceiveResult ReceiveStatistics(int count, HandleStatistics callback)
+        {
+            AssertMode(PacketCommunicatorMode.Statistics);
+            var statisticsHandler = new StatisticsHandler(callback);
+            var handlerDelegate = new PcapUnmanagedStructures.pcap_handler(statisticsHandler.Handle);
+
+            var result = Interop.Pcap.pcap_loop(
+                PcapDescriptor,
+                count,
+                handlerDelegate,
+                IntPtr.Zero);
+
+            if (result == -1)
+                ThrowInvalidOperation("Failed reading from device");
+
+            else if (result == -2)
+                return PacketCommunicatorReceiveResult.BreakLoop;
+
+            return PacketCommunicatorReceiveResult.Ok;
+        }
 
         /// <summary>
         /// Set a flag that will force ReceiveSomePackets(), ReceivePackets() or ReceiveStatistics() to return rather than looping.
@@ -286,7 +476,10 @@ namespace PcapDotNet { namespace Core
         ///     <item>If BreakLoop is returned from ReceiveSomePackets(), ReceivePackets() or ReceiveStatistics(), the flag is cleared, so a subsequent call will resume reading packets. If a different return value is returned, the flag is not cleared, so a subsequent call will return BreakLoop and clear the flag.</item>
         ///   </list>
         /// </remarks>
-        void Break();
+        public void Break()
+        {
+            Interop.Pcap.pcap_breakloop(PcapDescriptor);
+        }
 
         /// <summary>
         /// Send a raw packet.
@@ -294,8 +487,27 @@ namespace PcapDotNet { namespace Core
         /// <seealso cref="Transmit"/>
         /// </summary>
         /// <param name="packet">The packet to send (including the various protocol headers). The MAC CRC doesn't need to be included, because it is transparently calculated and added by the network interface driver.</param>
-        /// <exception cref="System::InvalidOperationException">The packet wasn't successfully sent.</exception>
-        void SendPacket(Packets::Packet^ packet);
+        /// <exception cref="InvalidOperationException">The packet wasn't successfully sent.</exception>
+        public void SendPacket(Packet packet)
+        {
+            if (packet is null) throw new ArgumentNullException(nameof(packet));
+
+            if (packet.Length == 0)
+                return;
+
+            int res;
+            unsafe
+            {
+                fixed (byte* buffer = packet.Buffer)
+                {
+                    res = Interop.Pcap.pcap_sendpacket(PcapDescriptor, new IntPtr(buffer), packet.Length);
+                }
+            }
+            if (res < 0)
+            {
+                ThrowInvalidOperation($"Failed writing to device. Packet length: {packet.Length}");
+            }
+        }
 
         /// <summary>
         /// Send a buffer of packets to the network.
@@ -305,30 +517,33 @@ namespace PcapDotNet { namespace Core
         /// </summary>
         /// <param name="sendBuffer">Contains the packets to send.</param>
         /// <param name="isSync">Determines if the send operation must be synchronized: if it is true, the packets are sent respecting the timestamps, otherwise they are sent as fast as possible.</param>
-        /// <exception cref="System::InvalidOperationException">Trying to transmit to an offline device or an error occurred during the send. The error can be caused by a driver/adapter problem or by an inconsistent/bogus send buffer.</exception>
+        /// <exception cref="InvalidOperationException">Trying to transmit to an offline device or an error occurred during the send. The error can be caused by a driver/adapter problem or by an inconsistent/bogus send buffer.</exception>
         /// <remarks>
         ///   <list type="bullet">
         ///     <item>Using this function is more efficient than issuing a series of SendPacket(), because the packets are buffered in the kernel driver, so the number of context switches is reduced. Therefore, expect a better throughput when using Transmit().</item>
         ///     <item>When isSync is true, the packets are synchronized in the kernel with a high precision timestamp. This requires a non-negligible amount of CPU, but allows normally to send the packets with a precision of some microseconds (depending on the accuracy of the performance counter of the machine). Such a precision cannot be reached sending the packets with SendPacket().</item>
         ///   </list>
         /// </remarks>
-        virtual void Transmit(PacketSendBuffer^ sendBuffer, bool isSync) = 0;
+        public abstract void Transmit(PacketSendBuffer sendBuffer, bool isSync);
 
         /// <summary>
         /// Compile a packet filter according to the communicator IPv4 netmask.
-        /// <seealso cref="SetFilter(BerkeleyPacketFilter^)"/>
-        /// <!--seealso cref="SetFilter(String^)"/--> todo bug in documentation
+        /// <seealso cref="SetFilter(BerkeleyPacketFilter)"/>
+        /// <seealso cref="SetFilter(string)">
         /// <seealso cref="BerkeleyPacketFilter"/>
         /// </summary>
         /// <param name="filterValue">A high level filtering expression (see <see href="http://www.winpcap.org/docs/docs_40_2/html/group__language.html">WinPcap Filtering expression syntax</see>)</param>
         /// <returns>
         /// The compiled filter that can be applied on the communicator.
         /// </returns>
-        /// <exception cref="System::InvalidOperationException">An error occurred.</exception>
+        /// <exception cref="InvalidOperationException">An error occurred.</exception>
         /// <remarks>
         /// The created filter should be disposed by the user.
         /// </remarks>
-        BerkeleyPacketFilter^ CreateFilter(System::String^ filterValue);
+        public BerkeleyPacketFilter CreateFilter(string filterValue)
+        {
+            return new BerkeleyPacketFilter(PcapDescriptor, filterValue, _ipV4Netmask);
+        }
 
         /// <summary>
         /// Associate a filter to a capture.
@@ -336,8 +551,13 @@ namespace PcapDotNet { namespace Core
         /// <seealso cref="BerkeleyPacketFilter"/>
         /// </summary>
         /// <param name="filter">The filter to associate. Usually the result of a call to CreateFilter().</param>
-        /// <exception cref="System::InvalidOperationException">Thrown on failure.</exception>
-        void SetFilter(BerkeleyPacketFilter^ filter);
+        /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
+        public void SetFilter(BerkeleyPacketFilter filter)
+        {
+            if (filter is null) throw new ArgumentNullException(nameof(filter));
+
+            filter.SetFilter(PcapDescriptor);
+        }
 
         /// <summary>
         /// Compile and associate a filter to a capture.
@@ -346,8 +566,14 @@ namespace PcapDotNet { namespace Core
         /// <seealso cref="BerkeleyPacketFilter"/>
         /// </summary>
         /// <param name="filterValue">A high level filtering expression (see <see href="http://www.winpcap.org/docs/docs_40_2/html/group__language.html">WinPcap Filtering expression syntax</see>).</param>
-        /// <exception cref="System::InvalidOperationException">Thrown on failure.</exception>
-        void SetFilter(System::String^ filterValue);
+        /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
+        public void SetFilter(string filterValue)
+        {
+            using (var filter = CreateFilter(filterValue))
+            {
+                SetFilter(filter);
+            }
+        }
 
         /// <summary>
         /// Open a file to write packets.
@@ -357,78 +583,91 @@ namespace PcapDotNet { namespace Core
         /// <returns>
         /// A dump file to dump packets capture by the communicator.
         /// </returns>
-        /// <exception cref="System::InvalidOperationException">Thrown on failure.</exception>
+        /// <exception cref="InvalidOperationException">Thrown on failure.</exception>
         /// <remarks>
         /// The created dump file should be disposed by the user.
         /// Only ISO-8859-1 characters filenames are supported.
         /// </remarks>
-        PacketDumpFile^ OpenDump(System::String^ fileName);
-
-        /// <summary>
-        /// Close the files associated with the capture and deallocates resources. 
-        /// </summary>
-        ~PacketCommunicator();
-
-    internal:
-        PacketCommunicator(pcap_t* pcapDescriptor, SocketAddress^ netmask);
-
-	protected:
-        property pcap_t* PcapDescriptor
+        public PacketDumpFile OpenDump(string fileName)
         {
-            pcap_t* get();
+            return new PacketDumpFile(PcapDescriptor, fileName);
         }
 
-        System::InvalidOperationException^ BuildInvalidOperation(System::String^ errorMessage);
-
-    private:
-        static Packets::Packet^ CreatePacket(const pcap_pkthdr& packetHeader, const unsigned char* packetData, Packets::IDataLink^ dataLink);
-
-        PacketCommunicatorReceiveResult RunPcapNextEx(pcap_pkthdr** packetHeader, const unsigned char** packetData);
-
-        [System::Runtime::InteropServices::UnmanagedFunctionPointer(System::Runtime::InteropServices::CallingConvention::Cdecl)]
-        delegate void HandlerDelegate(unsigned char *user, const struct pcap_pkthdr *packetHeader, const unsigned char *packetData);
-
-        void AssertMode(PacketCommunicatorMode mode);
-
-        ref class PacketHandler
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        protected void ThrowInvalidOperation(string errorMessage)
         {
-        public:
-            PacketHandler(HandlePacket^ callback, PcapDataLink dataLink)
+            PcapError.ThrowInvalidOperation(errorMessage, PcapDescriptor);
+        }
+
+        private static Packet CreatePacket(IntPtr /* pcap_pkthdr * */ packetHeader, IntPtr /* const unsigned char* */ packetData, IDataLink dataLink)
+        {
+            var header = Interop.Pcap.CreatePcapPacketHeader(packetHeader);
+            var buffer = new byte[header.PacketLength];
+            Marshal.Copy(packetData, buffer, 0, buffer.Length);
+
+            return new Packet(buffer, header.Timestamp, dataLink, header.OriginalLength);
+        }
+
+        private PacketCommunicatorReceiveResult RunPcapNextEx(ref IntPtr /* pcap_pkthdr * */ packetHeader, ref IntPtr /* const unsigned char* */ packetData)
+        {
+            var result = Interop.Pcap.pcap_next_ex(PcapDescriptor, ref packetHeader, ref packetData);
+            switch (result)
             {
-                _callback = callback;
+                case -2:
+                    return PacketCommunicatorReceiveResult.Eof;
+                case -1:
+                    ThrowInvalidOperation("Failed reading from device");
+                    goto default;
+                case 0:
+                    return PacketCommunicatorReceiveResult.Timeout;
+                case 1:
+                    return PacketCommunicatorReceiveResult.Ok;
+                default:
+                    throw new InvalidOperationException("Result value " + result.ToString(CultureInfo.InvariantCulture) + " is undefined");
+            }
+        }
+
+        private void AssertMode(PacketCommunicatorMode mode)
+        {
+            if (Mode != mode)
+                throw new InvalidOperationException($"Wrong Mode. Must be in mode {mode} and not in mode {Mode}");
+        }
+
+        private class PacketHandler
+        {
+            private readonly HandlePacket _callback;
+            private readonly PcapDataLink _dataLink;
+            private int _packetCounter = 0;
+
+            public PacketHandler(HandlePacket callback, PcapDataLink dataLink)
+            {
+                _callback = callback ?? throw new ArgumentNullException(nameof(callback));
                 _dataLink = dataLink;
             }
 
-            void Handle(unsigned char *user, const struct pcap_pkthdr *packetHeader, const unsigned char *packetData);
+            public int PacketCounter => _packetCounter;
 
-            property int PacketCounter
+            public void Handle(IntPtr /* unsigned char* */ user, IntPtr /* pcap_pkthdr * */ packetHeader, IntPtr /* const unsigned char* */ packetData)
             {
-                int get();
+                ++_packetCounter;
+                _callback(CreatePacket(packetHeader, packetData, _dataLink));
             }
+        }
 
-        private:
-            HandlePacket^ _callback;
-            PcapDataLink _dataLink;
-            int _packetCounter;
-        };
-
-        ref class StatisticsHandler
+        private class StatisticsHandler
         {
-        public:
-            StatisticsHandler(HandleStatistics^ callback)
+            private readonly HandleStatistics _callback;
+
+            public StatisticsHandler(HandleStatistics callback)
             {
                 _callback = callback;
             }
 
-            void Handle(unsigned char *user, const struct pcap_pkthdr *packetHeader, const unsigned char *packetData);
+            public void Handle(IntPtr /* unsigned char* */ user, IntPtr /* pcap_pkthdr * */ packetHeader, IntPtr /* const unsigned char* */ packetData)
+            {
+                _callback(new PacketSampleStatistics(packetHeader, packetData));
+            }
+        }
 
-        private:
-            HandleStatistics^ _callback;
-        };
-
-    private:
-        pcap_t* _pcapDescriptor;
-        IpV4SocketAddress^ _ipV4Netmask;
-        PacketCommunicatorMode _mode;
-    };
-}}
+    }
+}

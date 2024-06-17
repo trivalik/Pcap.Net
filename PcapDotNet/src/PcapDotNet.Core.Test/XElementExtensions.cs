@@ -1,14 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Base;
 using PcapDotNet.Packets.IpV4;
 using PcapDotNet.TestUtils;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -56,32 +53,32 @@ namespace PcapDotNet.Core.Test
 
         public static void AssertName(this XElement element, string expectedName)
         {
-            Assert.AreEqual(element.Name(), expectedName);
+            Assert.Equal(element.Name(), expectedName);
         }
 
         public static void AssertNoFields(this XElement element)
         {
-            Assert.IsFalse(element.Fields().Any(), string.Format("Element {0} has {1} fields.", element.Name(), element.Fields().Count()));
+            Assert.False(element.Fields().Any(), string.Format("Element {0} has {1} fields.", element.Name(), element.Fields().Count()));
         }
 
         public static void AssertNumFields(this XElement element, int expectedNumFields)
         {
-            Assert.AreEqual(expectedNumFields, element.Fields().Count());
+            Assert.Equal(expectedNumFields, element.Fields().Count());
         }
 
         public static void AssertShowname(this XElement element, string expectedValue, bool ignoreCase = false, string message = null)
         {
-            Assert.AreEqual(expectedValue, element.Showname(), ignoreCase, message ?? element.Name());
+            Assert.True(string.Equals(expectedValue, element.Showname(), ignoreCase ? System.StringComparison.OrdinalIgnoreCase : System.StringComparison.Ordinal), message ?? element.Name());
         }
 
         public static void AssertNoShow(this XElement element)
         {
-            Assert.IsNull(element.Attribute("show"));
+            Assert.Null(element.Attribute("show"));
         }
 
         public static void AssertShow(this XElement element, string expectedValue, bool ignoreCase = false, string message = null)
         {
-            Assert.AreEqual(expectedValue, element.Show(), ignoreCase, message ?? element.Name());
+            Assert.True(string.Equals(expectedValue, element.Show(), ignoreCase ? System.StringComparison.OrdinalIgnoreCase : System.StringComparison.Ordinal), message ?? element.Name());
         }
 
         public static void AssertShow(this XElement element, string expectedValue, string message)
@@ -171,8 +168,8 @@ namespace PcapDotNet.Core.Test
 
         public static void AssertValue(this XElement element, string expectedValue, string message = null)
         {
-            Assert.AreEqual(expectedValue.Length, element.Value().Length, (message ?? element.Name()) + " Length");
-            Assert.AreEqual(expectedValue, element.Value(), message ?? element.Name());
+            Assert.True(expectedValue.Length == element.Value().Length, (message ?? element.Name()) + " Length");
+            Assert.True(expectedValue == element.Value(), message ?? element.Name());
         }
 
         public static void AssertValueInRange(this XElement element, string expectedMinimumValue, string expectedMaximumValue)

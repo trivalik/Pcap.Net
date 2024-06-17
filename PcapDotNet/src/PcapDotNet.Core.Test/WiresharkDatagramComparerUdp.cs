@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Xml.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Ip;
-using PcapDotNet.Packets.IpV4;
 using PcapDotNet.Packets.Transport;
+using Xunit;
 
 namespace PcapDotNet.Core.Test
 {
@@ -33,7 +32,7 @@ namespace PcapDotNet.Core.Test
                     break;
 
                 case "udp.port":
-                    Assert.IsTrue(ushort.Parse(field.Show()) == udpDatagram.SourcePort ||
+                    Assert.True(ushort.Parse(field.Show()) == udpDatagram.SourcePort ||
                                   ushort.Parse(field.Show()) == udpDatagram.DestinationPort);
                     break;
 
@@ -55,7 +54,7 @@ namespace PcapDotNet.Core.Test
 
                                 case "udp.checksum_bad":
                                     if (checksumField.Show() == "1")
-                                        Assert.IsFalse(ipDatagram.IsTransportChecksumCorrect);
+                                        Assert.False(ipDatagram.IsTransportChecksumCorrect);
                                     else
                                         checksumField.AssertShowDecimal(0);
                                     break;
