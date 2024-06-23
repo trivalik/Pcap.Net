@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using PcapDotNet.Core.Native;
@@ -68,6 +68,7 @@ namespace PcapDotNet.Core
             get => _packetsCaptured;
         }
 
+        /// <inheritdoc/>
         public bool Equals(PacketTotalStatistics other)
         {
             if (other == null)
@@ -79,11 +80,13 @@ namespace PcapDotNet.Core
                     PacketsCaptured == other.PacketsCaptured);
         }
 
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             return Equals(obj as PacketTotalStatistics);
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return (int)
@@ -93,6 +96,7 @@ namespace PcapDotNet.Core
                 _packetsCaptured);
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return new StringBuilder()

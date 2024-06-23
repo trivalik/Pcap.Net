@@ -1,10 +1,13 @@
-﻿using System;
+using System;
 using PcapDotNet.Base;
 using PcapDotNet.Core.Native;
 
 namespace PcapDotNet.Core
 {
-    public sealed class PacketTimestamp
+    /// <summary>
+    /// Static helpers for timestamps in pcap packets.
+    /// </summary>
+    public static class PacketTimestamp
     {
         static PacketTimestamp()
         {

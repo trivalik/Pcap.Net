@@ -1,4 +1,4 @@
-﻿namespace PcapDotNet.Core
+namespace PcapDotNet.Core
 {
     /// <summary>
     /// The base of all device addresses.
@@ -8,7 +8,9 @@
     {
         private readonly SocketAddressFamily _family;
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         protected SocketAddress(ushort family)
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
             _family = (SocketAddressFamily)family;
         }
@@ -18,6 +20,7 @@
         /// </summary>
         public SocketAddressFamily Family => _family;
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return Family.ToString();

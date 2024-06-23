@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -9,9 +9,19 @@ using PcapDotNet.Packets;
 
 namespace PcapDotNet.Core
 {
+    /// <summary>
+    /// Callback definition to handle a captured packted
+    /// </summary>
     public delegate void HandlePacket(Packet packet);
+    
+    /// <summary>
+    /// Callback definition to handle next statistic data
+    /// </summary>
     public delegate void HandleStatistics(PacketSampleStatistics statistics);
 
+    /// <summary>
+    /// Used to receive and send packets accross the network or to read and write packets to a pcap file.
+    /// </summary>
     public abstract class PacketCommunicator : IDisposable
     {
         private readonly IpV4SocketAddress _ipV4Netmask;
@@ -30,13 +40,16 @@ namespace PcapDotNet.Core
         {
             PcapDescriptor.Dispose();
         }
-
+        
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
         }
 
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         ~PacketCommunicator()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
         {
             Dispose(false);
         }
@@ -428,13 +441,10 @@ namespace PcapDotNet.Core
         /// <param name="count">Number of statistics to process. A negative count causes ReceiveStatistics() to loop forever (or at least until an error occurs).</param>
         /// <param name="callback">Specifies a routine to be called with one argument: the statistics received.</param>
         /// <returns>
-        ///   <list type="table">
-        ///     <listheader>
-        ///         <term>Return value</term>
-        ///         <description>description</description>
-        ///     </listheader>
-        ///     <item><term>Ok</term><description>Count is exhausted</description></item>
-        ///     <item><term>BreakLoop</term><descrition>Indicates that the loop terminated due to a call to Break() before count statistics were processed.</description></item>
+        ///   <list>
+        ///     <item><term>Return value</term> <description>description</description></item>
+        ///     <item><term>Ok</term> <description>Count is exhausted</description></item>
+        ///     <item><term>BreakLoop</term> <description>Indicates that the loop terminated due to a call to Break() before count statistics were processed.</description></item>
         ///   </list>
         /// </returns>
         /// <exception cref="InvalidOperationException">Thrown if the mode is not Statistics or an error occurred.</exception>
@@ -527,9 +537,9 @@ namespace PcapDotNet.Core
         public abstract void Transmit(PacketSendBuffer sendBuffer, bool isSync);
 
         /// <summary>
-        /// Compile a packet filter according to the communicator IPv4 netmask.
-        /// <seealso cref="SetFilter(BerkeleyPacketFilter)"/>
-        /// <seealso cref="SetFilter(string)">
+        /// Compile a packet filter according to the communicator IPv4 netmask. See also: <br/>
+        /// <seealso cref="SetFilter(BerkeleyPacketFilter)"/><br/>
+        /// <seealso cref="SetFilter(string)" /><br/>
         /// <seealso cref="BerkeleyPacketFilter"/>
         /// </summary>
         /// <param name="filterValue">A high level filtering expression (see <see href="http://www.winpcap.org/docs/docs_40_2/html/group__language.html">WinPcap Filtering expression syntax</see>)</param>
@@ -594,7 +604,7 @@ namespace PcapDotNet.Core
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void ThrowInvalidOperation(string errorMessage)
+        private void ThrowInvalidOperation(string errorMessage)
         {
             PcapError.ThrowInvalidOperation(errorMessage, PcapDescriptor);
         }

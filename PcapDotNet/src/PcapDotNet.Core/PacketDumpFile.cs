@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using PcapDotNet.Core.Native;
 using PcapDotNet.Packets;
@@ -105,6 +105,7 @@ namespace PcapDotNet.Core
             }
         }
 
+        /// <inheritdoc cref="PacketDumpFile.Dump(string, PcapDataLink, int, IEnumerable{Packet})"/>
         public static void Dump(string fileName, DataLinkKind dataLink, int snapshotLength, IEnumerable<Packet> packets)
         {
             Dump(fileName, new PcapDataLink(dataLink), snapshotLength, packets);

@@ -1,4 +1,4 @@
-﻿namespace PcapDotNet.Core
+namespace PcapDotNet.Core
 {
     /// <summary>
     /// The type of socket address for a device address.
@@ -155,10 +155,13 @@
         /// </summary>
         NetworkDesigners = 28,
 
+        /// <summary></summary>
         TcnProcess = 29,
 
+        /// <summary></summary>
         TcnMessage = 30,
 
+        /// <summary></summary>
         Iclfxbm = 31,
 
         /// <summary>

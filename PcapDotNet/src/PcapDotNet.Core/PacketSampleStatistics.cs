@@ -44,6 +44,7 @@ namespace PcapDotNet.Core
         /// </summary>
         public ulong AcceptedBytes => _acceptedBytes;
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return _timestamp + ": " + _acceptedPackets + " packets. " + _acceptedBytes + " bytes.";

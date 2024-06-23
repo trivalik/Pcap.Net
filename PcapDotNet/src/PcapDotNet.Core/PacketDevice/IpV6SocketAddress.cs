@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
 using PcapDotNet.Base;
@@ -34,6 +34,7 @@ namespace PcapDotNet.Core
         /// </summary>
         public IpV6Address Address => _address;
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             var result = new StringBuilder();

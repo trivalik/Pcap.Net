@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using PcapDotNet.Core.Native;
 
 namespace PcapDotNet.Core
 {
+    /// <summary>
+    /// Used to read packets from a (pcap) file on disk.
+    /// </summary>
     public sealed class OfflinePacketCommunicator : PacketCommunicator
     {
         internal OfflinePacketCommunicator(string fileName)

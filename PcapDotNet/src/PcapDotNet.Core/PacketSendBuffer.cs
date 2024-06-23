@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using PcapDotNet.Core.Native;
@@ -25,6 +25,9 @@ namespace PcapDotNet.Core
             _buffer = new byte[capacity];
         }
 
+        /// <summary>
+        /// Number of queued packets
+        /// </summary>
         public int Length { get; private set; }
 
         /// <summary>

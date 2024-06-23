@@ -1,4 +1,4 @@
-﻿using PcapDotNet.Core.Native;
+using PcapDotNet.Core.Native;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -73,14 +73,19 @@ namespace PcapDotNet.Core
             Addresses = new ReadOnlyCollection<DeviceAddress>(addresses);
         }
 
+        /// <inheritdoc/>
         public override string Name { get; }
 
+        /// <inheritdoc/>
         public override string Description { get; }
 
+        /// <inheritdoc/>
         public override DeviceAttributes Attributes { get; }
 
+        /// <inheritdoc/>
         public override ReadOnlyCollection<DeviceAddress> Addresses { get; }
 
+        /// <inheritdoc/>
         public override PacketCommunicator Open(int snapshotLength, PacketDeviceOpenAttributes attributes, int readTimeout)
         {
             var netmask = Addresses.Count > 0 ? Addresses[0].Netmask : null;

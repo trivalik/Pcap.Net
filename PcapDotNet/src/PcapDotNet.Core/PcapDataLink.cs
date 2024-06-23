@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using PcapDotNet.Core.Native;
@@ -135,16 +135,19 @@ namespace PcapDotNet.Core
             }
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             return Name + " (" + Description + ")";
         }
-
+        
+        /// <inheritdoc/>
         public bool Equals(PcapDataLink other)
         {
             return Equals(this, other);
         }
 
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
             if (!(obj is PcapDataLink link))
@@ -153,16 +156,19 @@ namespace PcapDotNet.Core
             return Equals(link);
         }
 
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return _value.GetHashCode();
         }
 
+        /// <inheritdoc/>
         public static bool operator ==(PcapDataLink dataLink1, PcapDataLink dataLink2)
         {
             return Equals(dataLink1, dataLink2);
         }
 
+        /// <inheritdoc/>
         public static bool operator !=(PcapDataLink dataLink1, PcapDataLink dataLink2)
         {
             return !Equals(dataLink1, dataLink2);

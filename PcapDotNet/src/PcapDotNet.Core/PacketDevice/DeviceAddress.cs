@@ -1,4 +1,4 @@
-﻿using PcapDotNet.Core.Native;
+using PcapDotNet.Core.Native;
 using System;
 using System.Text;
 
@@ -65,6 +65,7 @@ namespace PcapDotNet.Core
         /// </summary>
         public SocketAddress Destination => _destination;
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             var result = new StringBuilder();

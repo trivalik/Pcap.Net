@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -28,7 +28,8 @@ namespace PcapDotNet.Core
         /// The ip version 4 address.
         /// </summary>
         public IpV4Address Address => _address;
-
+        
+        /// <inheritdoc/>
         public override string ToString()
         {
             var result = new StringBuilder();

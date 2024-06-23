@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 
 namespace PcapDotNet.Core
@@ -8,7 +8,9 @@ namespace PcapDotNet.Core
     /// </summary>
     public abstract class PacketDevice : IPacketDevice
     {
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
         protected PacketDevice() { }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 
         /// <summary>
         /// This snapshort length value should be sufficient, on most if not all networks, to capture all the data available from the packet.
