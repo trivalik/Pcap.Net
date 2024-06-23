@@ -448,25 +448,25 @@ namespace PcapDotNet.Core.Test
             using (Process process = new Process())
             {
                 process.StartInfo = new ProcessStartInfo
-                                    {
-                                        // Wireshark's preferences file is %APPDATA%\Wireshark\preferences
-                                            FileName = WiresharkTsharkPath,
-                                            Arguments = "-o ip.check_checksum:TRUE " + 
-                                                        "-o ipv6.use_geoip:FALSE " +
-                                                        "-o udp.check_checksum:TRUE " +
-                                                        "-o tcp.relative_sequence_numbers:FALSE " +
-                                                        "-o tcp.analyze_sequence_numbers:FALSE " +
-                                                        "-o tcp.track_bytes_in_flight:FALSE " +
-                                                        "-o tcp.desegment_tcp_streams:FALSE " +
-                                                        "-o tcp.check_checksum:TRUE " +
-                                                        "-o http.dechunk_body:FALSE " +
-                                                        "-t r -n -r \"" + pcapFilename + "\" -T pdml",
-                                            WorkingDirectory = WiresharkDiretory,
-                                            UseShellExecute = false,
-                                            RedirectStandardOutput = true,
-                                            RedirectStandardError = true,
-                                            CreateNoWindow = true
-                                        };
+                {
+                    // Wireshark's preferences file is %APPDATA%\Wireshark\preferences
+                        FileName = WiresharkTsharkPath,
+                        Arguments = "-o ip.check_checksum:TRUE " + 
+                                    "-o ipv6.use_geoip:FALSE " +
+                                    "-o udp.check_checksum:TRUE " +
+                                    "-o tcp.relative_sequence_numbers:FALSE " +
+                                    "-o tcp.analyze_sequence_numbers:FALSE " +
+                                    "-o tcp.track_bytes_in_flight:FALSE " +
+                                    "-o tcp.desegment_tcp_streams:FALSE " +
+                                    "-o tcp.check_checksum:TRUE " +
+                                    "-o http.dechunk_body:FALSE " +
+                                    "-t r -n -r \"" + pcapFilename + "\" -T pdml",
+                        WorkingDirectory = WiresharkDiretory,
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    };
                 Console.WriteLine("Starting process " + process.StartInfo.FileName + " " + process.StartInfo.Arguments);
                 Assert.True(process.Start());
                 string output = process.StandardOutput.ReadToEnd();

@@ -296,9 +296,9 @@ namespace PcapDotNet.Core
         ///         <term>Return value</term>
         ///         <description>description</description>
         ///     </listheader>
-        ///     <item><term>Ok</term><description>countGot packets has been read without problems. This includes the case where a read timeout occurred and the case the communicator is in non-blocking mode and no packets were available</description></item>
-        ///     <item><term>Eof</term><description>EOF was reached reading from an offline capture.</description></item>
-        ///     <item><term>BreakLoop</term><description>Indicates that the loop terminated due to a call to Break() before any packets were processed.</description></item>
+        ///     <item><term>Ok</term> <description>countGot packets has been read without problems. This includes the case where a read timeout occurred and the case the communicator is in non-blocking mode and no packets were available</description></item>
+        ///     <item><term>Eof</term> <description>EOF was reached reading from an offline capture.</description></item>
+        ///     <item><term>BreakLoop</term> <description>Indicates that the loop terminated due to a call to Break() before any packets were processed.</description></item>
         ///   </list>
         /// </returns>
         /// <exception cref="InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>
@@ -353,9 +353,9 @@ namespace PcapDotNet.Core
         ///         <term>Return value</term>
         ///         <description>description</description>
         ///     </listheader>
-        ///     <item><term>Ok</term><description>Count is exhausted</description></item>
-        ///     <item><term>Eof</term><description>Count wasn't exhausted and EOF was reached reading from an offline capture.</description></item>
-        ///     <item><term>BreakLoop</term><description>Indicates that the loop terminated due to a call to Break() before count packets were processed.</description></item>
+        ///     <item><term>Ok</term> <description>Count is exhausted</description></item>
+        ///     <item><term>Eof</term> <description>Count wasn't exhausted and EOF was reached reading from an offline capture.</description></item>
+        ///     <item><term>BreakLoop</term> <description>Indicates that the loop terminated due to a call to Break() before count packets were processed.</description></item>
         ///   </list>
         /// </returns>
         /// <exception cref="InvalidOperationException">Thrown if the mode is not Capture or an error occurred.</exception>

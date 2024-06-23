@@ -43,9 +43,15 @@
 
             Console.WriteLine($"Selected device: {selectedDevice.Name}; {selectedDevice.Description}");
 
-            var com = (LivePacketCommunicator)selectedDevice.Open();
+            using var com = (LivePacketCommunicator)selectedDevice.Open();
             
             var stat = com.TotalStatistics;
+
+            Console.WriteLine("SupportedDataLinks:");
+            foreach (var linktype in com.SupportedDataLinks)
+            {
+                Console.WriteLine($" - {linktype.Value}");
+            }
 
 
             Console.WriteLine(stat);

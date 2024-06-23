@@ -97,8 +97,9 @@ namespace PcapDotNet.Core.Test
             // Normal
             TestGetSomePackets(NumPacketsToSend, NumPacketsToSend, int.MaxValue, PacketCommunicatorReceiveResult.Ok, NumPacketsToSend, 0.05, 0.05);
             TestGetSomePackets(NumPacketsToSend, NumPacketsToSend / 2, int.MaxValue, PacketCommunicatorReceiveResult.Ok, NumPacketsToSend / 2, 0.05, 0.05);
-            
+
             // Eof
+            // ToDo: 'pcap_dispatch' does not return expected value, 0 as undefined behaviour on different plattforms
             TestGetSomePackets(NumPacketsToSend, 0, int.MaxValue, PacketCommunicatorReceiveResult.Eof, NumPacketsToSend, 0.05, 0.05);
             TestGetSomePackets(NumPacketsToSend, -1, int.MaxValue, PacketCommunicatorReceiveResult.Eof, NumPacketsToSend, 0.05, 0.05);
             TestGetSomePackets(NumPacketsToSend, NumPacketsToSend + 1, int.MaxValue, PacketCommunicatorReceiveResult.Eof, NumPacketsToSend, 0.05, 0.05);
@@ -143,10 +144,7 @@ namespace PcapDotNet.Core.Test
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
                 Assert.False(communicator.NonBlocking);
-                communicator.NonBlocking = false;
-                Assert.False(communicator.NonBlocking);
-                communicator.NonBlocking = true;
-                Assert.False(communicator.NonBlocking);
+                Assert.Throws<InvalidOperationException>(() => communicator.NonBlocking = false);
             }
         }
 
@@ -176,7 +174,7 @@ namespace PcapDotNet.Core.Test
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                Assert.Throws<ArgumentNullException>(() => communicator.SendPacket(_random.NextEthernetPacket(100)));
+                Assert.Throws<InvalidOperationException>(() => communicator.SendPacket(_random.NextEthernetPacket(100)));
             }
         }
 
@@ -185,7 +183,7 @@ namespace PcapDotNet.Core.Test
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                Assert.Throws<ArgumentNullException>(() => communicator.SetKernelBufferSize(1024 * 1024));
+                Assert.Throws<InvalidOperationException>(() => communicator.SetKernelBufferSize(1024 * 1024));
             }
         }
 
@@ -194,7 +192,7 @@ namespace PcapDotNet.Core.Test
         {
             using (PacketCommunicator communicator = OpenOfflineDevice())
             {
-                Assert.Throws<ArgumentNullException>(() => communicator.SetKernelMinimumBytesToCopy(1024));
+                Assert.Throws<InvalidOperationException>(() => communicator.SetKernelMinimumBytesToCopy(1024));
             }
         }
 
@@ -397,7 +395,7 @@ namespace PcapDotNet.Core.Test
 
         public static OfflinePacketDevice GetOfflineDevice(int numPackets, Packet packet, TimeSpan intervalBetweenPackets)
         {
-            return GetOfflineDevice(numPackets, packet, intervalBetweenPackets, Path.GetTempPath() + @"dump.pcap");
+            return GetOfflineDevice(numPackets, packet, intervalBetweenPackets, Path.Combine(Path.GetTempPath(), "dump.pcap"));
         }
 
         public static OfflinePacketDevice GetOfflineDevice(int numPackets, Packet packet, TimeSpan intervalBetweenPackets, string dumpFilename, string readFilename = null)
@@ -454,7 +452,7 @@ namespace PcapDotNet.Core.Test
 
         public static PacketCommunicator OpenOfflineDevice(int numPackets, Packet packet, TimeSpan intervalBetweenPackets)
         {
-            return OpenOfflineDevice(numPackets, packet, intervalBetweenPackets, Path.GetTempPath() + @"dump.pcap");
+            return OpenOfflineDevice(numPackets, packet, intervalBetweenPackets, Path.Combine(Path.GetTempPath() + @"dump.pcap"));
         }
 
         private static PacketCommunicator OpenOfflineDevice(int numPackets, Packet packet, TimeSpan intervalBetweenPackets, string dumpFilename, string readFilename = null)
