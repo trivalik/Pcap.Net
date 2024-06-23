@@ -1,4 +1,7 @@
-﻿namespace PcapDotNet.Core.Managed.Tests
+using System;
+using System.Linq;
+
+namespace PcapDotNet.Core.Managed.Test
 {
     internal class Program
     {
@@ -43,20 +46,19 @@
 
             Console.WriteLine($"Selected device: {selectedDevice.Name}; {selectedDevice.Description}");
 
-            using var com = (LivePacketCommunicator)selectedDevice.Open();
-            
-            var stat = com.TotalStatistics;
-
-            Console.WriteLine("SupportedDataLinks:");
-            foreach (var linktype in com.SupportedDataLinks)
+            using (var com = (LivePacketCommunicator)selectedDevice.Open())
             {
-                Console.WriteLine($" - {linktype.Value}");
+                var stat = com.TotalStatistics;
+
+                Console.WriteLine("SupportedDataLinks:");
+                foreach (var linktype in com.SupportedDataLinks)
+                {
+                    Console.WriteLine($" - {linktype.Value}");
+                }
+
+
+                Console.WriteLine(stat);
             }
-
-
-            Console.WriteLine(stat);
-
-
         }
     }
 }

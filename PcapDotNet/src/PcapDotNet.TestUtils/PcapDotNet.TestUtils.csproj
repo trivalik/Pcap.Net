@@ -1,24 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <OutputType>Library</OutputType>
-    <AssemblyTitle>PcapDotNet.TestUtils</AssemblyTitle>
-    <Company>Pcap.Net</Company>
-    <Product>PcapDotNet.TestUtils</Product>
-    <Copyright>Copyright © Pcap.Net 2010</Copyright>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
-    <FileVersion>1.0.4.0</FileVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\bin\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\..\bin\Release\</OutputPath>
-  </PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <PackageReference Include="xunit.assert" Version="2.8.1" />
     <ProjectReference Include="..\PcapDotNet.Base\PcapDotNet.Base.csproj" />
   </ItemGroup>
+
 </Project>

@@ -1,43 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <OutputType>Library</OutputType>
-  </PropertyGroup>
-  
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;</DefineConstants>
-    <DocumentationFile>..\..\bin\Debug\PcapDotNet.Core.Extensions.XML</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\..\bin\Release\</OutputPath>
-    <DocumentationFile>..\..\bin\Release\PcapDotNet.Core.Extensions.XML</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-    <OutputPath>..\..\bin\x64\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;</DefineConstants>
-    <DocumentationFile>..\..\bin\x64\Debug\PcapDotNet.Core.Extensions.XML</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\..\bin\x64\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <DocumentationFile>..\..\bin\x64\Release\PcapDotNet.Core.Extensions.XML</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
-    <OutputPath>..\..\bin\x86\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-    <DocumentationFile>..\..\bin\x86\Debug\PcapDotNet.Core.Extensions.XML</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
-    <OutputPath>..\..\bin\x86\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <DocumentationFile>..\..\bin\x86\Release\PcapDotNet.Core.Extensions.XML</DocumentationFile>
-  </PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\PcapDotNet.Base\PcapDotNet.Base.csproj" />
@@ -46,21 +7,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\PcapDotNet.snk" />
-  </ItemGroup>
-  
-  <ItemGroup>
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
     <PreBuildEvent>if not exist "$(SolutionDir)$(SolutionName).snk" ("%25PROGRAMFILES%25\Microsoft SDKs\Windows\v7.0A\bin\sn.exe" -k "$(SolutionDir)$(SolutionName).snk")</PreBuildEvent>
-    <AssemblyTitle>PcapDotNet.Core.Extensions</AssemblyTitle>
-    <Company>Pcap.Net</Company>
-    <Product>PcapDotNet.Core.Extensions</Product>
-    <Copyright>Copyright © Pcap.Net 2010</Copyright>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
-    <FileVersion>1.0.4.0</FileVersion>
   </PropertyGroup>
 </Project>

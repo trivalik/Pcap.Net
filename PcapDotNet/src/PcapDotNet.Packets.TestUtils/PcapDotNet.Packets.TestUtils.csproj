@@ -1,26 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <OutputType>Library</OutputType>
-    <AssemblyTitle>PcapDotNet.Packets.TestUtils</AssemblyTitle>
-    <Company>Pcap.Net</Company>
-    <Product>PcapDotNet.Packets.TestUtils</Product>
-    <Copyright>Copyright © Pcap.Net 2010</Copyright>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
-    <FileVersion>1.0.4.0</FileVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\bin\Debug\</OutputPath>
-  </PropertyGroup>
-
-<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\..\bin\Release\</OutputPath>
-  </PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\PcapDotNet.Base\PcapDotNet.Base.csproj" />
     <ProjectReference Include="..\PcapDotNet.Packets\PcapDotNet.Packets.csproj" />
     <ProjectReference Include="..\PcapDotNet.TestUtils\PcapDotNet.TestUtils.csproj" />
   </ItemGroup>
+
 </Project>

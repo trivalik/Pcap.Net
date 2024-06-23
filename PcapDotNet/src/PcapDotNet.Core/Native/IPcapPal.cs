@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text;
 using PcapDotNet.Packets;
 using static PcapDotNet.Core.Native.PcapUnmanagedStructures;
@@ -25,7 +25,7 @@ namespace PcapDotNet.Core.Native
         /// <summary>
         /// Creates a PcapPacketHeader object from platform depend unmanaged structure
         /// </summary>
-        /// <param name="handle">pointer to platform depend structure of pcap_pkthdr</param>
+        /// <param name="ptr">pointer to platform depend structure of pcap_pkthdr</param>
         PcapPacketHeader CreatePcapPacketHeader(IntPtr /* pcap_pkthdr* */ ptr);
 
         /// <returns>NULL or pointer to the first pcap_if_t entry</returns>
@@ -79,9 +79,9 @@ namespace PcapDotNet.Core.Native
         /// Outputs a packet to the 'savefile' opened with pcap_dump_open(). Note that its calling arguments are suitable for use with pcap_dispatch() or pcap_loop().
         /// </summary>
         /// <param name="user">If called directly, the user parameter is of type pcap_dumper_t as returned by pcap_dump_open().</param>
-        void pcap_dump(IntPtr /*u_char * */user, IntPtr /*const struct pcap_pkthdr * */header, IntPtr /*const u_char * */ data);
+        void pcap_dump(IntPtr /*u_char * */user, IntPtr /*const struct pcap_pkthdr * */ header, IntPtr /*const u_char * */ data);
 
-        /// <summary> close the files associated with <see cref="adaptHandle"/> and deallocates resources.</summary>
+        /// <summary> close the files associated with <paramref name="adaptHandle"/> and deallocates resources.</summary>
         void pcap_close(IntPtr /*pcap_t **/adaptHandle);
 
         /// <summary>

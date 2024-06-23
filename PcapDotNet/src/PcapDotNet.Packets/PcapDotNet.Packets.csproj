@@ -1,23 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <OutputType>Library</OutputType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DocumentationFile>..\..\bin\Debug\PcapDotNet.Packets.XML</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\..\bin\Release\</OutputPath>
-    <DocumentationFile>..\..\bin\Release\PcapDotNet.Packets.XML</DocumentationFile>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\PcapDotNet.snk" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PcapDotNet.Base\PcapDotNet.Base.csproj" />
@@ -25,11 +10,5 @@
 
   <PropertyGroup>
     <PreBuildEvent>if not exist "$(SolutionDir)$(SolutionName).snk" ("%25PROGRAMFILES%25\Microsoft SDKs\Windows\v7.0A\bin\sn.exe" -k "$(SolutionDir)$(SolutionName).snk")</PreBuildEvent>
-    <AssemblyTitle>Packets</AssemblyTitle>
-    <Company>Pcap.Net</Company>
-    <Product>Packets</Product>
-    <Copyright>Copyright © Pcap.Net 2010</Copyright>
-    <AssemblyVersion>1.0.4.0</AssemblyVersion>
-    <FileVersion>1.0.4.0</FileVersion>
   </PropertyGroup>
 </Project>

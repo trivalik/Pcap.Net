@@ -1,29 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <OutputType>Library</OutputType>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\PcapDotNet.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\bin\Debug\</OutputPath>
-    <DocumentationFile>..\..\bin\Debug\PcapDotNet.Base.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <OutputPath>..\..\bin\Release\</OutputPath>
-    <DocumentationFile>..\..\bin\Release\PcapDotNet.Base.XML</DocumentationFile>
-    <NoWarn/>
-  </PropertyGroup>
-  <ItemGroup>
-    <None Include="..\PcapDotNet.snk" />
-  </ItemGroup>
+
   <PropertyGroup>
     <PreBuildEvent>if not exist "$(SolutionDir)$(SolutionName).snk" ("%25PROGRAMFILES%25\Microsoft SDKs\Windows\v7.0A\bin\sn.exe" -k "$(SolutionDir)$(SolutionName).snk")</PreBuildEvent>
-    <AssemblyTitle>PcapDotNet.Base</AssemblyTitle>
-    <Company>Pcap.Net</Company>
-    <Product>PcapDotNet.Base</Product>
-    <Copyright>Copyright © Pcap.Net 2010</Copyright>
-    <AssemblyVersion>0.11.1.0</AssemblyVersion>
-    <FileVersion>0.11.1.0</FileVersion>
   </PropertyGroup>
+
 </Project>

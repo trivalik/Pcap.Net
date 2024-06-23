@@ -1,8 +1,8 @@
 PcapDotNet/3rdParty/
 PcapDotNet/bin/
+PcapDotNet/obj/
 PcapDotNet/src/*/obj
 PcapDotNet/src/*/bin
-PcapDotNet/src/PcapDotNet.Core/Debug
 PcapDotNet/src/TestResults
 .vs/
 TemporaryGeneratedFile_*

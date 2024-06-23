@@ -1,0 +1,43 @@
+<Project>
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Company>Pcap.Net</Company>
+    <Copyright>Copyright © Pcap.Net 2010</Copyright>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <NoWarn>1718, 1573</NoWarn>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(MSBuildThisFileDirectory)../bin/</BaseOutputPath>
+    <AppendTargetFrameworkToOutputPath>True</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <!-- All none test projects -->
+  <Choose>
+    <When Condition=" !$(MSBuildProjectName.EndsWith('.Test')) ">
+      <PropertyGroup>
+        <TargetFrameworks>netstandard2.0</TargetFrameworks>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
+  <!-- All test projects -->
+  <Choose>
+    <When Condition=" $(MSBuildProjectName.EndsWith('.TestUtils')) ">
+      <PropertyGroup>
+        <TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <GenerateDocumentationFile>False</GenerateDocumentationFile>
+      </PropertyGroup>
+    </When>
+  </Choose>
+
+  <Choose>
+    <When Condition=" $(MSBuildProjectName.EndsWith('.Test')) ">
+      <PropertyGroup>
+        <TargetFrameworks>net48;net6.0</TargetFrameworks>
+        <GenerateDocumentationFile>False</GenerateDocumentationFile>
+      </PropertyGroup>
+    </When>
+  </Choose>
+  
+</Project>
