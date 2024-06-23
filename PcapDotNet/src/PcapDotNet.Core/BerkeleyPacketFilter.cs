@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.InteropServices;
 using PcapDotNet.Core.Native;
 using PcapDotNet.Packets;
@@ -59,9 +59,15 @@ namespace PcapDotNet.Core
         /// </summary>
         public void Dispose()
         {
-            Interop.Pcap.pcap_freecode(_bpf);
-            Marshal.FreeHGlobal(_bpf);
-            _bpf = IntPtr.Zero;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+        ~BerkeleyPacketFilter()
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
+        { 
+            Dispose(false); 
         }
 
         /// <summary>
@@ -73,7 +79,7 @@ namespace PcapDotNet.Core
         /// <param name="snapshotLength">The length of the bytes that are currently available into the packet if the packet satisfies the filter, 0 otherwise.</param>
         /// <param name="packet">The packet that has to be filtered.</param>
         /// <returns>
-        /// True iff the given packet satisfies the filter.
+        /// True if the given packet satisfies the filter.
         /// </returns>
         public bool Test(out int snapshotLength, Packet packet)
         {
@@ -101,12 +107,11 @@ namespace PcapDotNet.Core
         /// </summary>
         /// <param name="packet">The packet that has to be filtered.</param>
         /// <returns>
-        /// True iff the given packet satisfies the filter.
+        /// True if the given packet satisfies the filter.
         /// </returns>
         public bool Test(Packet packet)
         {
-            int snapshotLength;
-            return Test(out snapshotLength, packet);
+            return Test(out _, packet);
         }
 
         internal void SetFilter(PcapHandle /* pcap_t* */ pcapDescriptor)
@@ -144,6 +149,20 @@ namespace PcapDotNet.Core
                 _bpf = IntPtr.Zero;
                 throw;
             }
+        }
+
+        private void Dispose(bool disposing)
+        {
+            if (_bpf == IntPtr.Zero)
+            {
+                return;
+            }
+
+            if (disposing) { /* no managed resources here */ }
+
+            Interop.Pcap.pcap_freecode(_bpf);
+            Marshal.FreeHGlobal(_bpf);
+            _bpf = IntPtr.Zero;
         }
 
     }
