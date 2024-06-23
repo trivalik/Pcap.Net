@@ -20,8 +20,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PcapDotNet.Core.Extensions"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PcapDotNet.Core", "PcapDotNet.Core\PcapDotNet.Core.csproj", "{CB7C9D43-422C-4B43-999A-F65F6E2C7075}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PcapDotNet.Core.Managed.Test", "PcapDotNet.Core.Managed.Tests\PcapDotNet.Core.Managed.Test.csproj", "{23F3898E-FDA7-442E-91AD-1DD5DF91B706}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C3C951FF-9AB9-4018-9AA7-134FDC7BCED5}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
@@ -70,10 +68,6 @@ Global
 		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CB7C9D43-422C-4B43-999A-F65F6E2C7075}.Release|Any CPU.Build.0 = Release|Any CPU
-		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23F3898E-FDA7-442E-91AD-1DD5DF91B706}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
