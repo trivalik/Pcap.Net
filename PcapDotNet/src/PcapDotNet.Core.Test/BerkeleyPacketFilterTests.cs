@@ -9,7 +9,8 @@ namespace PcapDotNet.Core.Test
     /// <summary>
     /// Summary description for BerkeleyPacketFilterTests
     /// </summary>
-    [ExcludeFromCodeCoverage] 
+    [ExcludeFromCodeCoverage]
+    [Collection(nameof(LivePacketDeviceTests))]
     public class BerkeleyPacketFilterTests
     {
         [Fact]

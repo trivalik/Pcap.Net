@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using PcapDotNet.Core.Extensions;
 using Xunit;
@@ -9,6 +9,7 @@ namespace PcapDotNet.Core.Test
     /// Summary description for LivePacketDeviceExtensionsTests
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [Collection(nameof(LivePacketDeviceTests))]
     public class LivePacketDeviceExtensionsTests
     {
         [Fact]

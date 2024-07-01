@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 using PcapDotNet.Packets;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.TestUtils;
@@ -15,6 +15,7 @@ namespace PcapDotNet.Core.Test
     /// Summary description for OfflinePacketDeviceTests
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [Collection(nameof(LivePacketDeviceTests))]
     public class OfflinePacketDeviceTests
     {
         private static void TestOpenMultipleTimes(int numTimes, string filename)
@@ -109,24 +110,51 @@ namespace PcapDotNet.Core.Test
             TestGetSomePackets(NumPacketsToSend, NumPacketsToSend, 0, PacketCommunicatorReceiveResult.BreakLoop, 0, 0.05, 0.05);
         }
 
-        [Fact]
-        public void GetPacketsTest()
+        private const int GetPacketsTest_NumPacketsToSend = 100;
+
+        [Theory]
+        // Normal
+        [InlineData(GetPacketsTest_NumPacketsToSend, GetPacketsTest_NumPacketsToSend, int.MaxValue, PacketCommunicatorReceiveResult.Ok, GetPacketsTest_NumPacketsToSend, 0.05, 0.05)]
+        [InlineData(GetPacketsTest_NumPacketsToSend, GetPacketsTest_NumPacketsToSend / 2, int.MaxValue, PacketCommunicatorReceiveResult.Ok, GetPacketsTest_NumPacketsToSend / 2, 0.05, 0.05)]
+        // Eof
+        [InlineData(GetPacketsTest_NumPacketsToSend, 0, int.MaxValue, PacketCommunicatorReceiveResult.Eof, GetPacketsTest_NumPacketsToSend, 0.05, 0.05)]
+        [InlineData(GetPacketsTest_NumPacketsToSend, -1, int.MaxValue, PacketCommunicatorReceiveResult.Eof, GetPacketsTest_NumPacketsToSend, 0.05, 0.05)]
+        [InlineData(GetPacketsTest_NumPacketsToSend, GetPacketsTest_NumPacketsToSend + 1, int.MaxValue, PacketCommunicatorReceiveResult.Eof, GetPacketsTest_NumPacketsToSend, 0.05, 0.05)]
+        [InlineData(0, -1, int.MaxValue, PacketCommunicatorReceiveResult.Eof, 0, 0.05, 0.05)]
+        // Break loop
+        [InlineData(GetPacketsTest_NumPacketsToSend, GetPacketsTest_NumPacketsToSend, GetPacketsTest_NumPacketsToSend / 2, PacketCommunicatorReceiveResult.BreakLoop, GetPacketsTest_NumPacketsToSend / 2, 0.05, 0.05)]
+        [InlineData(GetPacketsTest_NumPacketsToSend, GetPacketsTest_NumPacketsToSend, 0, PacketCommunicatorReceiveResult.BreakLoop, 0, 0.05, 0.05)]
+        public async Task GetPacketsTest(int numPacketsToSend, int numPacketsToGet, int numPacketsToBreakLoop,
+                                               PacketCommunicatorReceiveResult expectedResult, int expectedNumPackets,
+                                               double expectedMinSeconds, double expectedMaxSeconds)
         {
-            const int NumPacketsToSend = 100;
+            string testDescription = "NumPacketsToSend=" + numPacketsToSend + ". NumPacketsToGet=" + numPacketsToGet +
+                         ". NumPacketsToBreakLoop=" + numPacketsToBreakLoop;
 
-            // Normal
-            TestReceivePackets(NumPacketsToSend, NumPacketsToSend, int.MaxValue, PacketCommunicatorReceiveResult.Ok, NumPacketsToSend, 0.05, 0.05);
-            TestReceivePackets(NumPacketsToSend, NumPacketsToSend / 2, int.MaxValue, PacketCommunicatorReceiveResult.Ok, NumPacketsToSend / 2, 0.05, 0.05);
+            const string SourceMac = "11:22:33:44:55:66";
+            const string DestinationMac = "77:88:99:AA:BB:CC";
 
-            // Eof
-            TestReceivePackets(NumPacketsToSend, 0, int.MaxValue, PacketCommunicatorReceiveResult.Eof, NumPacketsToSend, 0.05, 0.05);
-            TestReceivePackets(NumPacketsToSend, -1, int.MaxValue, PacketCommunicatorReceiveResult.Eof, NumPacketsToSend, 0.05, 0.05);
-            TestReceivePackets(NumPacketsToSend, NumPacketsToSend + 1, int.MaxValue, PacketCommunicatorReceiveResult.Eof, NumPacketsToSend, 0.05, 0.05);
-            TestReceivePackets(0, -1, int.MaxValue, PacketCommunicatorReceiveResult.Eof, 0, 0.05, 0.05);
+            Packet expectedPacket = _random.NextEthernetPacket(24, SourceMac, DestinationMac);
 
-            // Break loop
-            TestReceivePackets(NumPacketsToSend, NumPacketsToSend, NumPacketsToSend / 2, PacketCommunicatorReceiveResult.BreakLoop, NumPacketsToSend / 2, 0.05, 0.05);
-            TestReceivePackets(NumPacketsToSend, NumPacketsToSend, 0, PacketCommunicatorReceiveResult.BreakLoop, 0, 0.05, 0.05);
+            using (PacketCommunicator communicator = OpenOfflineDevice(numPacketsToSend, expectedPacket))
+            {
+                communicator.SetFilter("ether src " + SourceMac + " and ether dst " + DestinationMac);
+
+                if (numPacketsToBreakLoop == 0)
+                    communicator.Break();
+                PacketHandler handler = new PacketHandler(expectedPacket, expectedMinSeconds, expectedMaxSeconds, communicator, numPacketsToBreakLoop);
+
+                PacketCommunicatorReceiveResult result = PacketCommunicatorReceiveResult.None;
+                var task = Task.Run(delegate ()
+                {
+                    result = communicator.ReceivePackets(numPacketsToGet, handler.Handle);
+                });
+                var delay = Task.Delay(TimeSpan.FromSeconds(5));
+                await Task.WhenAny(task, delay);
+
+                Assert.True(expectedResult == result, testDescription);
+                Assert.Equal(expectedNumPackets, handler.NumPacketsHandled);
+            }
         }
 
         [Fact]
@@ -348,43 +376,6 @@ namespace PcapDotNet.Core.Test
                 Assert.Equal(expectedResult, result);
                 Assert.True(expectedNumPackets == numPacketsGot, "NumPacketsGot. Test: " + testDescription);
                 Assert.True(expectedNumPackets == handler.NumPacketsHandled, "NumPacketsHandled. Test: " + testDescription);
-            }
-        }
-
-        private static void TestReceivePackets(int numPacketsToSend, int numPacketsToGet, int numPacketsToBreakLoop,
-                                               PacketCommunicatorReceiveResult expectedResult, int expectedNumPackets,
-                                               double expectedMinSeconds, double expectedMaxSeconds)
-        {
-            string testDescription = "NumPacketsToSend=" + numPacketsToSend + ". NumPacketsToGet=" + numPacketsToGet +
-                         ". NumPacketsToBreakLoop=" + numPacketsToBreakLoop;
-
-            const string SourceMac = "11:22:33:44:55:66";
-            const string DestinationMac = "77:88:99:AA:BB:CC";
-
-            Packet expectedPacket = _random.NextEthernetPacket(24, SourceMac, DestinationMac);
-
-            using (PacketCommunicator communicator = OpenOfflineDevice(numPacketsToSend, expectedPacket))
-            {
-                communicator.SetFilter("ether src " + SourceMac + " and ether dst " + DestinationMac);
-
-                if (numPacketsToBreakLoop == 0)
-                    communicator.Break();
-                PacketHandler handler = new PacketHandler(expectedPacket, expectedMinSeconds, expectedMaxSeconds, communicator, numPacketsToBreakLoop);
-
-                PacketCommunicatorReceiveResult result = PacketCommunicatorReceiveResult.None;
-                Thread thread = new Thread(delegate()
-                {
-                    result = communicator.ReceivePackets(numPacketsToGet, handler.Handle);
-                });
-                thread.Start();
-
-                if (!thread.Join(TimeSpan.FromSeconds(5)))
-                {
-                    thread.Abort();
-                }
-
-                Assert.True(expectedResult == result, testDescription);
-                Assert.Equal(expectedNumPackets, handler.NumPacketsHandled);
             }
         }
 

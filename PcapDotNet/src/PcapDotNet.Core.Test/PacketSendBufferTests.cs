@@ -12,6 +12,7 @@ namespace PcapDotNet.Core.Test
     /// Summary description for PacketSendQueueTests
     /// </summary>
     [ExcludeFromCodeCoverage]
+    [Collection(nameof(LivePacketDeviceTests))]
     public class PacketSendQueueTests
     {
         [Fact]
