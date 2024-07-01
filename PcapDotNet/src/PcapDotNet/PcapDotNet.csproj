@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <IsPackable>True</IsPackable>
+    <NoBuild>true</NoBuild>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <NuspecFile>$(MSBuildThisFileDirectory)PcapDotNet.nuspec</NuspecFile>
+    <NuspecBasePath>$(BaseOutputPath)\$(Configuration)</NuspecBasePath>
+    <NuspecProperties>version=$(Version);copyright=$(Copyright);authors=$(Authors);licenseUrl=$(PackageLicenseUrl);projectUrl=$(PackageProjectUrl);description=$(Description);licenseExpression=$(PackageLicenseExpression);licenseFile=$(PackageLicenseFile)</NuspecProperties>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PcapDotNet.Base\PcapDotNet.Base.csproj" />
+    <ProjectReference Include="..\PcapDotNet.Core\PcapDotNet.Core.csproj" />
+    <ProjectReference Include="..\PcapDotNet.Core.Extensions\PcapDotNet.Core.Extensions.csproj"  />
+    <ProjectReference Include="..\PcapDotNet.Packets\PcapDotNet.Packets.csproj" />
+  </ItemGroup>
+
+</Project>
