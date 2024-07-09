@@ -48,5 +48,11 @@
       </PropertyGroup>
     </When>
   </Choose>
-  
+
+  <Target Name="CreateSdk" BeforeTargets="BeforeBuild">
+    <GetFrameworkSdkPath>
+      <Output TaskParameter="Path" PropertyName="WindowsSdkPath"/>
+    </GetFrameworkSdkPath>
+    <Exec Command="&quot;$(WindowsSdkPath)bin\NETFX 4.8 Tools\sn.exe&quot; -k &quot;$(SolutionDir)$(SolutionName).snk&quot;" Condition="!Exists('$(SolutionDir)$(SolutionName).snk')" />
+  </Target>
 </Project>
