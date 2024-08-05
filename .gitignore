@@ -12,7 +12,6 @@ TemporaryGeneratedFile_*
 *.opensdf
 *.pdb
 *.sdf
-*.snk
 *.suo
 *.vcxproj.user
 *.db

@@ -26,6 +26,8 @@
     <When Condition=" !$(MSBuildProjectName.EndsWith('.Test')) ">
       <PropertyGroup>
         <TargetFrameworks>netstandard2.0</TargetFrameworks>
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)PcapDotNet.snk</AssemblyOriginatorKeyFile>
       </PropertyGroup>
     </When>
   </Choose>
