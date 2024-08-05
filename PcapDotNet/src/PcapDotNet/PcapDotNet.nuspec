@@ -15,8 +15,8 @@
   </metadata>
     <files>
       <file src="$licenseFile$" target="" />
-      <file src="netstandard2.0\PcapDotNet*.dll" target="lib\netstandard2.0" />
-      <file src="netstandard2.0\PcapDotNet*.pdb" target="lib\netstandard2.0" />
-      <file src="netstandard2.0\PcapDotNet*.xml" target="lib\netstandard2.0" />
+      <file src="netstandard2.0\PcapDotNet*.dll" target="lib\netstandard2.0" exclude="netstandard2.0\*Test*" />
+      <file src="netstandard2.0\PcapDotNet*.pdb" target="lib\netstandard2.0" exclude="netstandard2.0\*Test*" />
+      <file src="netstandard2.0\PcapDotNet*.xml" target="lib\netstandard2.0" exclude="netstandard2.0\*Test*" />
     </files>
 </package>
