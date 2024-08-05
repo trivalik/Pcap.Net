@@ -6,7 +6,7 @@
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NuspecFile>$(MSBuildThisFileDirectory)PcapDotNet.nuspec</NuspecFile>
     <NuspecBasePath>$(BaseOutputPath)\$(Configuration)</NuspecBasePath>
-    <NuspecProperties>version=$(Version);copyright=$(Copyright);authors=$(Authors);licenseUrl=$(PackageLicenseUrl);projectUrl=$(PackageProjectUrl);description=$(Description);licenseExpression=$(PackageLicenseExpression);licenseFile=$(PackageLicenseFile)</NuspecProperties>
+    <NuspecProperties>version=$(Version);copyright=$(Copyright);authors=$(Authors);licenseUrl=$(PackageLicenseUrl);projectUrl=$(PackageProjectUrl);description=$(Description);licenseExpression=$(PackageLicenseExpression);licenseFile=$(PackageLicenseFile);readmeFile=$(PackageReadmeFile)</NuspecProperties>
   </PropertyGroup>
 
   <ItemGroup>

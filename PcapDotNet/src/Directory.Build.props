@@ -7,12 +7,9 @@
     <Authors>Boaz Brickner</Authors>
     <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
     <PackageLicenseFile>$(MSBuildThisFileDirectory)../../license.txt</PackageLicenseFile>
+    <PackageReadmeFile>$(MSBuildThisFileDirectory)../../README.md</PackageReadmeFile>
     <PackageProjectUrl>http://pcapdot.net</PackageProjectUrl>
-    <Description>
-      Pcap.Net is a .NET wrapper for WinPcap/Npcap written in and C# using P/Invoke.
-      It Features almost all WinPcap features and includes a packet interpretation framework.
-      See http://pcapdot.net.
-    </Description>
+    <Description>Pcap.Net is a .NET wrapper for Npcap (formerly WinPcap), written in C# using P/Invoke, providing almost all Npcap functions and including a package interpretation framework. See http://pcapdot.net.</Description>
     <NoWarn>1718, 1573</NoWarn>
     <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory)../obj/$(MSBuildProjectName)/</BaseIntermediateOutputPath>
     <BaseOutputPath>$(MSBuildThisFileDirectory)../bin/</BaseOutputPath>
