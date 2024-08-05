@@ -1,5 +1,5 @@
 # Pcap.Net
-.NET wrapper for WinPcap written in C++/CLI and C#, which features almost all WinPcap features and includes a packet interpretation framework.
+.NET wrapper for [Npcap](https://npcap.com/) (formerly WinPcap), written in C# using [P/Invoke](https://learn.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke), providing almost all Npcap functions and including a package interpretation framework.
 
 ## Need help?
 * See the [Pcap.Net wiki](https://github.com/PcapDotNet/Pcap.Net/wiki) for guides on using and developing Pcap.Net.
@@ -7,8 +7,7 @@
 
 ## Features
 
-### .Net wrap for WinPcap
-
+### .NET wrapper for Npcap
 Including:
 * Getting the list of Live Devices on the local host.
 * Reading packets from Live Devices (Network Devices) and Offline Devices (Files) using the different WinPcap methods.
@@ -37,8 +36,18 @@ Not including:
 * DNS
 * HTTP
 
-[![Follow Pcap.Net on Google+](https://ssl.gstatic.com/images/icons/gplus-32.png)](https://plus.google.com/111766834267147414574) [Follow Pcap.Net on Google+](https://plus.google.com/111766834267147414574)
+## (Possible) Roadmap/Goals
 
-<a href='https://pledgie.com/campaigns/28716'><img alt='Click here to lend your support to: Pcap.Net and make a donation at pledgie.com !' src='https://pledgie.com/campaigns/28716.png?skin_name=chrome' border='0' ></a>
+### v2.0
+* Port v1.0 C++/CLI code to managed C# code.
+* Support for use in a .NET Core or .NET 5+ project.
+* Keep API as compatible as possible with v1.0.
+* Create the ability to support platforms other than Windows.
 
-<a href='https://salt.bountysource.com/teams/pcapdotnet'>Support Pcap.Net using Salt</a>
+
+### v3.0
+* Merge into a single assembly (DLL). Possible as there is no longer a C++/CLI assembly.
+* TBD
+
+### Unix support
+* Find good solution for `PacketSendBuffer`.
