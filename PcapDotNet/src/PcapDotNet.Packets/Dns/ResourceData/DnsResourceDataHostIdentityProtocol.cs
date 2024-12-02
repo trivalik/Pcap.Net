@@ -1,10 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using PcapDotNet.Base;
-using IListExtensions = PcapDotNet.Base.IListExtensions;
 
 namespace PcapDotNet.Packets.Dns
 {
@@ -71,7 +70,7 @@ namespace PcapDotNet.Packets.Dns
             HostIdentityTag = hostIdentityTag;
             PublicKeyAlgorithm = publicKeyAlgorithm;
             PublicKey = publicKey;
-            RendezvousServers = IListExtensions.AsReadOnly<DnsDomainName>(rendezvousServers.ToArray());
+            RendezvousServers = rendezvousServers.ToArray().AsReadOnly();
         }
 
         /// <summary>

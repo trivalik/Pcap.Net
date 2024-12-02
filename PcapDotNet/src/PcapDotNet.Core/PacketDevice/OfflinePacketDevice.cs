@@ -1,5 +1,7 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using PcapDotNet.Base;
 
 namespace PcapDotNet.Core
 {
@@ -49,7 +51,7 @@ namespace PcapDotNet.Core
         /// </summary>
         public override ReadOnlyCollection<DeviceAddress> Addresses
         {
-            get { return new ReadOnlyCollection<DeviceAddress>(Array.Empty<DeviceAddress>()); }
+            get { return new DeviceAddress[0].AsReadOnly(); }
         }
 
         /// <summary>

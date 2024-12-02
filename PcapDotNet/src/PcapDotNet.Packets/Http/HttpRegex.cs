@@ -1,7 +1,8 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using PcapDotNet.Base;
+using EncodingExtensions = PcapDotNet.Base.EncodingExtensions;
 
 namespace PcapDotNet.Packets.Http
 {

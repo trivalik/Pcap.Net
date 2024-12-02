@@ -59,15 +59,11 @@ namespace PcapDotNet.Packets.Ip
 
         private static OptionTypeRegistrationAttribute GetRegistrationAttribute(Type type)
         {
-            var registraionAttributes =
-                from attribute in type.GetCustomAttributes<OptionTypeRegistrationAttribute>(false)
+            var registrationAttributes =
+                from attribute in (IEnumerable<OptionTypeRegistrationAttribute>)type.GetCustomAttributes(typeof(OptionTypeRegistrationAttribute), false)
                 where attribute.OptionTypeType == typeof(TOptionType)
                 select attribute;
-
-            if (!registraionAttributes.Any())
-                return null;
-
-            return registraionAttributes.First();
+            return registrationAttributes.FirstOrDefault();
         }
 
         private static readonly Dictionary<TOptionType, IOptionComplexFactory> _complexOptions = InitializeComplexOptions();

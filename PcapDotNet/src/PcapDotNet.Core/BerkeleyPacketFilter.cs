@@ -140,7 +140,7 @@ namespace PcapDotNet.Core
             {
                 if (Interop.Pcap.pcap_compile(pcapDescriptor, _bpf, filterString, 1, netmaskValue) != 0)
                 {
-                    throw new ArgumentException("An error has occured when compiling the filter <" + filterString + ">: " + PcapError.GetErrorMessage(pcapDescriptor));
+                    throw new ArgumentException("An error has occurred when compiling the filter <" + filterString + ">: " + PcapError.GetErrorMessage(pcapDescriptor));
                 }
             }
             catch

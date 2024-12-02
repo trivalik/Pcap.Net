@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.CSharp;
 using PcapDotNet.Base;
+using EncodingExtensions = PcapDotNet.Base.EncodingExtensions;
 
 namespace PcapDotNet.Packets.Http
 {

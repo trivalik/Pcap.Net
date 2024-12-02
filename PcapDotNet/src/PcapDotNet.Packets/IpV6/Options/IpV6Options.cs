@@ -127,11 +127,8 @@ namespace PcapDotNet.Packets.IpV6
 
         private static IpV6OptionTypeRegistrationAttribute GetRegistrationAttribute(Type type)
         {
-            var registraionAttributes = type.GetCustomAttributes<IpV6OptionTypeRegistrationAttribute>(false);
-            if (!registraionAttributes.Any())
-                return null;
-
-            return registraionAttributes.First();
+            var registrationAttributes = (IEnumerable<IpV6OptionTypeRegistrationAttribute>)type.GetCustomAttributes(typeof(IpV6OptionTypeRegistrationAttribute), false);
+            return registrationAttributes.FirstOrDefault();
         }
 
         private static readonly IpV6Options _empty = new IpV6Options();
