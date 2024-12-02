@@ -159,7 +159,7 @@ namespace PcapDotNet.Packets.Ethernet
                 }
             }
         }
-        
+
         /// <summary>
         /// The Ethernet payload as an ARP datagram.
         /// </summary>

@@ -99,7 +99,7 @@ namespace PcapDotNet.Packets.Dns
         public ReadOnlyCollection<DnsDomainName> RendezvousServers { get; private set; }
 
         /// <summary>
-        /// Two DnsResourceDataHostIdentityProtocol are equal iff their host identity tag, public key algorithm, public key and rendezvous servers fields 
+        /// Two DnsResourceDataHostIdentityProtocol are equal iff their host identity tag, public key algorithm, public key and rendezvous servers fields
         /// are equal.
         /// </summary>
         public bool Equals(DnsResourceDataHostIdentityProtocol other)
@@ -112,7 +112,7 @@ namespace PcapDotNet.Packets.Dns
         }
 
         /// <summary>
-        /// Two DnsResourceDataHostIdentityProtocol are equal iff their host identity tag, public key algorithm, public key and rendezvous servers fields 
+        /// Two DnsResourceDataHostIdentityProtocol are equal iff their host identity tag, public key algorithm, public key and rendezvous servers fields
         /// are equal.
         /// </summary>
         public override bool Equals(object obj)
@@ -163,7 +163,7 @@ namespace PcapDotNet.Packets.Dns
             int hostIdentityTagLength = dns[offsetInDns + Offset.HostIdentityTagLength];
             DnsPublicKeyAlgorithm publicKeyAlgorithm = (DnsPublicKeyAlgorithm)dns[offsetInDns + Offset.PublicKeyAlgorithm];
             int publicKeyLength = dns.ReadUShort(offsetInDns + Offset.PublicKeyLength, Endianity.Big);
-            
+
             if (length < ConstantPartLength + hostIdentityTagLength + publicKeyLength)
                 return null;
             DataSegment hostIdentityTag = dns.Subsegment(offsetInDns + Offset.HostIdentityTag, hostIdentityTagLength);

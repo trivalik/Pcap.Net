@@ -32,7 +32,7 @@ namespace PcapDotNet.Core.Test
 #endif
 
         [Fact]
-        public void SendAndReceievePacketTest()
+        public void SendAndReceivePacketTest()
         {
             const string SourceMac = "11:22:33:44:55:66";
             const string DestinationMac = "77:88:99:AA:BB:CC";

@@ -31,7 +31,7 @@ namespace PcapDotNet.Packets.Gre
         }
 
         /// <summary>
-        /// The SRE Length field contains the number of octets in the SRE.  
+        /// The SRE Length field contains the number of octets in the SRE.
         /// </summary>
         public override byte PayloadLength
         {

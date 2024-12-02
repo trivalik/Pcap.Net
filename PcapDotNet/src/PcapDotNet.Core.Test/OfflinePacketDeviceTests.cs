@@ -310,7 +310,7 @@ namespace PcapDotNet.Core.Test
         public void SetSamplingMethodFirstAfterIntervalTest()
         {
             const int NumPackets = 10;
-            
+
             Packet expectedPacket = _random.NextEthernetPacket(100);
             using (PacketCommunicator communicator = OpenOfflineDevice(NumPackets, expectedPacket, TimeSpan.FromSeconds(1)))
             {
@@ -338,7 +338,7 @@ namespace PcapDotNet.Core.Test
         {
             Assert.Throws<InvalidOperationException>(() => OpenOfflineDevice(10, _random.NextEthernetPacket(100), TimeSpan.Zero, "??"));
         }
-        
+
         [Fact]
         public void EmptyNameTest()
         {
@@ -403,7 +403,6 @@ namespace PcapDotNet.Core.Test
 
             Assert.True(File.Exists(ReadUnicodeFilename), string.Format("File {0} doesn't exist", ReadUnicodeFilename));
         }
-
 
         [Fact]
         public void ReadNonExistingUnicodeFilenameTest()

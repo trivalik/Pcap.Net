@@ -452,7 +452,7 @@ namespace PcapDotNet.Core.Test
                     {
                     // Wireshark's preferences file is %APPDATA%\Wireshark\preferences
                         FileName = Path.Combine(wiresharkDirectory, WiresharkTshark),
-                        Arguments = "-o ip.check_checksum:TRUE " + 
+                        Arguments = "-o ip.check_checksum:TRUE " +
                                     "-o ipv6.use_geoip:FALSE " +
                                     "-o udp.check_checksum:TRUE " +
                                     "-o tcp.relative_sequence_numbers:FALSE " +

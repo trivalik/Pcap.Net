@@ -22,7 +22,7 @@ namespace PcapDotNet.Core
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown if some errors occurred. 
-        /// An error could be due to several reasons: 
+        /// An error could be due to several reasons:
         ///   <list type="bullet">
         ///     <item>libpcap/WinPcap was not installed on the local/remote host.</item>
         ///     <item>The user does not have enough privileges to list the devices.</item>

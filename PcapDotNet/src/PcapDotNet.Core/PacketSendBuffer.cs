@@ -44,7 +44,7 @@ namespace PcapDotNet.Core
             {
                 throw new ArgumentNullException(nameof(packet));
             }
-            
+
             var hdrSize = Interop.Pcap.PcapHeaderSize;
             if (hdrSize + packet.Length > _buffer.Length - _currentBufferPosition)
             {

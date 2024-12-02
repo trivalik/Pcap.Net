@@ -86,7 +86,7 @@ namespace PcapDotNet.Packets.Test
         {
             DnsLayer dnsLayer = new DnsLayer();
             TestDomainNameCompression(0, dnsLayer);
-            
+
             dnsLayer.Queries = new List<DnsQueryResourceRecord>();
             dnsLayer.Answers = new List<DnsDataResourceRecord>();
             dnsLayer.Authorities = new List<DnsDataResourceRecord>();
@@ -181,7 +181,7 @@ namespace PcapDotNet.Packets.Test
                 DnsResourceDataOptions data = (DnsResourceDataOptions)random.NextDnsResourceData(DnsType.Opt);
 
                 DnsOptResourceRecord record = new DnsOptResourceRecord(domainName, sendersUdpPayloadSize, extendedRcode, version, flags, data);
-                
+
                 Assert.Equal(domainName, record.DomainName);
                 Assert.Equal(sendersUdpPayloadSize, record.SendersUdpPayloadSize);
                 Assert.Equal(extendedRcode, record.ExtendedReturnCode);
@@ -723,7 +723,7 @@ namespace PcapDotNet.Packets.Test
         {
             Assert.Throws<ArgumentNullException>(() => new DnsResourceDataDelegationSigner(1, DnsAlgorithm.PrivateDns, DnsDigestType.Sha1, null));
         }
-        
+
         [Fact]
         public void DnsResourceDataDomainNameParseWrongLengthTest()
         {

@@ -699,7 +699,7 @@ namespace PcapDotNet.Core.Native
             internal extern static int pcap_minor_version(PcapHandle /* pcap_t* */ p);
 
             /// <summary>
-            /// pcap_activate() is used to activate a packet capture handle to look at packets on the network, with the options that were set on the handle being in effect.  
+            /// pcap_activate() is used to activate a packet capture handle to look at packets on the network, with the options that were set on the handle being in effect.
             /// </summary>
             /// <returns>Returns 0 on success without warnings, a non-zero positive value on success with warnings, and a negative value on error. A non-zero return value indicates what warning or error condition occurred.</returns>
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]

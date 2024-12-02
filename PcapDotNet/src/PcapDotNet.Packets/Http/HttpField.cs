@@ -1,12 +1,9 @@
 using System;
-using System.CodeDom;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
-using Microsoft.CSharp;
 using PcapDotNet.Base;
 using EncodingExtensions = PcapDotNet.Base.EncodingExtensions;
 
@@ -53,7 +50,7 @@ namespace PcapDotNet.Packets.Http
         /// <returns>The constructed HTTP field.</returns>
         public static HttpField CreateField(string fieldName, string fieldValue, Encoding fieldValueEncoding)
         {
-            if (fieldValueEncoding == null) 
+            if (fieldValueEncoding == null)
                 throw new ArgumentNullException("fieldValueEncoding");
 
             return CreateField(fieldName, fieldValueEncoding.GetBytes(NormalizeValue(fieldValue)));
@@ -143,7 +140,7 @@ namespace PcapDotNet.Packets.Http
         }
 
         internal HttpField(string name, string value, Encoding encoding)
-            : this(name, encoding == null ? null : encoding.GetBytes(NormalizeValue(value)))
+            : this(name, encoding?.GetBytes(NormalizeValue(value)))
         {
         }
 
@@ -157,7 +154,7 @@ namespace PcapDotNet.Packets.Http
             Name = name;
             Value = value;
         }
-        
+
         internal void Write(byte[] buffer, ref int offset)
         {
             buffer.Write(ref offset, Name, Encoding.ASCII);

@@ -1,6 +1,4 @@
 using System;
-using System.Text;
-using PcapDotNet.Base;
 using EncodingExtensions = PcapDotNet.Base.EncodingExtensions;
 
 namespace PcapDotNet.Packets.Http

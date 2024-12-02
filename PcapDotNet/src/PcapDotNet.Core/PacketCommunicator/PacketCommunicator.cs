@@ -20,7 +20,7 @@ namespace PcapDotNet.Core
     public delegate void HandleStatistics(PacketSampleStatistics statistics);
 
     /// <summary>
-    /// Used to receive and send packets accross the network or to read and write packets to a pcap file.
+    /// Used to receive and send packets across the network or to read and write packets to a pcap file.
     /// </summary>
     public abstract class PacketCommunicator : IDisposable
     {
@@ -34,13 +34,13 @@ namespace PcapDotNet.Core
         }
 
         /// <summary>
-        /// Close the files associated with the capture and deallocates resources. 
+        /// Close the files associated with the capture and deallocates resources.
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             PcapDescriptor.Dispose();
         }
-        
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -110,7 +110,7 @@ namespace PcapDotNet.Core
         }
 
         /// <summary>
-        /// The dimension of the packet portion (in bytes) that is delivered to the application. 
+        /// The dimension of the packet portion (in bytes) that is delivered to the application.
         /// </summary>
         public int SnapshotLength { get => Interop.Pcap.pcap_snapshot(PcapDescriptor); }
 
@@ -230,12 +230,12 @@ namespace PcapDotNet.Core
 
         /// <summary>
         /// Define a sampling method for packet capture.
-        /// This function allows applying a sampling method to the packet capture process. 
+        /// This function allows applying a sampling method to the packet capture process.
         /// The method will be applied as soon as the capture starts.
         /// </summary>
         /// <remarks>
         /// Warning: Sampling parameters cannot be changed when a capture is active. These parameters must be applied before starting the capture. If they are applied when the capture is in progress, the new settings are ignored.
-        /// Warning: Sampling works only when capturing data on Win32 or reading from a file. It has not been implemented on other platforms. Sampling works on remote machines provided that the probe (i.e. the capturing device) is a Win32 workstation. 
+        /// Warning: Sampling works only when capturing data on Win32 or reading from a file. It has not been implemented on other platforms. Sampling works on remote machines provided that the probe (i.e. the capturing device) is a Win32 workstation.
         /// </remarks>
         /// <param name="method">The sampling method to be applied</param>
         public void SetSamplingMethod(SamplingMethod method)
@@ -290,7 +290,7 @@ namespace PcapDotNet.Core
 
         /// <summary>
         /// Collect a group of packets.
-        /// Used to collect and process packets. 
+        /// Used to collect and process packets.
         /// <seealso cref="ReceivePacket"/>
         /// <seealso cref="ReceivePackets"/>
         /// <seealso cref="Break"/>

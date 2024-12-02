@@ -55,7 +55,7 @@ namespace PcapDotNet.Packets.IpV6
                 throw new ArgumentNullException("value");
 
             string cannonizedValue = value;
-            
+
             // Handle ...:1.2.3.4
             int lastColonIndex = cannonizedValue.LastIndexOf(':');
             if (lastColonIndex == -1)

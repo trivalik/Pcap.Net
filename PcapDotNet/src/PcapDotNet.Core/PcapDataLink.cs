@@ -140,7 +140,7 @@ namespace PcapDotNet.Core
         {
             return Name + " (" + Description + ")";
         }
-        
+
         /// <inheritdoc/>
         public bool Equals(PcapDataLink other)
         {

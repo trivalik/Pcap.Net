@@ -59,7 +59,7 @@ namespace PcapDotNet.Packets.IpV6
 
         internal abstract int GetDataHashCode();
 
-        internal IpV6ExtensionHeaderStandard(IpV4Protocol? nextHeader) 
+        internal IpV6ExtensionHeaderStandard(IpV4Protocol? nextHeader)
             : base(nextHeader)
         {
         }

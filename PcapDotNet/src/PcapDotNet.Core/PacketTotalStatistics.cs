@@ -6,7 +6,7 @@ using PcapDotNet.Core.Native;
 namespace PcapDotNet.Core
 {
     /// <summary>
-    /// Statistics on capture from the start of the run. 
+    /// Statistics on capture from the start of the run.
     /// </summary>
     public sealed class PacketTotalStatistics : IEquatable<PacketTotalStatistics>
     {
