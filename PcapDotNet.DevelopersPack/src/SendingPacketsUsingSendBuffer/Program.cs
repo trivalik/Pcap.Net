@@ -117,7 +117,7 @@ namespace SendingPacketsUsingSendBuffer
         {
             Console.WriteLine("Sends a libpcap/tcpdump capture file to the net.");
             Console.WriteLine("Usage:");
-            Console.WriteLine("\t" + Environment.GetCommandLineArgs()[0] + " <filename> [s]");
+            Console.WriteLine("\t" + Path.GetFileName(Environment.GetCommandLineArgs()[0]) + " <filename> [s]");
             Console.WriteLine();
             Console.WriteLine("Parameters:");
             Console.WriteLine("\tfilename: the name of the dump file that will be sent to the network");

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using PcapDotNet.Core;
@@ -53,7 +52,7 @@ namespace UsingLinq
             // Open the device
             using (PacketCommunicator communicator =
                 selectedDevice.Open(65536,                                  // portion of the packet to capture
-                // 65536 guarantees that the whole packet will be captured on all the link layers
+                                                                            // 65536 guarantees that the whole packet will be captured on all the link layers
                                     PacketDeviceOpenAttributes.Promiscuous, // promiscuous mode
                                     1000))                                  // read timeout
             {
@@ -65,13 +64,13 @@ namespace UsingLinq
                 }
 
                 // Compile and set the filter
-//                communicator.SetFilter("ip and tcp");
+                // communicator.SetFilter("ip and tcp");
 
                 Console.WriteLine("Listening on " + selectedDevice.Description + "...");
 
                 // start the capture
                 var query = from packet in communicator.ReceivePackets()
-//                            where !packet.IsValid
+                                //                            where !packet.IsValid
                             select packet;
 
                 using (PacketDumpFile dumpFile = communicator.OpenDump("dump.pcap"))
@@ -85,8 +84,8 @@ namespace UsingLinq
                         {
                             Console.WriteLine("Captured Packet " + packet.Timestamp);
                         }
-                        
-//                        dumpFile.Dump(packet);
+
+                        // dumpFile.Dump(packet);
                     }
                 }
             }

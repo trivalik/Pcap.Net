@@ -1,6 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObtainingTheDeviceList", "ObtainingTheDeviceList\ObtainingTheDeviceList.csproj", "{58B6F829-2F7C-4ED3-9CEF-DBE55814D31E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObtainingAdvancedInformationAboutInstalledDevices", "ObtainingAdvancedInformationAboutInstalledDevices\ObtainingAdvancedInformationAboutInstalledDevices.csproj", "{BF87FF20-7F17-44E2-BE2B-9F96755F1468}"
@@ -26,48 +28,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptureInvalidPackets", "CaptureInvalidPackets\CaptureInvalidPackets.csproj", "{ED16F17F-1AFA-496A-9CB7-404405FD998C}"
 EndProject
 Global
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 13
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://tfs06.codeplex.com/
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = ObtainingTheDeviceList\\ObtainingTheDeviceList.csproj
-		SccProjectName1 = ObtainingTheDeviceList
-		SccLocalPath1 = ObtainingTheDeviceList
-		SccProjectUniqueName2 = ObtainingAdvancedInformationAboutInstalledDevices\\ObtainingAdvancedInformationAboutInstalledDevices.csproj
-		SccProjectName2 = ObtainingAdvancedInformationAboutInstalledDevices
-		SccLocalPath2 = ObtainingAdvancedInformationAboutInstalledDevices
-		SccProjectUniqueName3 = OpeningAnAdapterAndCapturingThePackets\\OpeningAnAdapterAndCapturingThePackets.csproj
-		SccProjectName3 = OpeningAnAdapterAndCapturingThePackets
-		SccLocalPath3 = OpeningAnAdapterAndCapturingThePackets
-		SccProjectUniqueName4 = CapturingThePacketsWithoutTheCallback\\CapturingThePacketsWithoutTheCallback.csproj
-		SccProjectName4 = CapturingThePacketsWithoutTheCallback
-		SccLocalPath4 = CapturingThePacketsWithoutTheCallback
-		SccProjectUniqueName5 = InterpretingThePackets\\InterpretingThePackets.csproj
-		SccProjectName5 = InterpretingThePackets
-		SccLocalPath5 = InterpretingThePackets
-		SccProjectUniqueName6 = SavingPacketsToADumpFile\\SavingPacketsToADumpFile.csproj
-		SccProjectName6 = SavingPacketsToADumpFile
-		SccLocalPath6 = SavingPacketsToADumpFile
-		SccProjectUniqueName7 = ReadingPacketsFromADumpFile\\ReadingPacketsFromADumpFile.csproj
-		SccProjectName7 = ReadingPacketsFromADumpFile
-		SccLocalPath7 = ReadingPacketsFromADumpFile
-		SccProjectUniqueName8 = SendingASinglePacketWithSendPacket\\SendingASinglePacketWithSendPacket.csproj
-		SccProjectName8 = SendingASinglePacketWithSendPacket
-		SccLocalPath8 = SendingASinglePacketWithSendPacket
-		SccProjectUniqueName9 = SendingPacketsUsingSendBuffer\\SendingPacketsUsingSendBuffer.csproj
-		SccProjectName9 = SendingPacketsUsingSendBuffer
-		SccLocalPath9 = SendingPacketsUsingSendBuffer
-		SccProjectUniqueName10 = GatheringStatisticsOnTheNetworkTraffic\\GatheringStatisticsOnTheNetworkTraffic.csproj
-		SccProjectName10 = GatheringStatisticsOnTheNetworkTraffic
-		SccLocalPath10 = GatheringStatisticsOnTheNetworkTraffic
-		SccProjectUniqueName11 = UsingLinq\\UsingLinq.csproj
-		SccProjectName11 = UsingLinq
-		SccLocalPath11 = UsingLinq
-		SccProjectUniqueName12 = CaptureInvalidPackets\\CaptureInvalidPackets.csproj
-		SccProjectName12 = CaptureInvalidPackets
-		SccLocalPath12 = CaptureInvalidPackets
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
