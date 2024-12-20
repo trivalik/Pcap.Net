@@ -1,31 +1,36 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35527.113 d17.12
+VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObtainingTheDeviceList", "ObtainingTheDeviceList\ObtainingTheDeviceList.csproj", "{58B6F829-2F7C-4ED3-9CEF-DBE55814D31E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObtainingTheDeviceList", "src\ObtainingTheDeviceList\ObtainingTheDeviceList.csproj", "{58B6F829-2F7C-4ED3-9CEF-DBE55814D31E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObtainingAdvancedInformationAboutInstalledDevices", "ObtainingAdvancedInformationAboutInstalledDevices\ObtainingAdvancedInformationAboutInstalledDevices.csproj", "{BF87FF20-7F17-44E2-BE2B-9F96755F1468}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObtainingAdvancedInformationAboutInstalledDevices", "src\ObtainingAdvancedInformationAboutInstalledDevices\ObtainingAdvancedInformationAboutInstalledDevices.csproj", "{BF87FF20-7F17-44E2-BE2B-9F96755F1468}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpeningAnAdapterAndCapturingThePackets", "OpeningAnAdapterAndCapturingThePackets\OpeningAnAdapterAndCapturingThePackets.csproj", "{1AE948ED-4A9B-4B9E-A504-415EAB4C75BA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpeningAnAdapterAndCapturingThePackets", "src\OpeningAnAdapterAndCapturingThePackets\OpeningAnAdapterAndCapturingThePackets.csproj", "{1AE948ED-4A9B-4B9E-A504-415EAB4C75BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapturingThePacketsWithoutTheCallback", "CapturingThePacketsWithoutTheCallback\CapturingThePacketsWithoutTheCallback.csproj", "{A1E8AD04-50A1-409D-9E0F-5D10E36DF9F7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CapturingThePacketsWithoutTheCallback", "src\CapturingThePacketsWithoutTheCallback\CapturingThePacketsWithoutTheCallback.csproj", "{A1E8AD04-50A1-409D-9E0F-5D10E36DF9F7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterpretingThePackets", "InterpretingThePackets\InterpretingThePackets.csproj", "{C98B950D-E0DE-4250-9B14-4146FCBAEBAA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterpretingThePackets", "src\InterpretingThePackets\InterpretingThePackets.csproj", "{C98B950D-E0DE-4250-9B14-4146FCBAEBAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavingPacketsToADumpFile", "SavingPacketsToADumpFile\SavingPacketsToADumpFile.csproj", "{17FAC756-D60D-46E5-A996-876B05BDFE69}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavingPacketsToADumpFile", "src\SavingPacketsToADumpFile\SavingPacketsToADumpFile.csproj", "{17FAC756-D60D-46E5-A996-876B05BDFE69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadingPacketsFromADumpFile", "ReadingPacketsFromADumpFile\ReadingPacketsFromADumpFile.csproj", "{E94AA408-15EE-426B-8478-1453EA5A515A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadingPacketsFromADumpFile", "src\ReadingPacketsFromADumpFile\ReadingPacketsFromADumpFile.csproj", "{E94AA408-15EE-426B-8478-1453EA5A515A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendingASinglePacketWithSendPacket", "SendingASinglePacketWithSendPacket\SendingASinglePacketWithSendPacket.csproj", "{0E24449E-879B-43C6-9121-5AE50E95D87E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendingASinglePacketWithSendPacket", "src\SendingASinglePacketWithSendPacket\SendingASinglePacketWithSendPacket.csproj", "{0E24449E-879B-43C6-9121-5AE50E95D87E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendingPacketsUsingSendBuffer", "SendingPacketsUsingSendBuffer\SendingPacketsUsingSendBuffer.csproj", "{6BEDD1BC-579B-4C1B-AAAE-1CD4BDF14EC3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SendingPacketsUsingSendBuffer", "src\SendingPacketsUsingSendBuffer\SendingPacketsUsingSendBuffer.csproj", "{6BEDD1BC-579B-4C1B-AAAE-1CD4BDF14EC3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatheringStatisticsOnTheNetworkTraffic", "GatheringStatisticsOnTheNetworkTraffic\GatheringStatisticsOnTheNetworkTraffic.csproj", "{76C60DD0-9E5C-40E5-9EE5-B820978824A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GatheringStatisticsOnTheNetworkTraffic", "src\GatheringStatisticsOnTheNetworkTraffic\GatheringStatisticsOnTheNetworkTraffic.csproj", "{76C60DD0-9E5C-40E5-9EE5-B820978824A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsingLinq", "UsingLinq\UsingLinq.csproj", "{8E6F9FAC-0C41-49D9-8F90-B1DC61858BCE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UsingLinq", "src\UsingLinq\UsingLinq.csproj", "{8E6F9FAC-0C41-49D9-8F90-B1DC61858BCE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptureInvalidPackets", "CaptureInvalidPackets\CaptureInvalidPackets.csproj", "{ED16F17F-1AFA-496A-9CB7-404405FD998C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptureInvalidPackets", "src\CaptureInvalidPackets\CaptureInvalidPackets.csproj", "{ED16F17F-1AFA-496A-9CB7-404405FD998C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C8E490E9-A7FD-4BEE-86BF-43B59CD52D2E}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -5,8 +5,7 @@ PcapDotNet/src/*/obj
 PcapDotNet/src/*/bin
 PcapDotNet/src/TestResults
 PcapDotNet.DevelopersPack/3rdParty/
-obj/
-bin/
+artifacts/
 .vs/
 TemporaryGeneratedFile_*
 *.cache
