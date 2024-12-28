@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using PcapDotNet.Base;
 using PcapDotNet.Packets.Ethernet;
 using PcapDotNet.Packets.Igmp;
 using PcapDotNet.Packets.IpV4;
@@ -22,10 +22,10 @@ namespace PcapDotNet.Packets.Test
         public void RandomIgmpTest()
         {
             EthernetLayer ethernetLayer = new EthernetLayer
-                                              {
-                                                  Source = new MacAddress("00:01:02:03:04:05"),
-                                                  Destination = new MacAddress("A0:A1:A2:A3:A4:A5")
-                                              };
+            {
+                Source = new MacAddress("00:01:02:03:04:05"),
+                Destination = new MacAddress("A0:A1:A2:A3:A4:A5")
+            };
 
             int seed = new Random().Next();
             Console.WriteLine("Seed: " + seed);
@@ -166,10 +166,10 @@ namespace PcapDotNet.Packets.Test
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(),
                                                  new IgmpQueryVersion3Layer
-                                                     {
-                                                         MaxResponseTime = TimeSpan.FromHours(1),
-                                                         QueryInterval = TimeSpan.FromSeconds(1)
-                                                     }));
+                                                 {
+                                                     MaxResponseTime = TimeSpan.FromHours(1),
+                                                     QueryInterval = TimeSpan.FromSeconds(1)
+                                                 }));
         }
 
         [Fact]
@@ -200,9 +200,9 @@ namespace PcapDotNet.Packets.Test
             Assert.Throws<ArgumentOutOfRangeException>(() => PacketBuilder.Build(DateTime.Now,
                                                  new EthernetLayer(), new IpV4Layer(),
                                                  new IgmpQueryVersion2Layer
-                                                     {
-                                                         MaxResponseTime = TimeSpan.FromSeconds(-1)
-                                                     }));
+                                                 {
+                                                     MaxResponseTime = TimeSpan.FromSeconds(-1)
+                                                 }));
         }
 
         [Fact]
@@ -210,9 +210,9 @@ namespace PcapDotNet.Packets.Test
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(),
                                                  new IgmpQueryVersion2Layer
-                                                     {
-                                                         MaxResponseTime = TimeSpan.FromMinutes(5)
-                                                     }));
+                                                 {
+                                                     MaxResponseTime = TimeSpan.FromMinutes(5)
+                                                 }));
         }
 
         [Fact]
@@ -220,9 +220,9 @@ namespace PcapDotNet.Packets.Test
         {
             Packet queryVersion2 = PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(),
                                                         new IgmpQueryVersion2Layer
-                                                            {
-                                                                MaxResponseTime = TimeSpan.FromSeconds(1),
-                                                            });
+                                                        {
+                                                            MaxResponseTime = TimeSpan.FromSeconds(1),
+                                                        });
 
             Assert.True(queryVersion2.IsValid);
             Assert.True(queryVersion2.Ethernet.IpV4.Igmp.IsChecksumCorrect);
@@ -244,10 +244,10 @@ namespace PcapDotNet.Packets.Test
             // Big query version 3
             Packet queryVersion3 = PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(),
                                                         new IgmpQueryVersion3Layer
-                                                            {
-                                                                MaxResponseTime = TimeSpan.FromSeconds(1),
-                                                                QueryInterval = TimeSpan.FromSeconds(1),
-                                                            });
+                                                        {
+                                                            MaxResponseTime = TimeSpan.FromSeconds(1),
+                                                            QueryInterval = TimeSpan.FromSeconds(1),
+                                                        });
             Assert.True(queryVersion3.IsValid, "IsValid");
             buffer = new byte[queryVersion3.Length + 2];
             queryVersion3.Buffer.BlockCopy(0, buffer, 0, queryVersion3.Length);
@@ -283,9 +283,9 @@ namespace PcapDotNet.Packets.Test
             // Big report version 2
             Packet reportVersion2 = PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(),
                                                          new IgmpReportVersion2Layer
-                                                             {
-                                                                 MaxResponseTime = TimeSpan.FromSeconds(1)
-                                                             });
+                                                         {
+                                                             MaxResponseTime = TimeSpan.FromSeconds(1)
+                                                         });
 
             buffer = new byte[reportVersion2.Length + 2];
             reportVersion2.Buffer.BlockCopy(0, buffer, 0, reportVersion2.Length);
@@ -300,14 +300,14 @@ namespace PcapDotNet.Packets.Test
             Packet reportVersion3 = PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(),
                                                         new IgmpReportVersion3Layer
                                                         {
-                                                            GroupRecords = new[]
+                                                            GroupRecords = new ReadOnlyCollection<IgmpGroupRecord>(new[]
                                                                            {
                                                                                new IgmpGroupRecord(
                                                                                    IgmpRecordType.CurrentStateRecordModeIsExclude,
                                                                                    IpV4Address.Zero, new List<IpV4Address>(), Datagram.Empty)
-                                                                           }.AsReadOnly()
+                                                                           })
                                                         });
-            
+
             buffer = new byte[reportVersion3.Length];
             reportVersion3.Buffer.BlockCopy(0, buffer, 0, buffer.Length);
             buffer.Write(EthernetDatagram.HeaderLengthValue + IpV4Datagram.HeaderMinimumLength + 1, 1);
@@ -373,7 +373,7 @@ namespace PcapDotNet.Packets.Test
         public void IgmpGroupRecordBadAuxiliaryDataLengthTest()
         {
             Assert.Throws<ArgumentException>(() => new IgmpGroupRecord(IgmpRecordType.SourceListChangeAllowNewSources, IpV4Address.Zero, new List<IpV4Address>(),
-                                                         new Datagram(new byte[] {1})));
+                                                         new Datagram(new byte[] { 1 })));
         }
 
         [Fact]
@@ -387,7 +387,7 @@ namespace PcapDotNet.Packets.Test
             Assert.False(record.Equals(null));
             Assert.NotEqual(record, new IgmpGroupRecord(IgmpRecordType.CurrentStateRecordModeIsExclude, record.MulticastAddress, record.SourceAddresses, record.AuxiliaryData));
             Assert.NotEqual(record, new IgmpGroupRecord(record.RecordType, new IpV4Address("1.2.3.4"), record.SourceAddresses, record.AuxiliaryData));
-            Assert.NotEqual(record, new IgmpGroupRecord(record.RecordType, record.MulticastAddress, new List<IpV4Address>(new[] {new IpV4Address("2.3.4.5")}), record.AuxiliaryData));
+            Assert.NotEqual(record, new IgmpGroupRecord(record.RecordType, record.MulticastAddress, new List<IpV4Address>(new[] { new IpV4Address("2.3.4.5") }), record.AuxiliaryData));
             Assert.NotEqual(record, new IgmpGroupRecord(record.RecordType, record.MulticastAddress, record.SourceAddresses, new Datagram(new byte[12])));
             Assert.NotEqual(record.ToString(), new IgmpGroupRecord(record.RecordType, record.MulticastAddress, record.SourceAddresses, new Datagram(new byte[12])).ToString());
         }
@@ -408,23 +408,23 @@ namespace PcapDotNet.Packets.Test
         public void IgmpTooBigQueryRobustnessVariableTest()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => PacketBuilder.Build(DateTime.Now, new EthernetLayer(), new IpV4Layer(), new IgmpQueryVersion3Layer
-                                                                                                        {
-                                                                                                            QueryRobustnessVariable = 255
-                                                                                                        }));
+            {
+                QueryRobustnessVariable = 255
+            }));
         }
 
         [Fact]
         public void DifferentIgmpSimpleLayersTest()
         {
             IgmpVersion1PlusSimpleLayer layer1 = new IgmpQueryVersion1Layer
-                                         {
-                                             GroupAddress = new IpV4Address("1.2.3.4")
-                                         };
+            {
+                GroupAddress = new IpV4Address("1.2.3.4")
+            };
             IgmpVersion1PlusSimpleLayer layer2 = new IgmpQueryVersion2Layer
-                                         {
-                                             GroupAddress = new IpV4Address("1.2.3.4"),
-                                             MaxResponseTime = TimeSpan.FromMinutes(55)
-                                         };
+            {
+                GroupAddress = new IpV4Address("1.2.3.4"),
+                MaxResponseTime = TimeSpan.FromMinutes(55)
+            };
             Assert.False(layer1.Equals(layer2));
         }
 
@@ -476,7 +476,7 @@ namespace PcapDotNet.Packets.Test
         [Fact]
         public void IgmpReplyVersion0LayerSetInvalidType()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new IgmpReplyVersion0Layer {MessageType = IgmpMessageType.LeaveGroupVersion2});
+            Assert.Throws<ArgumentOutOfRangeException>(() => new IgmpReplyVersion0Layer { MessageType = IgmpMessageType.LeaveGroupVersion2 });
         }
 
         [Fact]

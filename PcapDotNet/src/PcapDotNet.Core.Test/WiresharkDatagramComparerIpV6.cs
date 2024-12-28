@@ -200,7 +200,7 @@ namespace PcapDotNet.Core.Test
                                 if (routingProtocolLowPowerAndLossyNetworks.Addresses.Count > 0)
                                 {
                                     IpV6Address actualAddress =
-                                        new IpV6Address(UInt128.Parse(headerField.Value(), NumberStyles.HexNumber, CultureInfo.InvariantCulture));
+                                        new IpV6Address(PcapDotNet.Base.UInt128.Parse(headerField.Value(), NumberStyles.HexNumber, CultureInfo.InvariantCulture));
                                     Assert.Equal(routingProtocolLowPowerAndLossyNetworks.Addresses[routingProtocolLowPowerAndLossyNetworksAddressIndex],
                                                     actualAddress);
                                 }
