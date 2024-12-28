@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security;
@@ -21,14 +21,15 @@ namespace PcapDotNet.Core.Native
             try
             {
                 // Try to change Libpcap to UTF-8 mode
-                var errorBuffer = Pcap.CreateErrorBuffer();
                 const uint PCAP_CHAR_ENC_UTF_8 = 1;
-                var res = SafeNativeMethods.pcap_init(PCAP_CHAR_ENC_UTF_8, errorBuffer);
+                var res = SafeNativeMethods.pcap_init(PCAP_CHAR_ENC_UTF_8, out var errorBuffer);
                 if (res == 0)
                 {
                     // We made it
                     return Encoding.UTF8;
                 }
+
+                throw new InvalidOperationException($"Failed to set pcap_init to UTF-8. Error: {errorBuffer.ToString(Encoding.Default)} ({res})");
             }
             catch (TypeLoadException)
             {
@@ -71,13 +72,12 @@ namespace PcapDotNet.Core.Native
         public PcapInterfaceHandle GetAllLocalMachine()
         {
             var handle = new PcapInterfaceHandle();
-            var errorBuffer = Pcap.CreateErrorBuffer();
             var auth = default(pcap_rmtauth); //auth is not needed
 
-            var result = pcap_findalldevs_ex(Pcap.PCAP_SRC_IF_STRING, ref auth, ref handle, errorBuffer);
+            var result = pcap_findalldevs_ex(Pcap.PCAP_SRC_IF_STRING, ref auth, ref handle, out var errbuf);
             if (result < 0)
             {
-                PcapError.ThrowInvalidOperation("Failed getting devices. Error: " + errorBuffer.ToString(), null);
+                PcapError.ThrowInvalidOperation($"Failed getting devices. Error: {errbuf}", null);
             }
             return handle;
         }
@@ -112,9 +112,11 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_compile(adaptHandle, fp, str, optimize, netmask);
         }
 
-        public PcapHandle pcap_create(string dev, StringBuilder errbuf)
+        public PcapHandle pcap_create(string dev, out string errbuf)
         {
-            return SafeNativeMethods.pcap_create(dev, errbuf);
+            var result = SafeNativeMethods.pcap_create(dev, out var errorBuffer);
+            errbuf = errorBuffer.ToString();
+            return result;
         }
 
         public int pcap_datalink(PcapHandle adaptHandle)
@@ -182,14 +184,18 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_fileno(adapter);
         }
 
-        public int pcap_findalldevs(ref PcapInterfaceHandle alldevs, StringBuilder errbuf)
+        public int pcap_findalldevs(ref PcapInterfaceHandle alldevs, out string errbuf)
         {
-            return SafeNativeMethods.pcap_findalldevs(ref alldevs, errbuf);
+            var result = SafeNativeMethods.pcap_findalldevs(ref alldevs, out var errorBuffer);
+            errbuf = errorBuffer.ToString();
+            return result;
         }
 
-        public int pcap_findalldevs_ex(string source, ref pcap_rmtauth auth, ref PcapInterfaceHandle alldevs, StringBuilder errbuf)
+        public int pcap_findalldevs_ex(string source, ref pcap_rmtauth auth, ref PcapInterfaceHandle alldevs, out string errbuf)
         {
-            return SafeNativeMethods.pcap_findalldevs_ex(source, ref auth, ref alldevs, errbuf);
+            var result = SafeNativeMethods.pcap_findalldevs_ex(source, ref auth, ref alldevs, out var errorBuffer);
+            errbuf = errorBuffer.ToString();
+            return result;
         }
 
         public void pcap_freealldevs(IntPtr alldevs)
@@ -207,9 +213,11 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_geterr(adaptHandle);
         }
 
-        public int pcap_getnonblock(PcapHandle adaptHandle, StringBuilder errbuf)
+        public int pcap_getnonblock(PcapHandle adaptHandle, out string errbuf)
         {
-            return SafeNativeMethods.pcap_getnonblock(adaptHandle, errbuf);
+            var result = SafeNativeMethods.pcap_getnonblock(adaptHandle, out var errorBuffer);
+            errbuf = errorBuffer.ToString();
+            return result;
         }
 
         public int pcap_get_selectable_fd(PcapHandle adaptHandle)
@@ -232,9 +240,11 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_offline_filter(prog, header, pkt_data);
         }
 
-        public PcapHandle pcap_open(string dev, int packetLen, int flags, int read_timeout, ref pcap_rmtauth rmtauth, StringBuilder errbuf)
+        public PcapHandle pcap_open(string dev, int packetLen, int flags, int read_timeout, ref pcap_rmtauth rmtauth, out string errbuf)
         {
-            return SafeNativeMethods.pcap_open(dev, packetLen, flags, read_timeout, ref rmtauth, errbuf);
+            var handle = SafeNativeMethods.pcap_open(dev, packetLen, flags, read_timeout, ref rmtauth, out var errorBuffer);
+            errbuf = errorBuffer.ToString();
+            return handle;
         }
 
         public PcapHandle pcap_open_dead(int linktype, int snaplen)
@@ -242,9 +252,11 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_open_dead(linktype, snaplen);
         }
 
-        public PcapHandle pcap_open_offline(string fname, StringBuilder errbuf)
+        public PcapHandle pcap_open_offline(string fname, out string errbuf)
         {
-            return SafeNativeMethods.pcap_open_offline(fname, errbuf);
+            var result = SafeNativeMethods.pcap_open_offline(fname, out var errorBuffer);
+            errbuf = errorBuffer.ToString();
+            return result;
         }
 
         public int pcap_sendpacket(PcapHandle adaptHandle, IntPtr data, int size)
@@ -257,9 +269,11 @@ namespace PcapDotNet.Core.Native
             return SafeNativeMethods.pcap_setfilter(adaptHandle, fp);
         }
 
-        public int pcap_setnonblock(PcapHandle adaptHandle, int nonblock, StringBuilder errbuf)
+        public int pcap_setnonblock(PcapHandle adaptHandle, int nonblock, out string errbuf)
         {
-            return SafeNativeMethods.pcap_setnonblock(adaptHandle, nonblock, errbuf);
+            var result = SafeNativeMethods.pcap_setnonblock(adaptHandle, nonblock, out var errorBuffer);
+            errbuf = errorBuffer.ToString();
+            return result;
         }
 
         public int pcap_set_buffer_size(PcapHandle adapter, int bufferSizeInBytes)
@@ -358,7 +372,7 @@ namespace PcapDotNet.Core.Native
         }
 
         /// <summary>
-        /// Per http://msdn.microsoft.com/en-us/ms182161.aspx 
+        /// Per http://msdn.microsoft.com/en-us/ms182161.aspx
         /// </summary>
         [SuppressUnmanagedCodeSecurity]
         private static class SafeNativeMethods
@@ -375,21 +389,17 @@ namespace PcapDotNet.Core.Native
             }
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
-            internal extern static int pcap_init(
-                uint opts,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder /* char* */ errbuf);
+            internal static extern int pcap_init(uint opts, out PcapErrorBuffer /* char* */ errbuf);
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
-            internal extern static int pcap_findalldevs(
-                ref PcapInterfaceHandle /* pcap_if_t** */ alldevs,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder /* char* */ errbuf);
+            internal extern static int pcap_findalldevs(ref PcapInterfaceHandle /* pcap_if_t** */ alldevs, out PcapErrorBuffer /* char* */ errbuf);
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static int pcap_findalldevs_ex(
                 [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] string /* char* */source,
                 ref pcap_rmtauth /* pcap_rmtauth* */auth,
                 ref PcapInterfaceHandle /* pcap_if_t** */alldevs,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder /* char* */errbuf);
+                out PcapErrorBuffer /* char* */ errbuf);
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static void pcap_freealldevs(IntPtr /* pcap_if_t* */ alldevs);
@@ -397,7 +407,7 @@ namespace PcapDotNet.Core.Native
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static PcapHandle /* pcap_t* */ pcap_create(
                 [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] string dev,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder errbuf);
+                out PcapErrorBuffer /* char* */ errbuf);
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static PcapHandle /* pcap_t* */ pcap_open(
@@ -406,12 +416,12 @@ namespace PcapDotNet.Core.Native
                 int flags,
                 int read_timeout,
                 ref pcap_rmtauth rmtauth,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder errbuf);
+                out PcapErrorBuffer /* char* */ errbuf);
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static PcapHandle /* pcap_t* */ pcap_open_offline(
                 [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] string/* const char* */ fname,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder/* char* */ errbuf);
+                out PcapErrorBuffer /* char* */ errbuf);
 
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static PcapHandle /* pcap_t* */ pcap_open_dead(int linktype, int snaplen);
@@ -535,17 +545,17 @@ namespace PcapDotNet.Core.Native
             /// </summary>
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static int pcap_setnonblock(
-                PcapHandle /* pcap_if_t** */ adaptHandle,
+                PcapHandle /* pcap_t* */ adaptHandle,
                 int nonblock,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder /* char* */ errbuf);
+                out PcapErrorBuffer /* char* */ errbuf);
 
             /// <summary>
             /// Get nonblocking mode, returns allways 0 for savefiles.
             /// </summary>
             [DllImport(PCAP_DLL, CallingConvention = CallingConvention.Cdecl)]
             internal extern static int pcap_getnonblock(
-                PcapHandle /* pcap_if_t** */ adaptHandle,
-                [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(PcapStringMarshaler))] StringBuilder /* char* */ errbuf);
+                PcapHandle /* pcap_t* */ adaptHandle,
+                out PcapErrorBuffer /* char* */ errbuf);
 
             /// <summary>
             /// Read packets until cnt packets are processed or an error occurs.

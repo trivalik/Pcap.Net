@@ -1,4 +1,4 @@
-﻿using PcapDotNet.Core.Native;
+using PcapDotNet.Core.Native;
 using System;
 
 namespace PcapDotNet.Core
@@ -55,7 +55,6 @@ namespace PcapDotNet.Core
 
         private static PcapHandle PcapOpen(string source, int snapshotLength, PacketDeviceOpenAttributes attributes, int readTimeout, PcapUnmanagedStructures.pcap_rmtauth auth)
         {
-            var errorBuffer = Pcap.CreateErrorBuffer();
             var handle = Interop.Pcap.pcap_open(
                 source,                 // name of the device
                 snapshotLength,         // portion of the packet to capture
@@ -63,7 +62,7 @@ namespace PcapDotNet.Core
                 (int)attributes,
                 readTimeout,
                 ref auth,               // authentication on the remote machine
-                errorBuffer);
+                out var errorBuffer);
 
             if (handle.IsInvalid)
             {

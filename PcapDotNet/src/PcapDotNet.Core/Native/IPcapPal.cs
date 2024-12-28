@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Text;
 using PcapDotNet.Packets;
 using static PcapDotNet.Core.Native.PcapUnmanagedStructures;
@@ -18,7 +19,7 @@ namespace PcapDotNet.Core.Native
         /// <summary>
         /// Creates a platform depend pcap packet header.handle
         /// </summary>
-        /// <remarks>MUST be freed with Marshal.FreeHCGlobal!</remarks>
+        /// <remarks>MUST be freed with <see cref="Marshal.FreeHGlobal(IntPtr)"/>!</remarks>
         /// <returns>Pointer to the header structure</returns>
         IntPtr CreatePcapPacketHeaderHandle(Packet packet);
 
@@ -34,7 +35,7 @@ namespace PcapDotNet.Core.Native
 
         PacketTotalStatistics GetTotalStatistics(PcapHandle pcapDescriptor);
 
-        int pcap_findalldevs(ref PcapInterfaceHandle /* pcap_if_t** */ alldevs, StringBuilder /* char* */ errbuf);
+        int pcap_findalldevs(ref PcapInterfaceHandle /* pcap_if_t** */ alldevs, out string /* char* */ errbuf);
 
         void pcap_freealldevs(IntPtr /* pcap_if_t * */ alldevs);
 
@@ -49,11 +50,11 @@ namespace PcapDotNet.Core.Native
             int flags,
             int read_timeout,
             ref pcap_rmtauth rmtauth,
-            StringBuilder errbuf);
+            out string errbuf);
 
-        PcapHandle /* pcap_t* */ pcap_create(string dev, StringBuilder errbuf);
+        PcapHandle /* pcap_t* */ pcap_create(string dev, out string errbuf);
 
-        PcapHandle /* pcap_t* */ pcap_open_offline(string/*const char* */ fname, StringBuilder/* char* */ errbuf);
+        PcapHandle /* pcap_t* */ pcap_open_offline(string/*const char* */ fname, out string /* char* */ errbuf);
 
 
         /// <summary>
@@ -154,54 +155,54 @@ namespace PcapDotNet.Core.Native
         /// <summary>
         /// Is used to get a list of the supported link-layer header types of the interface associated with the pcap descriptor. pcap_list_datalinks() allocates an array to hold the list and sets *dataLinkList to point to that array.
         /// The caller is responsible for freeing the array with pcap_free_datalinks(), which frees the list of link-layer header types pointed to by dataLinkList.
-        /// It must not be called on a pcap descriptor created by pcap_create(3PCAP) that has not yet been activated by pcap_activate(3PCAP). 
+        /// It must not be called on a pcap descriptor created by pcap_create(3PCAP) that has not yet been activated by pcap_activate(3PCAP).
         /// </summary>
         /// <param name="dataLinkList">list of link-layer header types supported by a capture device</param>
         /// <returns>The number of link-layer header types in the array on success, PCAP_ERROR_NOT_ACTIVATED if called on a capture handle that has been created but not activated, and PCAP_ERROR on other errors. If PCAP_ERROR is returned, pcap_geterr(3PCAP) or pcap_perror(3PCAP) may be called with p as an argument to fetch or display the error text.</returns>
         int pcap_list_datalinks(PcapHandle /* pcap_t* */ adaptHandle, ref IntPtr /* int** */ dataLinkList);
 
         /// <summary>
-        /// Frees the list of link-layer header types pointed to by dataLinkList. 
+        /// Frees the list of link-layer header types pointed to by dataLinkList.
         /// </summary>
         void pcap_free_datalinks(IntPtr /* int* */ dataLinkList);
 
         /// <summary>
         /// Get the link-layer header type value corresponding to a header type name.
-        /// Translates a link-layer header type name, which is a DLT_ name with the DLT_ removed, 
+        /// Translates a link-layer header type name, which is a DLT_ name with the DLT_ removed,
         /// to the corresponding link-layer header type value.The translation is case-insensitive.
         /// </summary>
         /// <returns>Returns the type value on success and PCAP_ERROR if the name is not a known type name.</returns>
         int pcap_datalink_name_to_val(string /*const char* */ name);
 
         /// <summary>
-        /// Translates a link-layer header type value to the corresponding link-layer header type name, 
-        /// which is the DLT_ name for the link-layer header type value with the DLT_ removed. 
-        /// NULL is returned if the type value does not correspond to a known DLT_ value. 
+        /// Translates a link-layer header type value to the corresponding link-layer header type name,
+        /// which is the DLT_ name for the link-layer header type value with the DLT_ removed.
+        /// NULL is returned if the type value does not correspond to a known DLT_ value.
         /// </summary>
         string /* const char* */ pcap_datalink_val_to_name(int dlt);
 
         /// <summary>
-        /// Translates a link-layer header type value to a short description of that link-layer header type. 
-        /// NULL is returned if the type value does not correspond to a known DLT_ value.  
+        /// Translates a link-layer header type value to a short description of that link-layer header type.
+        /// NULL is returned if the type value does not correspond to a known DLT_ value.
         /// </summary>
         string /* const char* */ pcap_datalink_val_to_description(int dlt);
 
         /// <summary>
         /// Translates a link-layer header type value to a short description of that link-layer header type 
-        /// just like pcap_datalink_val_to_description. If the type value does not correspond to a known DLT_ value, 
-        /// the string "DLT n" is returned, where n is the value of the dlt argument.  
+        /// just like pcap_datalink_val_to_description. If the type value does not correspond to a known DLT_ value,
+        /// the string "DLT n" is returned, where n is the value of the dlt argument.
         /// </summary>
         string /* const char* */ pcap_datalink_val_to_description_or_dlt(int dlt);
 
         /// <summary>
         /// Set nonblocking mode. pcap_loop() and pcap_next() doesnt work in  nonblocking mode!
         /// </summary>
-        int pcap_setnonblock(PcapHandle /* pcap_t* */ adaptHandle, int nonblock, StringBuilder /* char* */ errbuf);
+        int pcap_setnonblock(PcapHandle /* pcap_t* */ adaptHandle, int nonblock, out string /* char* */ errbuf);
 
         /// <summary>
         /// Get nonblocking mode, returns allways 0 for savefiles.
         /// </summary>
-        int pcap_getnonblock(PcapHandle /* pcap_t* */ adaptHandle, StringBuilder /* char* */ errbuf);
+        int pcap_getnonblock(PcapHandle /* pcap_t* */ adaptHandle, out string /* char* */ errbuf);
 
         /// <summary>
         /// Read packets until cnt packets are processed or an error occurs.
@@ -237,7 +238,7 @@ namespace PcapDotNet.Core.Native
         int pcap_snapshot(PcapHandle /* pcap_t* */ adapter);
 
         /// <summary>
-        /// find out whether a 'savefile' has the native byte order 
+        /// find out whether a 'savefile' has the native byte order
         /// </summary>
         /// <returns>
         /// returns true (1) if p refers to a 'savefile' that uses a different byte order than the current system. For a live capture, it always returns false (0). Returns PCAP_ERROR_NOT_ACTIVATED if called on a capture handle that has been created but not activated.
@@ -245,7 +246,7 @@ namespace PcapDotNet.Core.Native
         int pcap_is_swapped(PcapHandle /* pcap_t* */ adapter);
 
         /// <summary>
-        /// The version number of a 'savefile' 
+        /// The version number of a 'savefile'
         /// </summary>
         /// <returns>The major number of the file format of the 'savefile'</returns>
         /// <remarks>
@@ -255,7 +256,7 @@ namespace PcapDotNet.Core.Native
         int pcap_major_version(PcapHandle /* pcap_t* */ adapter);
 
         /// <summary>
-        /// The version number of a 'savefile' 
+        /// The version number of a 'savefile'
         /// </summary>
         /// <returns>The minor number of the file format of the 'savefile'</returns>
         /// <remarks>

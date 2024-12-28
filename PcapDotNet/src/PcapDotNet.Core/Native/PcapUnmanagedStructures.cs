@@ -1,4 +1,4 @@
-﻿/*
+/*
 This file is part of SharpPcap.
 
 SharpPcap is free software: you can redistribute it and/or modify
@@ -21,6 +21,7 @@ along with SharpPcap.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace PcapDotNet.Core.Native
 {
@@ -375,6 +376,28 @@ namespace PcapDotNet.Core.Native
             /// </summary>
             public int value;
         };
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct PcapErrorBuffer
+        {
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = Pcap.PCAP_ERRBUF_SIZE)]
+            internal byte[] Data;
+
+            public override string ToString()
+            {
+                return ToString(Interop.Pcap.StringEncoding);
+            }
+
+            public string ToString(Encoding encoding)
+            {
+                var nbBytes = 0;
+                while (Data[nbBytes] != 0)
+                {
+                    nbBytes++;
+                }
+                return encoding.GetString(Data, 0, nbBytes);
+            }
+        }
         #endregion Unmanaged Structs Implementation
 
     }

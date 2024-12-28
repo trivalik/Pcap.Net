@@ -1,5 +1,3 @@
-﻿using System.Text;
-
 namespace PcapDotNet.Core
 {
     /// <summary>
@@ -45,10 +43,5 @@ namespace PcapDotNet.Core
         /// <summary>interface isn't up</summary>
         internal const int PCAP_ERROR_IFACE_NOT_UP = -9;
         #endregion
-
-        internal static StringBuilder CreateErrorBuffer()
-        {
-            return new StringBuilder(PCAP_ERRBUF_SIZE);
-        }
     }
 }

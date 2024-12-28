@@ -172,18 +172,16 @@ namespace PcapDotNet.Core
         {
             get
             {
-                var errorBuffer = Pcap.CreateErrorBuffer();
-                var nonBlockValue = Interop.Pcap.pcap_getnonblock(PcapDescriptor, errorBuffer);
+                var nonBlockValue = Interop.Pcap.pcap_getnonblock(PcapDescriptor, out var errorBuffer);
                 if (nonBlockValue < 0)
                 {
-                    ThrowInvalidOperation("Error getting NonBlocking value: " + errorBuffer.ToString());
+                    ThrowInvalidOperation("Error getting NonBlocking value: " + errorBuffer);
                 }
                 return nonBlockValue != 0;
             }
             set
             {
-                var errorBuffer = Pcap.CreateErrorBuffer();
-                if (Interop.Pcap.pcap_setnonblock(PcapDescriptor, value ? 1 : 0, errorBuffer) < 0)
+                if (Interop.Pcap.pcap_setnonblock(PcapDescriptor, value ? 1 : 0, out var errorBuffer) < 0)
                 {
                     ThrowInvalidOperation($"Error setting NonBlocking to {value}: {errorBuffer}");
                 }

@@ -40,8 +40,7 @@ namespace PcapDotNet.Core
             // ToDo: This is currently still very simplified
             // compared to the original native version. Still needs to be revised.
 
-            var errorBuffer = Pcap.CreateErrorBuffer();
-            var handle = Interop.Pcap.pcap_open_offline(fileName, errorBuffer);
+            var handle = Interop.Pcap.pcap_open_offline(fileName, out var errorBuffer);
             if(handle.IsInvalid)
             {
                 PcapError.ThrowInvalidOperation($"Failed opening file {fileName}. Error: {errorBuffer}.", null);
